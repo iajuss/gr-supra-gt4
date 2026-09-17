@@ -14,3 +14,8 @@ export function lastIndexAtOrBefore(sorted, value) {
   }
   return low;
 }
+
+/** Linear interpolation from a (t = 0) to b (t = 1). */
+export function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
