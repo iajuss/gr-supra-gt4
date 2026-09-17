@@ -8,8 +8,9 @@
 - **Não commitado ainda** (6 arquivos): `styles/tokens.css` (`--header-h`), `styles/sections/lap.css`
   (controles e legenda abaixo do header), `styles/base.css` (`[hidden]`), `components/telemetryHud.js`
   (`clear()`), `components/lapSection.js` e `components/lapSection3d.js` (limpam o resumo no Restart).
-- **Próximo passo: Bloco 4 (3D do carro)** — nada mais pendente nos blocos anteriores. Começa com o
-  usuário escolhendo e baixando o modelo no Sketchfab (comparar peso, qualidade e licença antes).
+- **Próximo passo: Bloco 4 (3D do carro)**, detalhado em 6 passos abaixo — nada pendente nos blocos
+  anteriores. Começa pelo **passo 1 (palco com proxy)**, que não depende do download do modelo; a
+  escolha do GLB no Sketchfab (peso, qualidade, licença) é sua e entra no passo 5.
 - **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
   A entrada `sandbox/` continua no `.gitignore`, à toa.
 - **Bloco 3:** também fechado — reveal, contadores e barra verificados em movimento, em desktop e 375 px.
@@ -111,15 +112,34 @@ Protótipo aprovado em `sandbox/track3d`. O 2D atual continua como modo lite.
   - Barra: transição de 1,4 s até 1.226 px de 1.281 px = 0,96. Em 375 px, sem overflow horizontal.
 
 ## Bloco 4 — 3D (modo full)
-- [ ] Escolher e baixar o modelo (usuário) → comparar peso/qualidade/licença
-- [ ] Otimizar com `gltf-transform` (meta ≤ ~5 MB)
-- [ ] `lib/loader.js` + `components/preloader.js` com progresso real
-- [ ] `scene/renderer.js`, `stage.js`, `car.js`
-- [ ] 🧪 Interpolação entre pontos de câmera (`lib/math.js`)
-- [ ] `data/cameraShots.js` + `scene/cameraRig.js` (ScrollTrigger scrub) + `lib/scroll.js` (Lenis)
-- [ ] Pausa do render fora da zona 3D / aba em segundo plano
-- [ ] Capturar `public/shots/*.webp` de cada capítulo para o modo lite
-- [ ] 👁 Ajuste fino dos pontos de câmera e da iluminação
+Ordem combinada em 2026-09-17: **a cena nasce com um proxy no lugar do carro** (como o bloco lime no 2B),
+para o download do modelo não travar nada; o GLB entra depois, no passo 5. **Lenis entra junto com as
+câmeras** (passo 3), porque o ritmo do scrub é calibrado sentindo o scroll real.
+A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` e as seções `data-shot`.
+
+1. **Palco com proxy**
+   - [ ] `scene/stage.js`: piso, luzes e ambiente, reusando a fábrica `scene/renderer.js` do Bloco 2B
+   - [ ] `scene/car.js` com um proxy (caixa nas medidas do Vulcan) e a interface que o modelo vai cumprir
+   - [ ] 👁 Palco visível atrás do hero, sem erros no console
+2. **Pontos de câmera**
+   - [ ] 🧪 Interpolação entre pontos de câmera em `lib/math.js` (posição, alvo e fov)
+   - [ ] `data/cameraShots.js`: um ponto por capítulo (hero, aero, chassis, v12, transição)
+3. **Scroll**
+   - [ ] `lib/scroll.js`: Lenis + ScrollTrigger sincronizados (scroll nativo no toque)
+   - [ ] `scene/cameraRig.js`: timeline única com `scrub`, ligada aos `data-shot`
+   - [ ] Pausa do render fora da zona 3D e com a aba em segundo plano
+   - [ ] 👁 Percorrer a página inteira: transições sem tranco, FPS, console limpo
+4. **Preloader**
+   - [ ] `lib/loader.js` (GLB/HDR com progresso) + `components/preloader.js` com progresso real
+   - [ ] Falha no carregamento cai para o modo lite, como o `main.js` já faz com o 3D da volta
+5. **Modelo de verdade**
+   - [ ] Escolher e baixar o modelo (usuário) → comparar peso/qualidade/licença
+   - [ ] Otimizar com `gltf-transform` (meta ≤ ~5 MB)
+   - [ ] Trocar o proxy pelo modelo e ajustar materiais
+   - [ ] 👁 Ajuste fino dos pontos de câmera e da iluminação, com o carro real
+6. **Modo lite**
+   - [ ] Capturar `public/shots/*.webp` de cada capítulo a partir da cena ajustada
+   - [ ] 👁 Substituir os `chapter__shot-placeholder` pelas imagens, em 375 px
 
 ## Bloco 5 — Polimento e entrega
 - [ ] Transições do hero/preloader e ritmo do motion
