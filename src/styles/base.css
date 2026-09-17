@@ -102,6 +102,11 @@ p {
   text-transform: none;
 }
 
+/* Beats classes that set display (.button, for one); without it [hidden] hides nothing. */
+[hidden] {
+  display: none !important;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

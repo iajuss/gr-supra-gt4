@@ -49,6 +49,7 @@
   --space-8: 4.5rem;
   --space-9: 7rem;
   --gutter: clamp(1rem, 5vw, 4.5rem);
+  --header-h: 3.75rem; /* fixed header: 2 x --space-4 plus the text line */
   --section-pad-y: clamp(4.5rem, 3rem + 6vw, 9rem);
   --content-max: 90rem;
 

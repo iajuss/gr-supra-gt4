@@ -1,29 +1,27 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-17, fim da sessão)
+## ▶ Retomada (atualizado em 2026-09-17, fim da sessão de verificação)
 
-- **Onde paramos:** Blocos 1, 2 e 3 concluídos. Bloco 2B com passos 1 a 5 **commitados** (`283bf62` lógica pura,
-  `5555bfb` cena 3D na página). O usuário viu a pista 3D e aprovou ("ficou incrível"). 134 testes verdes.
-- **Próximo passo: passo 6 do 2B (verificação), com o painel do navegador visível** (método escolhido pelo usuário).
-  Roteiro combinado:
-  1. Desktop (≥ 1024 px): volta começa a 50% visível na Heli; capturas de Chase, Heli e Top (minimapa nas três).
-  2. FPS durante a volta em cada câmera.
-  3. Restart no meio e depois do fim (volta a 0:00, câmera direto na largada).
-  4. Pausa fora da tela: rolar para fora e voltar, a volta continua de onde parou.
-  5. Lite em 375 px: 2D, Restart visível, sem baixar o Three.js.
-  6. Reduced-motion (volta completa, Restart oculto) e sem WebGL (fallback 2D): simular o que der e dizer o que não deu.
-- **Sandbox:** `sandbox/track3d/` (fora do git) **fica por enquanto**; decidir no fim do bloco (mover para fora do
-  projeto, apagar ou manter). Não apagar sem perguntar: não tem cópia no git.
-- **Pendências pequenas notadas:**
-  - Ao dar Restart, o resumo para leitor de tela ("Simulated lap completed in …") continua com o texto da volta anterior.
-  - Bloco 3: ver o movimento do reveal e dos contadores com o painel visível + mobile.
+- **Onde paramos:** Blocos 1, 2 e 3 concluídos. **Bloco 2B fechado**: passos 1 a 5 commitados
+  (`283bf62`, `5555bfb`) e o passo 6 (verificação) feito com o painel do navegador visível.
+  134 testes verdes; console sem erros em full, lite, reduced-motion e sem WebGL.
+- **Não commitado ainda** (6 arquivos): `styles/tokens.css` (`--header-h`), `styles/sections/lap.css`
+  (controles e legenda abaixo do header), `styles/base.css` (`[hidden]`), `components/telemetryHud.js`
+  (`clear()`), `components/lapSection.js` e `components/lapSection3d.js` (limpam o resumo no Restart).
+- **Próximo passo: Bloco 4 (3D do carro)**, que começa com o usuário escolhendo e baixando o modelo
+  no Sketchfab (comparar peso, qualidade e licença antes).
+- **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
+  A entrada `sandbox/` continua no `.gitignore`, à toa.
+- **Pendência do Bloco 3:** ver o movimento do reveal e dos contadores com o painel visível + mobile.
 - **Dicas do ambiente:**
   - Com o painel do navegador oculto, `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` e
-    transições CSS não rodam, e as capturas saem pretas. Pedir para o usuário abrir o painel antes de verificar
-    visualmente.
-  - Para forçar o modo full no painel: emular 1440×900 e recarregar (o painel oculto tem janela 0×0 → lite).
-  - A porta 5173 pode estar ocupada pelo servidor de outra conversa na mesma pasta; dá para usar esse servidor
-    abrindo `http://localhost:5173/` direto.
+    transições CSS não rodam, e as capturas saem pretas — mesmo com `visibilityState` dizendo `visible`.
+    Sintoma típico: o canvas do palco fica em 300×150 (o padrão), esticado pelo CSS.
+  - Para forçar o modo full: emular 1440×900 e recarregar. O app limpa a emulação quando a largura do
+    painel muda, então vale reemular antes de cada recarga.
+  - Uma volta dura 12 s; entre duas chamadas de ferramenta ela pode terminar sozinha. Para pegá-la
+    correndo, agrupar clique + espera + leitura num único lote (ou orquestrar tudo em um script só).
+  - Clicar por referência de elemento rola a página antes do clique; clicar pelo DOM não mexe no scroll.
 
 ### Mapa do Bloco 2B
 
@@ -87,8 +85,15 @@ Protótipo aprovado em `sandbox/track3d`. O 2D atual continua como modo lite.
 - [x] Ligação: import dinâmico no modo full; lite mantém o 2D
   - Build: `lapSection3d` em chunk separado (559 KB, 139 KB gzip); bundle principal 86 KB (34 KB gzip)
 - [x] 👁 Usuário viu a pista 3D na página e aprovou; minimapa passou a aparecer também na Top
-- [ ] 👁 Desktop: 3 câmeras, Restart, pausa fora da tela, FPS · Lite: fallback 2D · reduced-motion · sem WebGL
-- [ ] Remover `sandbox/track3d`
+- [x] 👁 Desktop: 3 câmeras, Restart, pausa fora da tela, FPS · Lite: fallback 2D · reduced-motion · sem WebGL
+  - Verificado em 2026-09-17 com o painel visível, em 1440×900 e 375×812. FPS: Heli 134, Chase 142, Top 137.
+  - Restart no meio (0:44 → 0:00) e depois do fim (1:45.364 → 0:01), com a câmera direto na largada.
+  - Fora da tela o relógio congela (0:26.3) e retoma de lá. Lite e sem WebGL não baixam nada do Three.js.
+  - Reduced-motion e sem WebGL testados por uma página temporária que sobrescrevia `matchMedia` e
+    `getContext` antes do `main.js` (apagada depois): o `detectEnvironment` lê o `window` real.
+  - Três correções saíram daqui: controles abaixo do header, `[hidden]` valendo sobre `.button`
+    (o Restart aparecia em reduced-motion) e o resumo para leitor de tela limpo no Restart.
+- [x] Remover `sandbox/track3d` — movido para `Desktop/track3d-sandbox`, fora do projeto (2026-09-17)
 
 ## Bloco 3 — SPECS
 - [x] Levantar e conferir números do Vulcan em fontes públicas → tabela em `design.md` + valores no HTML (`data-count`)

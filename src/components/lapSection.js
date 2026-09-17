@@ -42,6 +42,7 @@ export function initLapSection(root, { reducedMotion }) {
       hud.update(sample);
     },
     onFinish: showFinish,
+    onRestart: hud.clear,
   });
   restart.addEventListener('click', player.restart);
 }

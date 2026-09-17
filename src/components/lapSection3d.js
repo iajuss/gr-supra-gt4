@@ -50,7 +50,10 @@ export function initLapSection3d(root) {
     model,
     onFrame: show,
     onFinish: showFinish,
-    onRestart: stage.snapCamera,
+    onRestart() {
+      hud.clear();
+      stage.snapCamera();
+    },
   });
 
   function settle() {

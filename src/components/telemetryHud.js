@@ -24,7 +24,12 @@ export function createTelemetryHud(root) {
     summary.textContent = `Simulated lap completed in ${formatLapTime(lapTime)}.`;
   }
 
-  return { update, announce };
+  /** Drops the summary of the previous lap, so a restart does not read a stale time. */
+  function clear() {
+    summary.textContent = '';
+  }
+
+  return { update, announce, clear };
 }
 
 function setText(node, text) {

@@ -60,6 +60,13 @@ Status: aprovado em 2026-09-17.
        Coordenadas no chão do 3D (`{ x, z }`, y para cima); o `{ x, y }` do traçado só existe dentro do `centreline`.
      - O relógio soma o tempo entre quadros com limite de 0,05 s: aba em segundo plano ou fora da tela
        retoma a volta de onde parou, em vez de pular para o fim (vale para o 2D também).
+     - Ajustes da verificação de 2026-09-17 (passo 6 do Bloco 2B):
+       - Controles, Restart e legenda do palco começam abaixo do header fixo (`--header-h`, 3,75 rem):
+         com o palco em tela cheia, a nav e os botões de câmera ocupavam a mesma faixa do topo.
+       - `[hidden] { display: none !important }` no `base.css`: `.button` define `display`, então o
+         atributo `hidden` não escondia o Restart no modo reduced-motion.
+       - O resumo para leitor de tela é limpo no Restart (`hud.clear()` nos dois modos); antes ele
+         mantinha o tempo da volta anterior enquanto a nova corria.
    - **Modo lite (mobile, reduced-motion, sem WebGL): canvas 2D** com contorno fantasma cinza + rastro lime.
      Pista girada 90° em telas largas (4:3) e em pé no mobile (3:4).
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.

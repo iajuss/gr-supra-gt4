@@ -131,13 +131,14 @@
   z-index: var(--z-hud);
 }
 
+/* Below the fixed header: on the full-screen stage both were fighting for the top strip. */
 [data-lap-view='3d'] .lap__controls {
-  top: var(--space-5);
+  top: calc(var(--header-h) + var(--space-3));
   right: var(--gutter);
 }
 
 [data-lap-view='3d'] .hud__note {
-  top: var(--space-5);
+  top: calc(var(--header-h) + var(--space-3));
   left: var(--gutter);
   color: var(--color-muted);
 }
