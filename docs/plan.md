@@ -5,10 +5,13 @@
 - **Onde paramos:** Blocos 1, 2, 2B e 3 concluídos e verificados no navegador; nada pendente para trás.
   Os **passos 1 (palco com proxy), 2 (pontos de câmera) e 3 (scroll) do Bloco 4** estão feitos e
   verificados. 159 testes verdes.
-- **Próximo passo: Bloco 4, passo 4 (preloader)** — `lib/loader.js` (GLB/HDR com progresso) e
-  `components/preloader.js` com progresso real; falha no carregamento cai para o modo lite. Método a
-  combinar: hoje não há nada pesado para carregar (o proxy é geometria), então vale decidir se o
-  preloader nasce junto com o modelo (passo 5) ou antes, com o carregamento simulado.
+- **Passo 4 (preloader) adiado** para junto do passo 5: hoje não há nada pesado para carregar e o
+  progresso seria inventado.
+- **Modelo escolhido: Sohan3D** (429k tris, zero textura, CC-BY) — comparação em [design.md](design.md).
+  O download é do usuário (exige login no Sketchfab).
+- **Próximo passo: Bloco 4, passo 6 (modo lite)**, que não depende do modelo: capturar as imagens de
+  cada capítulo da cena atual e trocar os `chapter__shot-placeholder`. Quando o carro real entrar, as
+  imagens são recapturadas.
 - **Passos 1 a 3, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
   `scene/car.js` (proxy por trás da interface final) e o import dinâmico do palco no `main.js`.
   O gradiente placeholder saiu do `stage.css`. Depois, `lib/math.js` (`clamp`, `lerpShot`, `shotAt`),
@@ -168,11 +171,12 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
      - Âncoras do header funcionam com o Lenis ligado (scrollY = offsetTop em Specs e Aero).
      - Lite em 375 px: nada de `lenis` nem de `ScrollTrigger` é baixado.
      - Build: `scroll` 18,9 KB (5,6 gzip) e `cameraRig` 1,0 KB em chunks sob demanda; principal 88,4 KB.
-4. **Preloader**
+4. **Preloader** — adiado para junto do passo 5 (2026-09-17): sem o GLB, o progresso seria inventado
    - [ ] `lib/loader.js` (GLB/HDR com progresso) + `components/preloader.js` com progresso real
    - [ ] Falha no carregamento cai para o modo lite, como o `main.js` já faz com o 3D da volta
 5. **Modelo de verdade**
-   - [ ] Escolher e baixar o modelo (usuário) → comparar peso/qualidade/licença
+   - [x] Comparar os candidatos (malha, texturas, licença) → **Sohan3D** escolhido em 2026-09-17
+   - [ ] Baixar o modelo (usuário; o Sketchfab exige login)
    - [ ] Otimizar com `gltf-transform` (meta ≤ ~5 MB)
    - [ ] Trocar o proxy pelo modelo e ajustar materiais
    - [ ] 👁 Ajuste fino dos pontos de câmera e da iluminação, com o carro real

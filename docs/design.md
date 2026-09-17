@@ -215,8 +215,28 @@ src/
 - **Navegador:** desktop e viewport de 375px, console sem erros, modo reduced-motion.
 - **Lighthouse** no build de produção.
 
+## Modelo 3D — comparação dos candidatos (2026-09-17)
+
+Levantado pela API pública do Sketchfab. O peso do `.zip` só aparece logado, então ele não entrou na
+comparação; malha, texturas e licença bastaram para decidir.
+
+| Modelo | Malha | Texturas | Licença | Observação |
+|---|---|---|---|---|
+| **Sohan3D** (escolhido) | 429k tris | 0 (16 materiais) | CC-BY | Forma completa: asa em pilares, difusor, splitter, rodas. Cor vem dos materiais |
+| KRYPTA "Soft Lavender" | 72k tris | 28 (PBR metalness) | CC-BY | Único com PBR declarado; malha mais replicada do site. Pintura lilás |
+| DisneyCars AMR Pro | 93k tris | 37 | CC-BY | Variante AMR Pro, com aero diferente do Vulcan |
+| Galaxy Car Showroom | 59k tris | 16 | CC-BY | O mais leve dos completos; feito para Unity |
+| AzzyLino | 67k tris | 0 | CC-BY | Estilizado/low-poly, sem asa — descartado |
+| Zain Jafar | 3,9M tris | — | CC-BY | Detalhado demais, exigiria decimação pesada |
+| temich / Outlaw Games | 72k tris | — | CC BY-**NC** | Os mais curtidos, mas a licença não-comercial não serve |
+
+**Escolhido: Sohan3D** (`sketchfab.com/3d-models/aston-martin-vulcan-66cdaa9a8d114633986772a07b32d91c`).
+Zero textura é vantagem aqui: a página tem direção visual própria (carbono escuro + lime), então a
+pintura é definida nos materiais e o peso do arquivo vira só malha, que Draco/meshopt comprimem bem.
+Os 429k triângulos são o preço, pago só no desktop — o mobile é lite, com imagens estáticas.
+
 ## Pendências
 
-- Usuário baixa o modelo Vulcan do Sketchfab (exige login). Candidatos: Sohan3D, Zain Jafar,
-  DisneyCars (AMR Pro). Comparar peso, qualidade e licença antes.
-- Confirmar os números da ficha técnica em fontes públicas.
+- Usuário baixa o GLB do Sohan3D no Sketchfab (exige login).
+- Preloader (passo 4) adiado para junto do modelo: hoje não há nada pesado para carregar, e o progresso
+  seria inventado. Quando o GLB entrar, o `lib/loader.js` reporta bytes de verdade.
