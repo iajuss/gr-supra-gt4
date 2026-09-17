@@ -18,8 +18,11 @@ Status: aprovado em 2026-09-17.
 | `--accent`   | `#C6FF00` | lime Aston Martin Racing     |
 | `--support`  | `#1F3D2B` | racing green escuro          |
 
-- Títulos: sans condensada pesada (ex.: Anton / Big Shoulders Display).
-- Labels e telemetria: monoespaçada (ex.: JetBrains Mono).
+- Títulos e números: **Big Shoulders Display** (variável 100–900; hero 900, títulos 800, números 700).
+  Escolhida depois de comparar com Anton: mais técnica/industrial e mais legível nos números.
+- Labels e telemetria: **JetBrains Mono** (variável).
+- Texto corrido: fonte do sistema (`system-ui`), sem download extra.
+- Fontes hospedadas no próprio site via `@fontsource-variable`. O navegador baixa só os subconjuntos usados.
 
 ## Estrutura da página
 
