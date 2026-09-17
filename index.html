@@ -41,7 +41,7 @@
       <section class="hero" id="top" aria-labelledby="hero-title">
         <p class="label hero__kicker">
           // Unofficial concept · <span class="accent">Track only</span> ·
-          <span data-provisional>V12 7.0</span> · <span data-provisional>24 units</span>
+          V12 7.0 · 24 units
         </p>
         <h1 class="hero__title" id="hero-title">Vulcan</h1>
         <p class="hero__lead">Seven litres. Twelve cylinders. No number plate.</p>
@@ -53,15 +53,15 @@
           <div class="chapter__shot-placeholder label">Shot_01 — rear wing</div>
         </figure>
         <div class="chapter__body">
-          <p class="label chapter__index"><span class="accent">01</span> — Aero</p>
-          <h2 class="chapter__title" id="aero-title">Downforce, sculpted.</h2>
+          <p class="label chapter__index" data-reveal="fade"><span class="accent">01</span> — Aero</p>
+          <h2 class="chapter__title" data-reveal="lines" id="aero-title">Downforce, sculpted.</h2>
           <p class="chapter__lead">
             A rear wing that towers over the bodywork and a diffuser that swallows the underside. At speed,
             the air stops being resistance and turns into grip.
           </p>
           <dl class="datapoints">
             <div><dt class="label">Bodywork</dt><dd>Carbon fibre</dd></div>
-            <div><dt class="label">Front</dt><dd>Splitter + canards</dd></div>
+            <div><dt class="label">Downforce</dt><dd>1,300+ <span class="unit">kg</span></dd></div>
             <div><dt class="label">Rear</dt><dd>Wing + diffuser</dd></div>
           </dl>
         </div>
@@ -72,16 +72,16 @@
           <div class="chapter__shot-placeholder label">Shot_02 — front splitter</div>
         </figure>
         <div class="chapter__body">
-          <p class="label chapter__index"><span class="accent">02</span> — Chassis</p>
-          <h2 class="chapter__title" id="chassis-title">Carbon, all the way down.</h2>
+          <p class="label chapter__index" data-reveal="fade"><span class="accent">02</span> — Chassis</p>
+          <h2 class="chapter__title" data-reveal="lines" id="chassis-title">Carbon, all the way down.</h2>
           <p class="chapter__lead">
             A carbon-fibre monocoque wraps the driver like a racing prototype. Anything that didn't make the
             car faster stayed at the factory.
           </p>
           <dl class="datapoints">
             <div><dt class="label">Monocoque</dt><dd>Carbon fibre</dd></div>
-            <div><dt class="label">Brakes</dt><dd data-provisional>Carbon-ceramic</dd></div>
-            <div><dt class="label">Gearbox</dt><dd data-provisional>6-speed sequential</dd></div>
+            <div><dt class="label">Brakes</dt><dd>380/360 <span class="unit">mm</span> carbon</dd></div>
+            <div><dt class="label">Gearbox</dt><dd>6-speed sequential</dd></div>
           </dl>
         </div>
       </section>
@@ -91,28 +91,28 @@
           <div class="chapter__shot-placeholder label">Shot_03 — side exhaust</div>
         </figure>
         <div class="chapter__body">
-          <p class="label chapter__index"><span class="accent">03</span> — V12</p>
-          <h2 class="chapter__title" id="v12-title">Twelve cylinders. Zero turbos.</h2>
+          <p class="label chapter__index" data-reveal="fade"><span class="accent">03</span> — V12</p>
+          <h2 class="chapter__title" data-reveal="lines" id="v12-title">Twelve cylinders. Zero turbos.</h2>
           <p class="chapter__lead">
             A naturally aspirated V12 exhaling through side-exit pipes, tuned for sound as much as for speed.
           </p>
           <dl class="datapoints">
-            <div><dt class="label">Engine</dt><dd data-provisional>7.0 L V12</dd></div>
+            <div><dt class="label">Engine</dt><dd>7.0 <span class="unit">L</span> V12</dd></div>
             <div><dt class="label">Aspiration</dt><dd>Natural</dd></div>
-            <div><dt class="label">Power</dt><dd data-provisional>820 PS</dd></div>
+            <div><dt class="label">Power</dt><dd>820 <span class="unit">hp</span></dd></div>
           </dl>
         </div>
       </section>
 
       <section class="handoff" aria-label="Transition">
-        <p class="label">Built for one place</p>
-        <p class="handoff__line">The circuit.</p>
+        <p class="label" data-reveal="fade">Built for one place</p>
+        <p class="handoff__line" data-reveal="lines">The circuit.</p>
       </section>
 
       <section class="lap" id="lap" aria-labelledby="lap-title">
         <header class="section-head">
-          <p class="label"><span class="accent">04</span> — The lap</p>
-          <h2 class="section-head__title" id="lap-title">One lap of Silverstone.</h2>
+          <p class="label" data-reveal="fade"><span class="accent">04</span> — The lap</p>
+          <h2 class="section-head__title" data-reveal="lines" id="lap-title">One lap of Silverstone.</h2>
           <p class="section-head__lead">5.891 km. 18 corners. One very loud V12.</p>
         </header>
 
@@ -150,28 +150,55 @@
 
       <section class="specs" id="specs" aria-labelledby="specs-title">
         <header class="section-head">
-          <p class="label"><span class="accent">05</span> — Specification</p>
-          <h2 class="section-head__title" id="specs-title">The numbers.</h2>
+          <p class="label" data-reveal="fade"><span class="accent">05</span> — Specification</p>
+          <h2 class="section-head__title" data-reveal="lines" id="specs-title">The numbers.</h2>
         </header>
 
+        <!-- Figures and sources: docs/design.md → "Fontes dos números". -->
         <dl class="specs__grid">
           <div class="stat">
             <dt class="label">Power</dt>
-            <dd class="stat__value" data-provisional>820<span class="stat__unit">PS</span></dd>
+            <dd class="stat__value"><span data-count="820">820</span><span class="stat__unit unit">hp</span></dd>
+            <dd class="stat__detail label">@ 7,750 rpm</dd>
           </div>
           <div class="stat">
-            <dt class="label">Engine</dt>
-            <dd class="stat__value" data-provisional>7.0<span class="stat__unit">L V12</span></dd>
+            <dt class="label">Torque</dt>
+            <dd class="stat__value"><span data-count="780">780</span><span class="stat__unit unit">Nm</span></dd>
+            <dd class="stat__detail label">@ 6,500 rpm</dd>
           </div>
           <div class="stat">
-            <dt class="label">Gearbox</dt>
-            <dd class="stat__value" data-provisional>6<span class="stat__unit">speed seq.</span></dd>
+            <dt class="label">Weight</dt>
+            <dd class="stat__value"><span data-count="1350">1,350</span><span class="stat__unit unit">kg</span></dd>
+            <dd class="stat__detail label">Approx. dry</dd>
           </div>
           <div class="stat">
             <dt class="label">Built</dt>
-            <dd class="stat__value" data-provisional>24<span class="stat__unit">units</span></dd>
+            <dd class="stat__value"><span data-count="24">24</span><span class="stat__unit">units</span></dd>
+            <dd class="stat__detail label">2015 – 2016</dd>
           </div>
         </dl>
+
+        <figure class="downforce" data-bar>
+          <figcaption class="downforce__caption">
+            <p class="label">Downforce near 200 mph vs. weight</p>
+            <p class="downforce__statement">
+              The air pushes down with <span class="accent"><span data-count="96">96</span>%</span> of the car's own
+              weight.
+            </p>
+          </figcaption>
+          <div
+            class="downforce__track"
+            role="img"
+            aria-label="About 1,300 kg of downforce, 96% of the car's 1,350 kg weight"
+          >
+            <div class="downforce__fill" style="--fill: 0.96"></div>
+          </div>
+          <div class="downforce__scale label" aria-hidden="true">
+            <span>0</span>
+            <span>1,300+ kg downforce</span>
+            <span>1,350 kg weight</span>
+          </div>
+        </figure>
       </section>
     </main>
 

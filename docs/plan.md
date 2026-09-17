@@ -31,11 +31,14 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
 - [x] 👁 Reduced-motion: volta completa, HUD final (1:45.364) e replay oculto
 
 ## Bloco 3 — SPECS
-- [ ] Levantar e conferir números do Vulcan em fontes públicas → `data/specs.js`
-- [ ] 🧪 Lógica de contagem (easing, formatação de números/unidades)
-- [ ] `components/specCounters.js` + barras comparativas
-- [ ] `components/textReveal.js` (reutilizável nas outras seções)
-- [ ] 👁 Desktop + mobile + reduced-motion
+- [x] Levantar e conferir números do Vulcan em fontes públicas → tabela em `design.md` + valores no HTML (`data-count`)
+  - Corrigido: 820 PS → 820 hp; "Splitter + canards" (não confirmado) → Downforce 1,300+ kg
+- [x] 🧪 Lógica de contagem (`lib/counter.js`: easing, casas decimais, valor por progresso, formatação en-US)
+- [x] `components/specCounters.js` + barra downforce vs peso (96%): uma vez ao entrar na tela, escalonado
+- [x] 🧪 `lib/lines.js` + `components/textReveal.js`: linhas sobem de trás de uma máscara (GSAP), aplicado a títulos de capítulos e seções
+  - Unidades com a caixa correta (`.unit`: Nm, kg, mm); espaços preservados entre as linhas divididas
+- [x] 👁 Desktop: contadores chegam a 820 / 780 / 1,350 / 24 / 96% e a barra a 0,96, sem erros no console
+- [ ] 👁 Ver o movimento do reveal e dos contadores com o painel visível (o painel ficou oculto durante os testes) + mobile
 
 ## Bloco 4 — 3D (modo full)
 - [ ] Escolher e baixar o modelo (usuário) → comparar peso/qualidade/licença

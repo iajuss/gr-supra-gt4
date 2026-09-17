@@ -56,6 +56,20 @@ main,
   line-height: 1.1;
 }
 
+/* Text reveal masks (components/textReveal.js) */
+.reveal-line {
+  display: block;
+  overflow: hidden;
+  /* Room for descenders and the condensed display font's tall caps. */
+  padding-block: 0.04em;
+  margin-block: -0.04em;
+}
+
+.reveal-line__inner {
+  display: block;
+  will-change: transform;
+}
+
 .button {
   display: inline-flex;
   align-items: center;

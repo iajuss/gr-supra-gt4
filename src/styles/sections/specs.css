@@ -29,7 +29,68 @@
   font-size: 0.32em;
   font-weight: var(--weight-heading);
   color: var(--color-accent);
+}
+
+.stat__detail {
+  font-size: 0.6875rem;
+}
+
+/* Downforce vs weight bar. Filled by default (no JS); specCounters.js empties it, then fills it. */
+.downforce {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.downforce__caption {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.downforce__statement {
+  max-width: 24ch;
+  font-family: var(--font-display);
+  font-weight: var(--weight-heading);
+  font-size: var(--fs-heading);
+  line-height: var(--leading-display);
   text-transform: uppercase;
+  text-wrap: balance;
+  font-variant-numeric: tabular-nums;
+}
+
+.downforce__track {
+  position: relative;
+  height: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.downforce__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform: scaleX(var(--fill));
+  transform-origin: left center;
+}
+
+[data-bar-state='empty'] .downforce__fill {
+  transform: scaleX(0);
+}
+
+[data-bar-state='filled'] .downforce__fill {
+  transition: transform 1.4s var(--ease-out);
+}
+
+.downforce__scale {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-size: 0.6875rem;
+}
+
+.downforce__scale span:nth-child(2) {
+  margin-left: auto;
+  color: var(--color-accent);
 }
 
 @media (min-width: 64rem) {

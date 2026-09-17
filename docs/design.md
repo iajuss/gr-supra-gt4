@@ -42,6 +42,26 @@ Status: aprovado em 2026-09-17.
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.
 8. **Footer** — aviso fan-made, crédito CC-BY do modelo 3D, crédito do traçado.
 
+## Fontes dos números
+
+Os valores exibidos ficam no `index.html` (atributo `data-count` na SPECS), que é a única fonte da verdade.
+O JS só anima até esses valores. Conferido em 2026-09-17.
+
+| Dado | Valor na página | Fontes |
+|---|---|---|
+| Motor | 7.0 L V12 aspirado (6.949 cc) | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan), [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12) |
+| Potência | 820 hp @ 7,750 rpm (= 831 PS; oficial: "800-plus bhp") | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan), [Aston Martin Pressroom](https://media.astonmartin.com/vulcan/), [Motor1](https://www.motor1.com/news/53403/aston-martin-vulcan-unveiled-with-800-bhp/) |
+| Torque | 780 Nm @ 6,500 rpm | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
+| Peso | ~1,350 kg (algumas fontes: 1,360) | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
+| Downforce | 1,300+ kg perto de 200 mph → 96% do peso | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12) (Wikipedia: 1,362 kg na velocidade máxima) |
+| Câmbio | Xtrac sequencial de 6 marchas (transaxle) | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12), [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
+| Freios | Brembo carbono-cerâmica, 380/360 mm | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12), [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
+| Chassi | Monocoque e carroceria de fibra de carbono (Multimatic) | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12), [Stratstone](https://www.stratstone.com/blog/spotlight/aston-martin-vulcan/) |
+| Escape | Saída lateral (Inconel e titânio) | [TopSpeed](https://www.topspeed.com/cars/aston-martin/2016-aston-martin-vulcan-ar167713.html) |
+| Produção | 24 unidades (2015–2016) | todas as fontes acima |
+
+Fora da página: velocidade máxima e 0–100, porque as fontes divergem.
+
 ## Abordagem técnica — canvas 3D fixo + timeline única
 
 - Um canvas Three.js `position: fixed` atrás das seções 1–5.

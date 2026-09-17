@@ -97,6 +97,11 @@ p {
   color: var(--color-accent);
 }
 
+/* Units keep their correct casing (Nm, kg, mm) inside uppercase display text. */
+.unit {
+  text-transform: none;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
