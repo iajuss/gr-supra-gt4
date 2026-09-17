@@ -8,6 +8,7 @@ import {
   rotateQuarter,
   orientToBox,
   sliceUntil,
+  rotateStart,
 } from './track.js';
 
 const square = [
@@ -166,5 +167,33 @@ describe('sliceUntil', () => {
     const path = measurePath(square);
     expect(sliceUntil(path, 0)).toEqual([{ x: 0, y: 0 }]);
     expect(sliceUntil(path, 1)).toEqual(square);
+  });
+});
+
+describe('rotateStart', () => {
+  it('starts the closed loop at a point inside a segment', () => {
+    expect(rotateStart(square, 0.125)).toEqual([
+      { x: 5, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+      { x: 0, y: 0 },
+      { x: 5, y: 0 },
+    ]);
+  });
+
+  it('starts at an existing vertex without duplicating it', () => {
+    expect(rotateStart(square, 0.25)).toEqual([
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+    ]);
+  });
+
+  it('keeps the loop unchanged at progress 0 and preserves its length', () => {
+    expect(rotateStart(square, 0)).toEqual(square);
+    expect(measurePath(rotateStart(square, 0.6)).total).toBeCloseTo(40);
   });
 });

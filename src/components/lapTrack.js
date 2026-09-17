@@ -1,7 +1,6 @@
 // Canvas 2D drawing of the circuit: ghost outline, sector ticks, start line, lime trail and car dot.
 
 import {
-  projectCoordinates,
   orientToBox,
   fitToBox,
   measurePath,
@@ -13,12 +12,11 @@ const MAX_DPR = 2;
 
 /**
  * @param {HTMLCanvasElement} canvas
- * @param {[number, number][]} coordinates GeoJSON [lon, lat] pairs
+ * @param {{ x: number, y: number }[]} metres closed loop in metres, starting at the start/finish line
  * @param {{ sectorSplits?: number[] }} [options]
  */
-export function createLapTrack(canvas, coordinates, { sectorSplits = [] } = {}) {
+export function createLapTrack(canvas, metres, { sectorSplits = [] } = {}) {
   const ctx = canvas.getContext('2d');
-  const metres = projectCoordinates(coordinates);
   const colors = readColors();
   let path = null;
   let dpr = 1;

@@ -1,8 +1,8 @@
 // THE LAP: builds the simulated lap and plays it on the canvas + HUD when the section comes into view.
 
-import silverstone from '../data/silverstone.json';
+import circuit from '../data/circuit.js';
 import dynamics from '../data/vulcanDynamics.js';
-import { projectCoordinates, measurePath } from '../lib/track.js';
+import { projectCoordinates, measurePath, rotateStart } from '../lib/track.js';
 import { createLapModel, sampleAtTime } from '../lib/telemetry.js';
 import { createLapTrack } from './lapTrack.js';
 import { createTelemetryHud } from './telemetryHud.js';
@@ -15,10 +15,10 @@ const START_VISIBILITY = 0.5;
  * @param {{ reducedMotion: boolean }} options
  */
 export function initLapSection(root, { reducedMotion }) {
-  const coordinates = silverstone.geometry.coordinates;
-  const model = createLapModel(measurePath(projectCoordinates(coordinates)), dynamics);
-  const track = createLapTrack(root.querySelector('[data-lap-canvas]'), coordinates, {
-    sectorSplits: dynamics.sectorSplits,
+  const metres = rotateStart(projectCoordinates(circuit.coordinates), circuit.startProgress);
+  const model = createLapModel(measurePath(metres), { ...dynamics, sectorSplits: circuit.sectorSplits });
+  const track = createLapTrack(root.querySelector('[data-lap-canvas]'), metres, {
+    sectorSplits: circuit.sectorSplits,
   });
   const hud = createTelemetryHud(root);
   const replay = root.querySelector('[data-lap-replay]');

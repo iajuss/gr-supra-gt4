@@ -36,6 +36,9 @@ Status: aprovado em 2026-09-17.
 6. **THE LAP** — traçado real de Silverstone (GeoJSON `bacinger/f1-circuits`, MIT) em Canvas 2D, ponto lime
    percorrendo a volta + HUD (velocidade, marcha, setor, tempo). Inicia ao entrar na tela; botão `REPLAY`.
    Telemetria **simulada**, identificada como tal.
+   - Velocidade derivada da curvatura do traçado (suavizado). Volta de ~1:45, animada em 12 s.
+   - Largada na Hamilton Straight (atual). O GeoJSON começa na reta pré-2011, então o laço é reordenado.
+   - Contorno fantasma cinza + rastro lime. Pista girada 90° no desktop (4:3) e em pé no mobile (3:4).
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.
 8. **Footer** — aviso fan-made, crédito CC-BY do modelo 3D, crédito do traçado.
 

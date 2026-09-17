@@ -15,5 +15,4 @@ export default {
   braking: 3.2 * G,
   topSpeed: 320 / 3.6,
   gearTopSpeeds: [85, 125, 165, 205, 250, Infinity],
-  sectorSplits: [1 / 3, 2 / 3],
 };

@@ -120,6 +120,28 @@ export function sliceUntil({ points, cumulative, total }, progress) {
   return travelled;
 }
 
+/**
+ * Re-orders a closed loop (first point === last point) so it starts at a given progress.
+ * Used to move the start/finish line without touching the source data.
+ * @param {{ x: number, y: number }[]} points
+ * @param {number} progress
+ */
+export function rotateStart(points, progress) {
+  const path = measurePath(points);
+  const t = ((progress % 1) + 1) % 1;
+  if (t === 0) return points;
+
+  const distance = t * path.total;
+  const i = lastIndexAtOrBefore(path.cumulative, distance);
+
+  if (distance === path.cumulative[i]) {
+    return [...points.slice(i), ...points.slice(1, i + 1)];
+  }
+
+  const { x, y } = pointAt(path, t);
+  return [{ x, y }, ...points.slice(i + 1), ...points.slice(1, i + 1), { x, y }];
+}
+
 function mean(values) {
   return values.reduce((sum, v) => sum + v, 0) / values.length;
 }

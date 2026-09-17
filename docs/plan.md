@@ -25,8 +25,10 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
 - [x] `components/telemetryHud.js` — exibe os dados recebidos (+ resumo para leitor de tela)
 - [x] `components/lapSection.js` — volta de 12 s ao entrar na tela, botão REPLAY, modo reduced-motion
 - [x] 👁 Desktop (traçado girado, 4:3) + mobile (em pé, 3:4), sem erros no console
-- [ ] Linha de largada: o GeoJSON começa na reta antiga (Woodcote–Copse), não na atual (Hamilton Straight) → decidir
-- [ ] 👁 Conferir o modo reduced-motion no navegador
+- [x] 🧪 Linha de largada movida para Hamilton Straight (`rotateStart` + `data/circuit.js`). O GeoJSON começava na reta antiga (Woodcote–Copse).
+  - Teste amarrado à realidade: 18 zonas de frenagem, Abbey à frente e Club atrás (200–400 m cada), passagem acima de 200 km/h
+  - Setores aproximados: S1 termina na Wellington, S2 na Hangar
+- [x] 👁 Reduced-motion: volta completa, HUD final (1:45.364) e replay oculto
 
 ## Bloco 3 — SPECS
 - [ ] Levantar e conferir números do Vulcan em fontes públicas → `data/specs.js`
