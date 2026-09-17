@@ -9,9 +9,11 @@
   progresso seria inventado.
 - **Modelo escolhido: Sohan3D** (429k tris, zero textura, CC-BY) — comparação em [design.md](design.md).
   O download é do usuário (exige login no Sketchfab).
-- **Próximo passo: Bloco 4, passo 6 (modo lite)**, que não depende do modelo: capturar as imagens de
-  cada capítulo da cena atual e trocar os `chapter__shot-placeholder`. Quando o carro real entrar, as
-  imagens são recapturadas.
+- **Passo 6 (modo lite) feito** com o proxy: imagens em `public/shots/`, capturadas por
+  `tools/capture.html`. Basta rodar a captura de novo quando o carro real entrar.
+- **Próximo passo: passo 5 (modelo de verdade)**, assim que o GLB do Sohan3D estiver baixado —
+  otimizar com `gltf-transform`, trocar o proxy, ajustar materiais, luzes e os cinco enquadramentos,
+  e então o passo 4 (preloader com progresso real). Sem o modelo, sobra o Bloco 5 (polimento).
 - **Passos 1 a 3, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
   `scene/car.js` (proxy por trás da interface final) e o import dinâmico do palco no `main.js`.
   O gradiente placeholder saiu do `stage.css`. Depois, `lib/math.js` (`clamp`, `lerpShot`, `shotAt`),
@@ -180,9 +182,17 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
    - [ ] Otimizar com `gltf-transform` (meta ≤ ~5 MB)
    - [ ] Trocar o proxy pelo modelo e ajustar materiais
    - [ ] 👁 Ajuste fino dos pontos de câmera e da iluminação, com o carro real
-6. **Modo lite**
-   - [ ] Capturar `public/shots/*.webp` de cada capítulo a partir da cena ajustada
-   - [ ] 👁 Substituir os `chapter__shot-placeholder` pelas imagens, em 375 px
+6. **Modo lite** — feito com o proxy em 2026-09-17; as imagens são recapturadas no passo 5
+   - [x] Ferramenta de captura: `tools/capture.html` + `tools/capture.js` montam o palco num canvas de
+     1440×900 e postam cada shot; o plugin de dev `tools/shotServer.js` grava em `public/shots/`.
+     Rodar com o dev server no ar: `http://localhost:<porta>/tools/capture.html`
+   - [x] `public/shots/{aero,chassis,v12}.webp` capturados (9–12 KB cada)
+   - [x] `components/chapterShots.js`: o `src` fica em `data-src` e só o modo lite o promove, senão o
+     desktop baixaria imagens que nunca mostra (medido: uma delas vinha mesmo com `display: none`)
+   - [x] 👁 Substituir os `chapter__shot-placeholder` pelas imagens, em 375 px
+     - Medido na aba visível: full baixa 0 imagens, lite baixa as 3 e as renderiza; console limpo.
+     - Duas armadilhas do ambiente: capturar antes do `ResizeObserver` enquadra a cena contra o canvas
+       padrão de 300×150, e em aba de segundo plano o lazy loading não roda (a medição mente).
 
 ## Bloco 5 — Polimento e entrega
 - [ ] Transições do hero/preloader e ritmo do motion

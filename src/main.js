@@ -3,6 +3,7 @@ import '@fontsource-variable/jetbrains-mono';
 import './styles/main.css';
 
 import { decideMode, detectEnvironment } from './lib/capabilities.js';
+import { initChapterShots } from './components/chapterShots.js';
 import { initLapSection } from './components/lapSection.js';
 import { initSpecCounters } from './components/specCounters.js';
 import { initTextReveal } from './components/textReveal.js';
@@ -16,7 +17,8 @@ const motion = { reducedMotion: env.reducedMotion };
 initTextReveal(document, motion);
 
 const stage = document.querySelector('.stage');
-if (stage && mode === 'full') initStage(stage);
+if (mode === 'full' && stage) initStage(stage);
+else initChapterShots(document);
 
 const lap = document.querySelector('[data-lap]');
 if (lap) initLap(lap);
@@ -63,9 +65,12 @@ async function initStage(root) {
       onActive: view.setActive,
     });
   } catch (error) {
-    // Bloco 4 step 4 turns this into the lite fallback; for now the stage just stays out of the way.
+    // Bloco 4 step 4 turns this into the full lite fallback; for now the stage steps aside and the
+    // chapters show their stills, so the page is never left without the car.
     console.warn('[vulcan] 3D stage unavailable', error);
     root.hidden = true;
+    document.documentElement.dataset.mode = 'lite';
+    initChapterShots(document);
   }
 }
 

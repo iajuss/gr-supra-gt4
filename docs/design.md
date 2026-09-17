@@ -143,6 +143,18 @@ Fora da página: velocidade máxima e 0–100, porque as fontes divergem.
   0 fora da zona, centenas durante o scroll.
 - `data-shot` agora marca as cinco seções: hero, os três capítulos e a transição.
 
+### Imagens do modo lite (passo 6 — 2026-09-17)
+
+- As imagens de cada capítulo saem **da própria cena**, não de um render externo: `tools/capture.html`
+  monta o palco num canvas de 1440×900 (16:10, o mesmo da figura), percorre os shots e posta cada um
+  para `tools/shotServer.js`, um plugin de dev do Vite que grava em `public/shots/`. Repetível: quando
+  o carro real entrar, roda-se a captura de novo e as três imagens se atualizam.
+- O `src` fica em **`data-src`** e só o modo lite o promove (`components/chapterShots.js`). Sem isso o
+  desktop baixava imagem que nunca mostra: `display: none` não impede o download, e uma das três vinha
+  mesmo com `loading="lazy"`.
+- Se o palco 3D falhar, o `main.js` cai para lite e carrega as imagens, então a página nunca fica sem
+  o carro.
+
 ## Abordagem técnica — canvas 3D fixo + timeline única
 
 - Um canvas Three.js `position: fixed` atrás das seções 1–5.

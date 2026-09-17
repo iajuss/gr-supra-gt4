@@ -48,9 +48,14 @@
         <p class="label hero__cue" aria-hidden="true">Scroll to drive <span class="accent">↓</span></p>
       </section>
 
+      <!-- Lite only: each chapter shows a still of the same camera shot the 3D stage flies to.
+           Captured from the scene itself by tools/capture.html. The source sits in data-src so full
+           mode never downloads them; components/chapterShots.js promotes it in lite. -->
       <section class="chapter chapter--end" id="aero" data-shot="aero" aria-labelledby="aero-title">
         <figure class="chapter__shot">
-          <div class="chapter__shot-placeholder label">Shot_01 — rear wing</div>
+          <img class="chapter__shot-image" data-src="/shots/aero.webp" width="1440" height="900"
+            loading="lazy" decoding="async"
+            alt="The Vulcan seen from behind, its rear wing and diffuser lit against a dark studio floor" />
         </figure>
         <div class="chapter__body">
           <p class="label chapter__index" data-reveal="fade"><span class="accent">01</span> — Aero</p>
@@ -69,7 +74,9 @@
 
       <section class="chapter chapter--start" id="chassis" data-shot="chassis" aria-labelledby="chassis-title">
         <figure class="chapter__shot">
-          <div class="chapter__shot-placeholder label">Shot_02 — front splitter</div>
+          <img class="chapter__shot-image" data-src="/shots/chassis.webp" width="1440" height="900"
+            loading="lazy" decoding="async"
+            alt="The Vulcan from a low front angle, its splitter close to the ground" />
         </figure>
         <div class="chapter__body">
           <p class="label chapter__index" data-reveal="fade"><span class="accent">02</span> — Chassis</p>
@@ -88,7 +95,9 @@
 
       <section class="chapter chapter--end" id="v12" data-shot="v12" aria-labelledby="v12-title">
         <figure class="chapter__shot">
-          <div class="chapter__shot-placeholder label">Shot_03 — side exhaust</div>
+          <img class="chapter__shot-image" data-src="/shots/v12.webp" width="1440" height="900"
+            loading="lazy" decoding="async"
+            alt="The Vulcan in profile, along the side exhausts" />
         </figure>
         <div class="chapter__body">
           <p class="label chapter__index" data-reveal="fade"><span class="accent">03</span> — V12</p>
