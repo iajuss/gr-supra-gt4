@@ -31,9 +31,7 @@ export function createStage(canvas, config) {
   scene.fog = new FogExp2(colors.background, fog.density);
 
   const camera = new PerspectiveCamera(cameraConfig.fov, 1, cameraConfig.near, cameraConfig.far);
-  camera.position.set(cameraConfig.position.x, cameraConfig.position.y, cameraConfig.position.z);
-  const target = new Vector3(cameraConfig.target.x, cameraConfig.target.y, cameraConfig.target.z);
-  camera.lookAt(target);
+  const target = new Vector3();
 
   const { renderer, dispose: disposeRenderer } = createRenderer(canvas, (width, height) => {
     camera.aspect = width / height;
@@ -85,9 +83,22 @@ export function createStage(canvas, config) {
     renderer.render(scene, camera);
   }
 
+  /**
+   * Points the camera at a shot (or anything lerpShot returns).
+   * @param {{ position: { x: number, y: number, z: number }, target: { x: number, y: number, z: number }, fov: number }} shot
+   */
+  function setShot(shot) {
+    camera.position.set(shot.position.x, shot.position.y, shot.position.z);
+    target.set(shot.target.x, shot.target.y, shot.target.z);
+    camera.lookAt(target);
+    camera.fov = shot.fov;
+    camera.updateProjectionMatrix();
+  }
+
   return {
     scene,
     camera,
+    setShot,
     /** @param {import('three').Object3D} object */
     add(object) {
       scene.add(object);

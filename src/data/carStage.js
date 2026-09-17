@@ -37,13 +37,11 @@ export default {
 
   fog: { density: 0.022 },
 
-  // Hero framing (three-quarter front). Bloco 4 step 2 moves this into data/cameraShots.js.
+  // The framing itself lives in data/cameraShots.js; fov here is only the value the camera starts with.
   camera: {
     fov: 38,
     near: 0.1,
     far: 500,
-    position: { x: 6.6, y: 1.7, z: 5.4 },
-    target: { x: 0, y: 0.6, z: 0 },
   },
 
   // Scene colours (hex), following the CSS tokens.

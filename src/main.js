@@ -29,14 +29,19 @@ console.info(`[vulcan] mode=${mode}`, reasons);
 /** The fixed car stage, full mode only: Three.js is never fetched in lite. */
 async function initStage(root) {
   try {
-    const [{ createStage }, { createCar }, { default: carStage }] = await Promise.all([
+    const [{ createStage }, { createCar }, { default: carStage }, { default: cameraShots }] = await Promise.all([
       import('./scene/stage.js'),
       import('./scene/car.js'),
       import('./data/carStage.js'),
+      import('./data/cameraShots.js'),
     ]);
     const view = createStage(root.querySelector('.stage__canvas'), carStage);
     const car = await createCar(carStage);
     view.add(car.object3D);
+
+    // ?shot=<id> holds one chapter's framing, to check it on its own. Scroll takes over in step 3.
+    const requested = new URLSearchParams(window.location.search).get('shot');
+    view.setShot(cameraShots.find((shot) => shot.id === requested) ?? cameraShots[0]);
     view.render();
   } catch (error) {
     // Bloco 4 step 4 turns this into the lite fallback; for now the stage just stays out of the way.

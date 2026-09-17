@@ -112,6 +112,20 @@ Fora da página: velocidade máxima e 0–100, porque as fontes divergem.
   com o Lenis e a timeline de scroll.
 - Valores de apresentação em `src/data/carStage.js`, como `data/lapScene.js` faz para a volta.
 
+### Pontos de câmera (passo 2 — 2026-09-17)
+
+- Cada ponto é **posição + alvo + fov** em coordenadas absolutas (`data/cameraShots.js`), na ordem em
+  que a página passa por eles: `hero`, `aero`, `chassis`, `v12`, `transition`. Orbital (azimute,
+  elevação, distância) foi considerado e descartado: cartesiano é mais fácil de ler e de ajustar com o
+  carro real. Se as transições do passo 3 ficarem retas demais, revisitamos.
+- A interpolação é código puro e testado, não do GSAP: `lerpShot(a, b, t)` e `shotAt(shots, progress)`
+  em `lib/math.js`. No passo 3 o ScrollTrigger só move um progresso 0–1; quem calcula a câmera é o
+  `shotAt`.
+- **`?shot=<id>`** trava a câmera num capítulo, para conferir o enquadramento isolado. É o mecanismo de
+  inspeção do passo 2 e não aparece em uso normal.
+- Enquadrar contra uma caixa tem limite: os cinco ângulos existem e são distintos, mas o ajuste fino
+  (distância, altura, fov e luz) é o passo 5, com o modelo real.
+
 ## Abordagem técnica — canvas 3D fixo + timeline única
 
 - Um canvas Three.js `position: fixed` atrás das seções 1–5.

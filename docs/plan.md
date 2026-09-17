@@ -3,14 +3,17 @@
 ## ▶ Retomada (atualizado em 2026-09-17, fim do passo 1 do Bloco 4)
 
 - **Onde paramos:** Blocos 1, 2, 2B e 3 concluídos e verificados no navegador; nada pendente para trás.
-  O **passo 1 do Bloco 4 (palco com proxy)** está feito e verificado. 140 testes verdes.
-- **Próximo passo: Bloco 4, passo 2 (pontos de câmera)** — método combinado: teste antes da
-  interpolação (posição, alvo e fov) em `lib/math.js`, depois `data/cameraShots.js` com um ponto por
-  capítulo e um modo de inspeção para conferir cada enquadramento no navegador.
-- **Passo 1, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
+  Os **passos 1 (palco com proxy) e 2 (pontos de câmera) do Bloco 4** estão feitos e verificados.
+  151 testes verdes.
+- **Próximo passo: Bloco 4, passo 3 (scroll)** — método combinado: `lib/scroll.js` sincroniza Lenis e
+  ScrollTrigger; uma única timeline com `scrub` move um progresso 0–1 e o `scene/cameraRig.js` chama
+  `shotAt()`. A matemática fica no código já testado e o GSAP só dá o ritmo.
+- **Passos 1 e 2, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
   `scene/car.js` (proxy por trás da interface final) e o import dinâmico do palco no `main.js`.
-  O gradiente placeholder saiu do `stage.css`. Build: `stage` 3,3 KB, `car` 1,0 KB, `carStage` 0,6 KB
-  em chunks próprios, compartilhando `renderer`/`three.core` com a volta 3D; principal 87 KB (34,7 gzip).
+  O gradiente placeholder saiu do `stage.css`. Depois, `lib/math.js` (`clamp`, `lerpShot`, `shotAt`),
+  `data/cameraShots.js` e `?shot=<id>` para inspecionar um enquadramento por vez.
+  Build: `stage` 3,3 KB, `car` 1,0 KB, `carStage` 0,6 KB em chunks próprios, compartilhando
+  `renderer`/`three.core` com a volta 3D; principal 87 KB (34,7 gzip).
 - **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
   A entrada `sandbox/` continua no `.gitignore`, à toa.
 - **Dicas do ambiente:**
@@ -133,9 +136,16 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
      - O palco fixo não vaza: aparece atrás do AERO (zona 3D) e as seções LAP e SPECS o cobrem.
      - O rim lime como `DirectionalLight` cobria o piso metálico inteiro de verde (lóbulo especular);
        virou um `SpotLight` de alcance curto mirado no carro.
-2. **Pontos de câmera**
-   - [ ] 🧪 Interpolação entre pontos de câmera em `lib/math.js` (posição, alvo e fov)
-   - [ ] `data/cameraShots.js`: um ponto por capítulo (hero, aero, chassis, v12, transição)
+2. **Pontos de câmera** — concluído em 2026-09-17
+   - [x] 🧪 Interpolação entre pontos de câmera em `lib/math.js`: `clamp`, `lerpShot(a, b, t)`
+     (posição, alvo e fov, com `t` preso em [0, 1] e sem devolver os objetos de entrada) e
+     `shotAt(shots, progress)`, que percorre a lista com paradas igualmente espaçadas
+   - [x] `data/cameraShots.js`: um ponto por capítulo (hero, aero, chassis, v12, transição), em
+     posição + alvo + fov. O enquadramento do hero saiu de `carStage.js`, que ficou só com fov, near e far
+   - [x] `scene/stage.js` ganhou `setShot(shot)` e o `main.js` aceita `?shot=<id>` para travar a câmera
+     num capítulo (mecanismo de inspeção; o scroll assume no passo 3)
+   - [x] 👁 Os cinco conferidos em 1440×900, console limpo. Com o proxy dá para julgar pouco: só o `v12`
+     mudou (estava colado na lateral, recuou para caber com silhueta). O ajuste fino dos cinco é o passo 5
 3. **Scroll**
    - [ ] `lib/scroll.js`: Lenis + ScrollTrigger sincronizados (scroll nativo no toque)
    - [ ] `scene/cameraRig.js`: timeline única com `scrub`, ligada aos `data-shot`
