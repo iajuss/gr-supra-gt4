@@ -1,5 +1,24 @@
 # Plano de implementação
 
+## ▶ Retomada (atualizado em 2026-09-17)
+
+- **Onde paramos:** Blocos 1, 2 e 3 concluídos e commitados. Bloco 2B (THE LAP em 3D) aprovado e planejado,
+  ainda **sem código**.
+- **Referência visual aprovada:** `sandbox/track3d/` (fora do git; rode `npm run dev` e abra `/sandbox/track3d/`).
+- **Ritmo combinado para o 2B:** passos 1 e 2 juntos (só lógica, TDD) → pausa com relatório → passos 3 a 5
+  (cena, layout, ligação) → pausa para o usuário ver → verificação e limpeza.
+- **Próximo passo (1 + 2), módulos propostos:**
+
+  | Módulo | Responsabilidade |
+  |---|---|
+  | `lib/lapClock.js` | tempo na tela → tempo simulado e `done` (usado pelo 2D e pelo 3D) |
+  | `lib/geometry.js` | `smoothClosed` e `circumradius` movidos de `telemetry.js` (os testes vão junto) |
+  | `lib/centreline.js` | linha central suavizada (tangentes, normais), `frameAt(progress)`, trechos com zebra |
+  | `lib/ribbon.js` | vértices e índices das fitas sem Three.js, com opção de pular segmentos (zebras sem rampas) |
+  | `lib/cameraRigs.js` | posição e alvo de Chase (atrás 24, alto 7,5, olha 30 à frente), Heli (atrás 90, alto 70, lado 40, olha 60 à frente) e Top (offset fixo −150, 950, 250), mais FOV por velocidade (Chase: 50 + v/300 × 18) |
+
+  Depois: refatorar `components/lapSection.js` (2D) para usar `lapClock`.
+
 Ordem aprovada: **Fundação → Pista → Specs → 3D → Polimento**. Design em [design.md](design.md).
 Cada bloco é detalhado e combinado na conversa antes de começar; marque `[x]` ao concluir.
 Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
@@ -29,6 +48,21 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
   - Teste amarrado à realidade: 18 zonas de frenagem, Abbey à frente e Club atrás (200–400 m cada), passagem acima de 200 km/h
   - Setores aproximados: S1 termina na Wellington, S2 na Hangar
 - [x] 👁 Reduced-motion: volta completa, HUD final (1:45.364) e replay oculto
+
+## Bloco 2B — THE LAP em 3D (modo full)
+Protótipo aprovado em `sandbox/track3d`. O 2D atual continua como modo lite.
+- [ ] 🧪 Extrair a lógica pura do protótipo:
+  - relógio da volta (tempo na tela → tempo simulado, fim da volta);
+  - posição e direção ao longo da linha central;
+  - geometria das fitas (vértices e índices, sem Three.js);
+  - trechos com zebra (por raio de curva);
+  - posição das 3 câmeras.
+- [ ] Refatorar `components/lapSection.js` (2D) para usar o relógio da volta
+- [ ] `scene/renderer.js` (fábrica compartilhada com o Bloco 4) + `scene/lap/` (pista, zebras, largada, rastro, carro, bloom, loop com pausa)
+- [ ] HTML/CSS do modo full: palco em tela cheia, HUD, minimapa, câmeras (padrão Heli), Replay
+- [ ] Ligação: import dinâmico no modo full; lite mantém o 2D
+- [ ] 👁 Desktop: 3 câmeras, replay, pausa fora da tela, FPS, tamanho do build · Lite: fallback 2D
+- [ ] Remover `sandbox/track3d`
 
 ## Bloco 3 — SPECS
 - [x] Levantar e conferir números do Vulcan em fontes públicas → tabela em `design.md` + valores no HTML (`data-count`)

@@ -38,7 +38,19 @@ Status: aprovado em 2026-09-17.
    Telemetria **simulada**, identificada como tal.
    - Velocidade derivada da curvatura do traçado (suavizado). Volta de ~1:45, animada em 12 s.
    - Largada na Hamilton Straight (atual). O GeoJSON começa na reta pré-2011, então o laço é reordenado.
-   - Contorno fantasma cinza + rastro lime. Pista girada 90° no desktop (4:3) e em pé no mobile (3:4).
+   - **Modo full (desktop): pista 3D** (decidido em 2026-09-17, após protótipo em `sandbox/track3d`):
+     - Palco em tela cheia (100% × 100vh) abaixo do título, com HUD (inferior esquerdo), minimapa 2D
+       (inferior direito), botões de câmera e Replay (superior direito) sobrepostos.
+     - Fita de asfalto com bordas cinza, zebras lime/brancas só em curvas fechadas, linha de largada,
+       chão escuro com grid racing green, neblina e bloom.
+     - Carro representado por um bloco lime brilhante com luz (carro procedural testado e rejeitado).
+       Rastro fino verde-escuro, abaixo do limiar do bloom, para não ofuscar a câmera próxima.
+     - Uma volta de 12 s ao entrar na tela (50% visível) → para na linha com o tempo final → Replay.
+       O render pausa ao terminar e fora da tela.
+     - Câmeras Chase / Heli / Top em botões; começa na **Heli**. Minimapa some na Top.
+     - Three.js e pós-processamento carregados sob demanda, só no modo full.
+   - **Modo lite (mobile, reduced-motion, sem WebGL): canvas 2D** com contorno fantasma cinza + rastro lime.
+     Pista girada 90° em telas largas (4:3) e em pé no mobile (3:4).
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.
 8. **Footer** — aviso fan-made, crédito CC-BY do modelo 3D, crédito do traçado.
 
