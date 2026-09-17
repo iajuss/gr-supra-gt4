@@ -1,29 +1,46 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-17)
+## ▶ Retomada (atualizado em 2026-09-17, fim da sessão)
 
-- **Onde paramos:** Blocos 1, 2 e 3 concluídos e commitados. Bloco 2B: passos 1 a 5 com código (lógica, cena,
-  layout e ligação), 134 testes verdes, **aguardando o usuário ver a pista 3D na página** (painel ficou oculto
-  nos testes). Depois: passo 6 (verificação visual, FPS) e remoção do sandbox.
-- **Referência visual aprovada:** `sandbox/track3d/` (fora do git; rode `npm run dev` e abra `/sandbox/track3d/`).
-  Já importa `smoothClosed` e `circumradius` de `lib/geometry.js`.
-- **Ritmo combinado para o 2B:** passos 1 e 2 juntos (só lógica, TDD) → pausa com relatório → passos 3 a 5
-  (cena, layout, ligação) → pausa para o usuário ver → verificação e limpeza.
-- **Módulos prontos:**
+- **Onde paramos:** Blocos 1, 2 e 3 concluídos. Bloco 2B com passos 1 a 5 **commitados** (`283bf62` lógica pura,
+  `5555bfb` cena 3D na página). O usuário viu a pista 3D e aprovou ("ficou incrível"). 134 testes verdes.
+- **Próximo passo: passo 6 do 2B (verificação), com o painel do navegador visível** (método escolhido pelo usuário).
+  Roteiro combinado:
+  1. Desktop (≥ 1024 px): volta começa a 50% visível na Heli; capturas de Chase, Heli e Top (minimapa nas três).
+  2. FPS durante a volta em cada câmera.
+  3. Restart no meio e depois do fim (volta a 0:00, câmera direto na largada).
+  4. Pausa fora da tela: rolar para fora e voltar, a volta continua de onde parou.
+  5. Lite em 375 px: 2D, Restart visível, sem baixar o Three.js.
+  6. Reduced-motion (volta completa, Restart oculto) e sem WebGL (fallback 2D): simular o que der e dizer o que não deu.
+- **Sandbox:** `sandbox/track3d/` (fora do git) **fica por enquanto**; decidir no fim do bloco (mover para fora do
+  projeto, apagar ou manter). Não apagar sem perguntar: não tem cópia no git.
+- **Pendências pequenas notadas:**
+  - Ao dar Restart, o resumo para leitor de tela ("Simulated lap completed in …") continua com o texto da volta anterior.
+  - Bloco 3: ver o movimento do reveal e dos contadores com o painel visível + mobile.
+- **Dicas do ambiente:**
+  - Com o painel do navegador oculto, `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` e
+    transições CSS não rodam, e as capturas saem pretas. Pedir para o usuário abrir o painel antes de verificar
+    visualmente.
+  - Para forçar o modo full no painel: emular 1440×900 e recarregar (o painel oculto tem janela 0×0 → lite).
+  - A porta 5173 pode estar ocupada pelo servidor de outra conversa na mesma pasta; dá para usar esse servidor
+    abrindo `http://localhost:5173/` direto.
 
-  | Módulo | Responsabilidade |
-  |---|---|
-  | `data/lapScene.js` | duração (12 s), limite do quadro, medidas da pista e das zebras, valores das câmeras |
-  | `lib/lapClock.js` | tempo na tela → tempo simulado e `done` (usado pelo 2D e pelo 3D) |
-  | `lib/geometry.js` | `smoothClosed` e `circumradius` (saíram de `telemetry.js`) |
-  | `lib/centreline.js` | linha central `{ x, z }` com tangentes, normais e raios, `frameAt(progress)`, `kerbSamples` |
-  | `lib/ribbon.js` | `buildRibbon` (vértices, índices, cores; segmentos pulados), `indexCountUntil` (rastro), `stripeAt` |
-  | `lib/cameraRigs.js` | `cameraRig` (Chase / Heli / Top), `cameraFov` (Chase 50 → 68° a 300 km/h), `followFactor` |
+### Mapa do Bloco 2B
 
-- **Passos 3 a 5 (feitos):** `lib/lap.js` (`buildLap`), `components/lapPlayer.js` (loop + relógio + início a 50% +
-  pausa fora da tela + Restart, usado pelo 2D e pelo 3D), `components/lapSection3d.js`, `scene/renderer.js`,
-  `scene/lap/` (`lapStage`, `environment`, `track`, `trail`, `car`, `ribbonMesh`). Marcação do lite reaproveitada:
-  no 3D o HUD e o canvas 2D (minimapa) viram sobreposições. Sem Pause e sem atalhos de teclado.
+| Arquivo | Responsabilidade |
+|---|---|
+| `data/lapScene.js` | duração (12 s), limite do quadro, medidas da pista/zebras, visual da Top, cores, câmeras (inicial: Heli) |
+| `lib/lapClock.js` | tempo na tela → tempo simulado e `done` |
+| `lib/geometry.js` | `smoothClosed` e `circumradius` |
+| `lib/centreline.js` | linha central `{ x, z }`, tangentes, normais, raios, `frameAt(progress)`, `kerbSamples` |
+| `lib/ribbon.js` | `buildRibbon` (vértices, índices, cores, segmentos pulados), `indexCountUntil`, `stripeAt` |
+| `lib/cameraRigs.js` | `cameraRig`, `cameraFov`, `followFactor`, `topCameraLook` |
+| `lib/lap.js` | `buildLap`: traçado em metros + modelo da volta (2D e 3D) |
+| `components/lapPlayer.js` | loop + relógio: início a 50% visível, pausa fora da tela, fim na linha, Restart |
+| `components/lapSection.js` | modo lite (canvas 2D + HUD) |
+| `components/lapSection3d.js` | modo full (palco 3D, HUD, minimapa, câmeras, Restart); import dinâmico em `main.js` |
+| `scene/renderer.js` | fábrica do WebGLRenderer (1,5× máx.), compartilhada com o Bloco 4 |
+| `scene/lap/` | `lapStage` (cena, câmera, bloom), `environment`, `track`, `trail`, `car`, `ribbonMesh` |
 
 Ordem aprovada: **Fundação → Pista → Specs → 3D → Polimento**. Design em [design.md](design.md).
 Cada bloco é detalhado e combinado na conversa antes de começar; marque `[x]` ao concluir.
@@ -69,7 +86,8 @@ Protótipo aprovado em `sandbox/track3d`. O 2D atual continua como modo lite.
 - [x] HTML/CSS do modo full: palco em tela cheia, HUD, minimapa, câmeras (padrão Heli), Restart
 - [x] Ligação: import dinâmico no modo full; lite mantém o 2D
   - Build: `lapSection3d` em chunk separado (559 KB, 139 KB gzip); bundle principal 86 KB (34 KB gzip)
-- [ ] 👁 Desktop: 3 câmeras, replay, pausa fora da tela, FPS, tamanho do build · Lite: fallback 2D
+- [x] 👁 Usuário viu a pista 3D na página e aprovou; minimapa passou a aparecer também na Top
+- [ ] 👁 Desktop: 3 câmeras, Restart, pausa fora da tela, FPS · Lite: fallback 2D · reduced-motion · sem WebGL
 - [ ] Remover `sandbox/track3d`
 
 ## Bloco 3 — SPECS
