@@ -3,10 +3,191 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0b0a" />
     <title>Vulcan — Unofficial Concept</title>
+    <meta
+      name="description"
+      content="An unofficial, fan-made concept page for the Aston Martin Vulcan: a track-only, naturally aspirated V12."
+    />
   </head>
   <body>
-    <main id="app"></main>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Full mode only: fixed WebGL stage and loading screen (Bloco 4). -->
+    <div class="preloader" hidden>
+      <p class="label" role="status">
+        Loading_telemetry — <span class="preloader__value">0</span>%
+      </p>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <canvas class="stage__canvas"></canvas>
+    </div>
+
+    <header class="site-header">
+      <a class="site-header__mark label" href="#top">Vulcan <span class="accent">/</span> Fan concept</a>
+      <nav class="site-header__nav" aria-label="Sections">
+        <ul role="list">
+          <li><a class="label" href="#aero">Aero</a></li>
+          <li><a class="label" href="#chassis">Chassis</a></li>
+          <li><a class="label" href="#v12">V12</a></li>
+          <li><a class="label" href="#lap">Lap</a></li>
+          <li><a class="label" href="#specs">Specs</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <p class="label hero__kicker">
+          // Unofficial concept · <span class="accent">Track only</span> ·
+          <span data-provisional>V12 7.0</span> · <span data-provisional>24 units</span>
+        </p>
+        <h1 class="hero__title" id="hero-title">Vulcan</h1>
+        <p class="hero__lead">Seven litres. Twelve cylinders. No number plate.</p>
+        <p class="label hero__cue" aria-hidden="true">Scroll to drive <span class="accent">↓</span></p>
+      </section>
+
+      <section class="chapter chapter--end" id="aero" data-shot="aero" aria-labelledby="aero-title">
+        <figure class="chapter__shot">
+          <div class="chapter__shot-placeholder label">Shot_01 — rear wing</div>
+        </figure>
+        <div class="chapter__body">
+          <p class="label chapter__index"><span class="accent">01</span> — Aero</p>
+          <h2 class="chapter__title" id="aero-title">Downforce, sculpted.</h2>
+          <p class="chapter__lead">
+            A rear wing that towers over the bodywork and a diffuser that swallows the underside. At speed,
+            the air stops being resistance and turns into grip.
+          </p>
+          <dl class="datapoints">
+            <div><dt class="label">Bodywork</dt><dd>Carbon fibre</dd></div>
+            <div><dt class="label">Front</dt><dd>Splitter + canards</dd></div>
+            <div><dt class="label">Rear</dt><dd>Wing + diffuser</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="chapter chapter--start" id="chassis" data-shot="chassis" aria-labelledby="chassis-title">
+        <figure class="chapter__shot">
+          <div class="chapter__shot-placeholder label">Shot_02 — front splitter</div>
+        </figure>
+        <div class="chapter__body">
+          <p class="label chapter__index"><span class="accent">02</span> — Chassis</p>
+          <h2 class="chapter__title" id="chassis-title">Carbon, all the way down.</h2>
+          <p class="chapter__lead">
+            A carbon-fibre monocoque wraps the driver like a racing prototype. Anything that didn't make the
+            car faster stayed at the factory.
+          </p>
+          <dl class="datapoints">
+            <div><dt class="label">Monocoque</dt><dd>Carbon fibre</dd></div>
+            <div><dt class="label">Brakes</dt><dd data-provisional>Carbon-ceramic</dd></div>
+            <div><dt class="label">Gearbox</dt><dd data-provisional>6-speed sequential</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="chapter chapter--end" id="v12" data-shot="v12" aria-labelledby="v12-title">
+        <figure class="chapter__shot">
+          <div class="chapter__shot-placeholder label">Shot_03 — side exhaust</div>
+        </figure>
+        <div class="chapter__body">
+          <p class="label chapter__index"><span class="accent">03</span> — V12</p>
+          <h2 class="chapter__title" id="v12-title">Twelve cylinders. Zero turbos.</h2>
+          <p class="chapter__lead">
+            A naturally aspirated V12 exhaling through side-exit pipes, tuned for sound as much as for speed.
+          </p>
+          <dl class="datapoints">
+            <div><dt class="label">Engine</dt><dd data-provisional>7.0 L V12</dd></div>
+            <div><dt class="label">Aspiration</dt><dd>Natural</dd></div>
+            <div><dt class="label">Power</dt><dd data-provisional>820 PS</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="handoff" aria-label="Transition">
+        <p class="label">Built for one place</p>
+        <p class="handoff__line">The circuit.</p>
+      </section>
+
+      <section class="lap" id="lap" aria-labelledby="lap-title">
+        <header class="section-head">
+          <p class="label"><span class="accent">04</span> — The lap</p>
+          <h2 class="section-head__title" id="lap-title">One lap of Silverstone.</h2>
+          <p class="section-head__lead">5.891 km. 18 corners. One very loud V12.</p>
+        </header>
+
+        <div class="lap__layout">
+          <figure class="lap__track">
+            <canvas class="lap__canvas" aria-label="Animated map of the Silverstone circuit"></canvas>
+            <figcaption class="label lap__caption">Silverstone GP circuit · clockwise</figcaption>
+          </figure>
+
+          <aside class="hud" aria-label="Lap telemetry">
+            <dl class="hud__grid">
+              <div class="hud__item hud__item--wide">
+                <dt class="label">Speed</dt>
+                <dd><span class="hud__value hud__value--xl">000</span> <span class="label">km/h</span></dd>
+              </div>
+              <div class="hud__item">
+                <dt class="label">Gear</dt>
+                <dd><span class="hud__value">N</span></dd>
+              </div>
+              <div class="hud__item">
+                <dt class="label">Sector</dt>
+                <dd><span class="hud__value">S1</span></dd>
+              </div>
+              <div class="hud__item hud__item--wide">
+                <dt class="label">Lap time</dt>
+                <dd><span class="hud__value">0:00.000</span></dd>
+              </div>
+            </dl>
+            <button class="button" type="button">Replay lap</button>
+            <p class="hud__note label">Telemetry simulated for illustration</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="specs" id="specs" aria-labelledby="specs-title">
+        <header class="section-head">
+          <p class="label"><span class="accent">05</span> — Specification</p>
+          <h2 class="section-head__title" id="specs-title">The numbers.</h2>
+        </header>
+
+        <dl class="specs__grid">
+          <div class="stat">
+            <dt class="label">Power</dt>
+            <dd class="stat__value" data-provisional>820<span class="stat__unit">PS</span></dd>
+          </div>
+          <div class="stat">
+            <dt class="label">Engine</dt>
+            <dd class="stat__value" data-provisional>7.0<span class="stat__unit">L V12</span></dd>
+          </div>
+          <div class="stat">
+            <dt class="label">Gearbox</dt>
+            <dd class="stat__value" data-provisional>6<span class="stat__unit">speed seq.</span></dd>
+          </div>
+          <div class="stat">
+            <dt class="label">Built</dt>
+            <dd class="stat__value" data-provisional>24<span class="stat__unit">units</span></dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p class="site-footer__disclaimer">
+        Unofficial fan-made concept. Not affiliated with, endorsed by or connected to Aston Martin Lagonda.
+      </p>
+      <ul class="site-footer__credits" role="list">
+        <li class="label">3D model — credit pending (CC BY 4.0)</li>
+        <li class="label">
+          Circuit data —
+          <a href="https://github.com/bacinger/f1-circuits" rel="noopener">bacinger/f1-circuits</a> (MIT)
+        </li>
+        <li class="label">Type — Big Shoulders Display, JetBrains Mono (OFL)</li>
+      </ul>
+    </footer>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

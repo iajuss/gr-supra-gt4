@@ -1,0 +1,73 @@
+/* Opaque background: from here down the 3D stage is covered. */
+.lap {
+  padding: var(--section-pad-y) var(--gutter);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-line);
+}
+
+.lap__layout {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.lap__track {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.lap__canvas {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.hud {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+}
+
+.hud__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--color-line);
+  border-left: 1px solid var(--color-line);
+}
+
+.hud__item {
+  padding: var(--space-4);
+  border-right: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.hud__item--wide {
+  grid-column: 1 / -1;
+}
+
+.hud__item dd {
+  margin-top: var(--space-2);
+}
+
+.hud__value {
+  font-family: var(--font-display);
+  font-weight: var(--weight-stat);
+  font-size: var(--fs-heading);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud__value--xl {
+  font-size: var(--fs-stat);
+}
+
+.hud__note {
+  font-size: 0.6875rem;
+}
+
+@media (min-width: 64rem) {
+  .lap__layout {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}

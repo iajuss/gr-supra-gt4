@@ -1,0 +1,13 @@
+/* Entry stylesheet. Order matters: tokens → base → shared → sections. */
+@import './tokens.css';
+@import './base.css';
+@import './shared.css';
+
+@import './sections/stage.css';
+@import './sections/header.css';
+@import './sections/hero.css';
+@import './sections/chapters.css';
+@import './sections/handoff.css';
+@import './sections/lap.css';
+@import './sections/specs.css';
+@import './sections/footer.css';

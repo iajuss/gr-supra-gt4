@@ -1,0 +1,79 @@
+/* Lite (default): shot image above the text, stacked.
+   Full: no image, text floats over the fixed 3D stage and each chapter is a tall scroll segment. */
+
+.chapter {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--section-pad-y) var(--gutter);
+}
+
+.chapter__shot {
+  aspect-ratio: 16 / 10;
+  background:
+    radial-gradient(70% 60% at 50% 60%, rgb(31 61 43 / 0.6), transparent 75%),
+    var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.chapter__shot-placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.chapter__body {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 34rem;
+}
+
+.chapter__title {
+  font-size: var(--fs-heading);
+}
+
+.chapter__lead {
+  font-size: var(--fs-lead);
+  color: var(--color-text-soft);
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 64rem) {
+  .chapter {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+  }
+
+  .chapter__shot {
+    grid-column: 1 / 8;
+  }
+
+  .chapter__body {
+    grid-column: 8 / -1;
+  }
+
+  .chapter--start .chapter__shot {
+    grid-column: 6 / -1;
+    grid-row: 1;
+  }
+
+  .chapter--start .chapter__body {
+    grid-column: 1 / 6;
+    grid-row: 1;
+  }
+}
+
+[data-mode='full'] .chapter {
+  min-height: 140svh;
+}
+
+[data-mode='full'] .chapter__shot {
+  display: none;
+}
+
+[data-mode='full'] .chapter--end .chapter__body {
+  grid-column: 9 / -1;
+}
+
+[data-mode='full'] .chapter--start .chapter__body {
+  grid-column: 1 / 5;
+}

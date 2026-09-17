@@ -1,7 +1,6 @@
 import '@fontsource-variable/big-shoulders-display';
 import '@fontsource-variable/jetbrains-mono';
-import './styles/tokens.css';
-import './styles/base.css';
+import './styles/main.css';
 
 import { decideMode, detectEnvironment } from './lib/capabilities.js';
 

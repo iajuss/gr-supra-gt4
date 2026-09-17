@@ -1,0 +1,22 @@
+.handoff {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  min-height: 70svh;
+  padding: var(--section-pad-y) var(--gutter);
+  text-align: center;
+}
+
+.handoff__line {
+  font-family: var(--font-display);
+  font-weight: var(--weight-hero);
+  font-size: var(--fs-heading);
+  line-height: var(--leading-display);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+[data-mode='full'] .handoff {
+  min-height: 100svh;
+}

@@ -1,0 +1,35 @@
+.site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: var(--z-hud);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--gutter);
+  background: linear-gradient(rgb(10 11 10 / 0.85), transparent);
+}
+
+.site-header a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.site-header__nav {
+  display: none;
+}
+
+.site-header__nav ul {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.site-header__nav a:hover {
+  color: var(--color-accent);
+}
+
+@media (min-width: 48rem) {
+  .site-header__nav {
+    display: block;
+  }
+}

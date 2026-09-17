@@ -1,0 +1,80 @@
+/* Building blocks reused across sections. */
+
+.skip-link {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-preloader);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+main,
+.site-footer {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+.section-head {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 48rem;
+  margin-bottom: var(--space-8);
+}
+
+.section-head__title {
+  font-size: var(--fs-heading);
+}
+
+.section-head__lead {
+  font-size: var(--fs-lead);
+  color: var(--color-text-soft);
+}
+
+.datapoints {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line);
+}
+
+.datapoints dd {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-weight: var(--weight-stat);
+  font-size: var(--fs-lead);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.button:hover {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}

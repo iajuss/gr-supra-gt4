@@ -1,0 +1,39 @@
+/* Fixed WebGL stage + preloader. Only shown in full mode. */
+
+.stage {
+  display: none;
+}
+
+[data-mode='full'] .stage {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-canvas);
+  /* Placeholder lighting until the 3D scene exists (Bloco 4). */
+  background:
+    radial-gradient(60% 45% at 50% 62%, rgb(31 61 43 / 0.55), transparent 70%),
+    var(--color-bg);
+}
+
+.stage__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  display: grid;
+  place-items: end start;
+  padding: var(--gutter);
+  background: var(--color-bg);
+}
+
+.preloader[hidden] {
+  display: none;
+}
+
+.preloader__value {
+  color: var(--color-accent);
+}

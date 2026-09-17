@@ -9,8 +9,9 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
 - [x] Scripts npm: `dev`, `build`, `preview`, `test`
 - [x] 🧪 `lib/capabilities.js` — decide `full | lite`
 - [x] `styles/tokens.css` + `base.css` (fontes, tipografia fluida, reset)
-- [ ] `index.html` com a marcação semântica de todas as seções (conteúdo em inglês, placeholders visuais)
-- [ ] 👁 Layout estático de cada seção em desktop e em 375px
+- [x] `index.html` com a marcação semântica de todas as seções (conteúdo em inglês, placeholders visuais)
+- [x] 👁 Layout estático de cada seção em desktop e em 375px
+  - Números técnicos marcados com `data-provisional` até a conferência no Bloco 3
 
 ## Bloco 2 — THE LAP
 - [ ] Obter o GeoJSON de Silverstone (`bacinger/f1-circuits`) e registrar o crédito
