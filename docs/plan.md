@@ -14,9 +14,12 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
   - Números técnicos marcados com `data-provisional` até a conferência no Bloco 3
 
 ## Bloco 2 — THE LAP
-- [ ] Obter o GeoJSON de Silverstone (`bacinger/f1-circuits`) e registrar o crédito
-- [ ] 🧪 `lib/math.js` — normalização de coordenadas para o canvas e comprimento acumulado do traçado
-- [ ] 🧪 Modelo de telemetria simulada: progresso → { speed, gear, sector, lapTime }
+- [x] Obter o GeoJSON de Silverstone (`bacinger/f1-circuits`) e registrar o crédito → `data/silverstone.json` (3,3 KB)
+- [x] 🧪 `lib/track.js` — projeção, ajuste ao canvas, comprimento acumulado e `pointAt(progress)`
+  - Traçado projetado: 5878 m (oficial 5891 m, erro de −0,22%). Sentido horário na tela.
+- [x] 🧪 Modelo de telemetria simulada (`lib/telemetry.js` + `data/vulcanDynamics.js`): tempo → { progress, speed, gear, sector, elapsed }
+  - Velocidade derivada da curvatura. Volta de 1:45.4, 94–288 km/h, 18 zonas de frenagem (= 18 curvas). Montagem em ~1 ms.
+  - `lib/math.js` com a busca binária compartilhada
 - [ ] `components/lapTrack.js` — desenho progressivo do traçado + ponto, com ajuste à densidade de pixels e ao redimensionamento
 - [ ] `components/telemetryHud.js` — exibe os dados recebidos
 - [ ] Início ao entrar na tela, botão REPLAY, suporte a reduced-motion
