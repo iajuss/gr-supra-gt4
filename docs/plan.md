@@ -20,10 +20,13 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
 - [x] 🧪 Modelo de telemetria simulada (`lib/telemetry.js` + `data/vulcanDynamics.js`): tempo → { progress, speed, gear, sector, elapsed }
   - Velocidade derivada da curvatura. Volta de 1:45.4, 94–288 km/h, 18 zonas de frenagem (= 18 curvas). Montagem em ~1 ms.
   - `lib/math.js` com a busca binária compartilhada
-- [ ] `components/lapTrack.js` — desenho progressivo do traçado + ponto, com ajuste à densidade de pixels e ao redimensionamento
-- [ ] `components/telemetryHud.js` — exibe os dados recebidos
-- [ ] Início ao entrar na tela, botão REPLAY, suporte a reduced-motion
-- [ ] 👁 Desktop + mobile
+- [x] 🧪 `lib/track.js` + `orientToBox`, `sliceUntil` · `lib/format.js` (tempo de volta e velocidade)
+- [x] `components/lapTrack.js` — contorno fantasma, marcas de setor, linha de largada, rastro lime e ponto com brilho
+- [x] `components/telemetryHud.js` — exibe os dados recebidos (+ resumo para leitor de tela)
+- [x] `components/lapSection.js` — volta de 12 s ao entrar na tela, botão REPLAY, modo reduced-motion
+- [x] 👁 Desktop (traçado girado, 4:3) + mobile (em pé, 3:4), sem erros no console
+- [ ] Linha de largada: o GeoJSON começa na reta antiga (Woodcote–Copse), não na atual (Hamilton Straight) → decidir
+- [ ] 👁 Conferir o modo reduced-motion no navegador
 
 ## Bloco 3 — SPECS
 - [ ] Levantar e conferir números do Vulcan em fontes públicas → `data/specs.js`

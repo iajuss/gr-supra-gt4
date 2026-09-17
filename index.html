@@ -116,32 +116,33 @@
           <p class="section-head__lead">5.891 km. 18 corners. One very loud V12.</p>
         </header>
 
-        <div class="lap__layout">
+        <div class="lap__layout" data-lap>
           <figure class="lap__track">
-            <canvas class="lap__canvas" aria-label="Animated map of the Silverstone circuit"></canvas>
+            <canvas class="lap__canvas" role="img" aria-label="Animated map of the Silverstone circuit" data-lap-canvas></canvas>
             <figcaption class="label lap__caption">Silverstone GP circuit · clockwise</figcaption>
           </figure>
 
           <aside class="hud" aria-label="Lap telemetry">
-            <dl class="hud__grid">
+            <dl class="hud__grid" aria-hidden="true">
               <div class="hud__item hud__item--wide">
                 <dt class="label">Speed</dt>
-                <dd><span class="hud__value hud__value--xl">000</span> <span class="label">km/h</span></dd>
+                <dd><span class="hud__value hud__value--xl" data-hud="speed">000</span> <span class="label">km/h</span></dd>
               </div>
               <div class="hud__item">
                 <dt class="label">Gear</dt>
-                <dd><span class="hud__value">N</span></dd>
+                <dd><span class="hud__value" data-hud="gear">N</span></dd>
               </div>
               <div class="hud__item">
                 <dt class="label">Sector</dt>
-                <dd><span class="hud__value">S1</span></dd>
+                <dd><span class="hud__value" data-hud="sector">S1</span></dd>
               </div>
               <div class="hud__item hud__item--wide">
                 <dt class="label">Lap time</dt>
-                <dd><span class="hud__value">0:00.000</span></dd>
+                <dd><span class="hud__value" data-hud="time">0:00.000</span></dd>
               </div>
             </dl>
-            <button class="button" type="button">Replay lap</button>
+            <p class="visually-hidden" role="status" data-hud="summary"></p>
+            <button class="button" type="button" data-lap-replay>Replay lap</button>
             <p class="hud__note label">Telemetry simulated for illustration</p>
           </aside>
         </div>

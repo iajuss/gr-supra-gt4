@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import silverstone from '../data/silverstone.json';
-import { projectCoordinates, fitToBox, measurePath, pointAt } from './track.js';
+import {
+  projectCoordinates,
+  fitToBox,
+  measurePath,
+  pointAt,
+  rotateQuarter,
+  orientToBox,
+  sliceUntil,
+} from './track.js';
 
 const square = [
   { x: 0, y: 0 },
@@ -107,5 +115,56 @@ describe('pointAt', () => {
     expect(pointAt(path, 1.125)).toEqual(pointAt(path, 0.125));
     expect(pointAt(path, -0.875)).toEqual(pointAt(path, 0.125));
     expect(pointAt(path, 1)).toEqual(pointAt(path, 0));
+  });
+});
+
+describe('rotateQuarter', () => {
+  it('rotates 90° clockwise on screen (east → south, north → east)', () => {
+    const [east, north] = rotateQuarter([
+      { x: 1, y: 0 },
+      { x: 0, y: -1 },
+    ]);
+    expect(east.x).toBeCloseTo(0);
+    expect(east.y).toBeCloseTo(1);
+    expect(north.x).toBeCloseTo(1);
+    expect(north.y).toBeCloseTo(0);
+  });
+});
+
+describe('orientToBox', () => {
+  const portraitTrack = [
+    { x: 0, y: 0 },
+    { x: 10, y: 30 },
+  ];
+
+  it('rotates a portrait track to fill a landscape box', () => {
+    const { points, rotated } = orientToBox(portraitTrack, { width: 400, height: 300 });
+    expect(rotated).toBe(true);
+    const width = Math.abs(points[1].x - points[0].x);
+    const height = Math.abs(points[1].y - points[0].y);
+    expect(width).toBeGreaterThan(height);
+  });
+
+  it('keeps a portrait track as is in a portrait box', () => {
+    expect(orientToBox(portraitTrack, { width: 300, height: 400 })).toEqual({
+      points: portraitTrack,
+      rotated: false,
+    });
+  });
+});
+
+describe('sliceUntil', () => {
+  it('returns the travelled polyline ending at the interpolated position', () => {
+    expect(sliceUntil(measurePath(square), 0.375)).toEqual([
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 5 },
+    ]);
+  });
+
+  it('returns only the start point at progress 0 and the full loop at progress 1', () => {
+    const path = measurePath(square);
+    expect(sliceUntil(path, 0)).toEqual([{ x: 0, y: 0 }]);
+    expect(sliceUntil(path, 1)).toEqual(square);
   });
 });

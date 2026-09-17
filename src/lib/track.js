@@ -82,6 +82,44 @@ export function pointAt({ points, cumulative, total }, progress) {
   };
 }
 
+/** Rotates points 90° clockwise on screen (canvas y-down): (x, y) → (-y, x). */
+export function rotateQuarter(points) {
+  return points.map(({ x, y }) => ({ x: -y, y: x }));
+}
+
+/**
+ * Rotates the track a quarter turn when its aspect disagrees with the box (portrait track in a
+ * landscape box or vice versa), so it fills the available space.
+ */
+export function orientToBox(points, { width, height }) {
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  const trackIsLandscape = Math.max(...xs) - Math.min(...xs) >= Math.max(...ys) - Math.min(...ys);
+  const boxIsLandscape = width >= height;
+
+  return trackIsLandscape === boxIsLandscape
+    ? { points, rotated: false }
+    : { points: rotateQuarter(points), rotated: true };
+}
+
+/**
+ * Polyline travelled from the start up to a progress in [0, 1] (no wrapping: 1 is the full loop).
+ * @returns {{ x: number, y: number }[]}
+ */
+export function sliceUntil({ points, cumulative, total }, progress) {
+  if (progress >= 1) return points;
+
+  const distance = Math.max(0, progress) * total;
+  const i = lastIndexAtOrBefore(cumulative, distance);
+  const travelled = points.slice(0, i + 1);
+
+  if (distance > cumulative[i]) {
+    const { x, y } = pointAt({ points, cumulative, total }, progress);
+    travelled.push({ x, y });
+  }
+  return travelled;
+}
+
 function mean(values) {
   return values.reduce((sum, v) => sum + v, 0) / values.length;
 }
