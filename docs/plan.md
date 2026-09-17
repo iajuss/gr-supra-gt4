@@ -8,11 +8,11 @@
 - **Não commitado ainda** (6 arquivos): `styles/tokens.css` (`--header-h`), `styles/sections/lap.css`
   (controles e legenda abaixo do header), `styles/base.css` (`[hidden]`), `components/telemetryHud.js`
   (`clear()`), `components/lapSection.js` e `components/lapSection3d.js` (limpam o resumo no Restart).
-- **Próximo passo: Bloco 4 (3D do carro)**, que começa com o usuário escolhendo e baixando o modelo
-  no Sketchfab (comparar peso, qualidade e licença antes).
+- **Próximo passo: Bloco 4 (3D do carro)** — nada mais pendente nos blocos anteriores. Começa com o
+  usuário escolhendo e baixando o modelo no Sketchfab (comparar peso, qualidade e licença antes).
 - **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
   A entrada `sandbox/` continua no `.gitignore`, à toa.
-- **Pendência do Bloco 3:** ver o movimento do reveal e dos contadores com o painel visível + mobile.
+- **Bloco 3:** também fechado — reveal, contadores e barra verificados em movimento, em desktop e 375 px.
 - **Dicas do ambiente:**
   - Com o painel do navegador oculto, `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` e
     transições CSS não rodam, e as capturas saem pretas — mesmo com `visibilityState` dizendo `visible`.
@@ -103,7 +103,12 @@ Protótipo aprovado em `sandbox/track3d`. O 2D atual continua como modo lite.
 - [x] 🧪 `lib/lines.js` + `components/textReveal.js`: linhas sobem de trás de uma máscara (GSAP), aplicado a títulos de capítulos e seções
   - Unidades com a caixa correta (`.unit`: Nm, kg, mm); espaços preservados entre as linhas divididas
 - [x] 👁 Desktop: contadores chegam a 820 / 780 / 1,350 / 24 / 96% e a barra a 0,96, sem erros no console
-- [ ] 👁 Ver o movimento do reveal e dos contadores com o painel visível (o painel ficou oculto durante os testes) + mobile
+- [x] 👁 Ver o movimento do reveal e dos contadores com o painel visível + mobile
+  - Verificado em 2026-09-17, em 1440×900 e 375×812, amostrando o movimento quadro a quadro.
+  - Reveal: a linha sobe de 83 px (desktop) / 42 px (mobile) até 0 em ~0,9 s e o texto volta ao normal
+    (`unsplit`), então um resize depois disso reflui sem resíduo.
+  - Contadores: escalonados, chegam a 820 / 780 / 1,350 / 24 / 96 em ~1,8 s.
+  - Barra: transição de 1,4 s até 1.226 px de 1.281 px = 0,96. Em 375 px, sem overflow horizontal.
 
 ## Bloco 4 — 3D (modo full)
 - [ ] Escolher e baixar o modelo (usuário) → comparar peso/qualidade/licença
