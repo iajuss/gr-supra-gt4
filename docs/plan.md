@@ -1,25 +1,26 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-17, fim da sessão de verificação)
+## ▶ Retomada (atualizado em 2026-09-17, fim do passo 1 do Bloco 4)
 
-- **Onde paramos:** Blocos 1, 2 e 3 concluídos. **Bloco 2B fechado**: passos 1 a 5 commitados
-  (`283bf62`, `5555bfb`) e o passo 6 (verificação) feito com o painel do navegador visível.
-  134 testes verdes; console sem erros em full, lite, reduced-motion e sem WebGL.
-- **Não commitado ainda** (6 arquivos): `styles/tokens.css` (`--header-h`), `styles/sections/lap.css`
-  (controles e legenda abaixo do header), `styles/base.css` (`[hidden]`), `components/telemetryHud.js`
-  (`clear()`), `components/lapSection.js` e `components/lapSection3d.js` (limpam o resumo no Restart).
-- **Próximo passo: Bloco 4 (3D do carro)**, detalhado em 6 passos abaixo — nada pendente nos blocos
-  anteriores. Começa pelo **passo 1 (palco com proxy)**, que não depende do download do modelo; a
-  escolha do GLB no Sketchfab (peso, qualidade, licença) é sua e entra no passo 5.
+- **Onde paramos:** Blocos 1, 2, 2B e 3 concluídos e verificados no navegador; nada pendente para trás.
+  O **passo 1 do Bloco 4 (palco com proxy)** está feito e verificado. 140 testes verdes.
+- **Próximo passo: Bloco 4, passo 2 (pontos de câmera)** — método combinado: teste antes da
+  interpolação (posição, alvo e fov) em `lib/math.js`, depois `data/cameraShots.js` com um ponto por
+  capítulo e um modo de inspeção para conferir cada enquadramento no navegador.
+- **Passo 1, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
+  `scene/car.js` (proxy por trás da interface final) e o import dinâmico do palco no `main.js`.
+  O gradiente placeholder saiu do `stage.css`. Build: `stage` 3,3 KB, `car` 1,0 KB, `carStage` 0,6 KB
+  em chunks próprios, compartilhando `renderer`/`three.core` com a volta 3D; principal 87 KB (34,7 gzip).
 - **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
   A entrada `sandbox/` continua no `.gitignore`, à toa.
-- **Bloco 3:** também fechado — reveal, contadores e barra verificados em movimento, em desktop e 375 px.
 - **Dicas do ambiente:**
   - Com o painel do navegador oculto, `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` e
     transições CSS não rodam, e as capturas saem pretas — mesmo com `visibilityState` dizendo `visible`.
     Sintoma típico: o canvas do palco fica em 300×150 (o padrão), esticado pelo CSS.
   - Para forçar o modo full: emular 1440×900 e recarregar. O app limpa a emulação quando a largura do
     painel muda, então vale reemular antes de cada recarga.
+  - O buffer de rede da aba mistura as cargas anteriores: para provar que o lite não baixa Three.js,
+    abrir uma aba nova, emular 375 px e ler a rede só dela.
   - Uma volta dura 12 s; entre duas chamadas de ferramenta ela pode terminar sozinha. Para pegá-la
     correndo, agrupar clique + espera + leitura num único lote (ou orquestrar tudo em um script só).
   - Clicar por referência de elemento rola a página antes do clique; clicar pelo DOM não mexe no scroll.
@@ -117,10 +118,21 @@ para o download do modelo não travar nada; o GLB entra depois, no passo 5. **Le
 câmeras** (passo 3), porque o ritmo do scrub é calibrado sentindo o scroll real.
 A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` e as seções `data-shot`.
 
-1. **Palco com proxy**
-   - [ ] `scene/stage.js`: piso, luzes e ambiente, reusando a fábrica `scene/renderer.js` do Bloco 2B
-   - [ ] `scene/car.js` com um proxy (caixa nas medidas do Vulcan) e a interface que o modelo vai cumprir
-   - [ ] 👁 Palco visível atrás do hero, sem erros no console
+1. **Palco com proxy** — concluído em 2026-09-17
+   - [x] 🧪 `lib/fitModel.js`: `fitToLength` põe uma bounding box no tamanho real, centrada em x/z e
+     apoiada em y = 0. O proxy já passa por ele; o GLB do passo 5 reaproveita.
+   - [x] `data/carStage.js`: medidas do Vulcan, luzes, piso, névoa, câmera do hero e cores
+   - [x] `scene/stage.js`: estúdio escuro (piso quase metálico, key/fill/rim, `RoomEnvironment` via PMREM,
+     névoa), câmera parada e render sob demanda, reusando a fábrica `scene/renderer.js` do Bloco 2B
+   - [x] `scene/car.js`: `createCar()` async → `{ object3D, dimensions, setVisible, dispose }`, com o proxy
+     (caixa nas medidas do Vulcan) por trás da interface que o modelo vai cumprir
+   - [x] Ligação no `main.js` (import dinâmico só em full) e limpeza do gradiente placeholder no `stage.css`
+   - [x] 👁 Palco visível atrás do hero, sem erros no console
+     - Verificado em 1440×900 com o painel visível: canvas 1425×900 CSS / 1781×1125 de buffer.
+     - Lite em 375 px: palco com `display: none` e nenhuma das 60 requisições vinda do Three.js.
+     - O palco fixo não vaza: aparece atrás do AERO (zona 3D) e as seções LAP e SPECS o cobrem.
+     - O rim lime como `DirectionalLight` cobria o piso metálico inteiro de verde (lóbulo especular);
+       virou um `SpotLight` de alcance curto mirado no carro.
 2. **Pontos de câmera**
    - [ ] 🧪 Interpolação entre pontos de câmera em `lib/math.js` (posição, alvo e fov)
    - [ ] `data/cameraShots.js`: um ponto por capítulo (hero, aero, chassis, v12, transição)

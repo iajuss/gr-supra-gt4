@@ -15,6 +15,9 @@ const motion = { reducedMotion: env.reducedMotion };
 
 initTextReveal(document, motion);
 
+const stage = document.querySelector('.stage');
+if (stage && mode === 'full') initStage(stage);
+
 const lap = document.querySelector('[data-lap]');
 if (lap) initLap(lap);
 
@@ -22,6 +25,25 @@ const specs = document.querySelector('.specs');
 if (specs) initSpecCounters(specs, motion);
 
 console.info(`[vulcan] mode=${mode}`, reasons);
+
+/** The fixed car stage, full mode only: Three.js is never fetched in lite. */
+async function initStage(root) {
+  try {
+    const [{ createStage }, { createCar }, { default: carStage }] = await Promise.all([
+      import('./scene/stage.js'),
+      import('./scene/car.js'),
+      import('./data/carStage.js'),
+    ]);
+    const view = createStage(root.querySelector('.stage__canvas'), carStage);
+    const car = await createCar(carStage);
+    view.add(car.object3D);
+    view.render();
+  } catch (error) {
+    // Bloco 4 step 4 turns this into the lite fallback; for now the stage just stays out of the way.
+    console.warn('[vulcan] 3D stage unavailable', error);
+    root.hidden = true;
+  }
+}
 
 /** Full mode loads the 3D lap on demand; lite, or any failure loading it, keeps the 2D lap. */
 async function initLap(root) {

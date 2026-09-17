@@ -92,6 +92,26 @@ O JS só anima até esses valores. Conferido em 2026-09-17.
 
 Fora da página: velocidade máxima e 0–100, porque as fontes divergem.
 
+## Palco do carro (Bloco 4, passo 1 — 2026-09-17)
+
+- **Estúdio próprio**, distinto do palco da volta: piso grande quase metálico (roughness 0,5,
+  metalness 0,85) que espelha o escuro em vez de acumular luz difusa, névoa exponencial fechando o
+  horizonte e ambiente procedural (`RoomEnvironment` via PMREM) — sem HDRI para baixar.
+- **Luzes:** key quente e fill frio como `DirectionalLight`; **rim lime como `SpotLight`** de alcance
+  curto mirado no carro. Como directional, o rim virava um lóbulo especular que pintava o piso inteiro
+  de verde (visto no navegador). Sem sombras em tempo real, como já previsto.
+- **Proxy antes do modelo:** `scene/car.js` já expõe a interface final
+  (`{ object3D, dimensions, setVisible, dispose }`, criação assíncrona); hoje ela devolve uma caixa nas
+  medidas do Vulcan, no passo 5 devolverá o GLB, sem mexer em quem chama.
+- **Tamanho real vem de uma função pura:** `lib/fitModel.js` (`fitToLength`) recebe uma bounding box e
+  devolve escala uniforme + deslocamento que a põem no comprimento real, centrada em x/z e apoiada em
+  y = 0. O proxy é criado de propósito em "centímetros" e fora do chão, então passa pelo mesmo caminho
+  que o GLB vai passar. Medidas aproximadas usadas na cena (4,72 × 2,05 × 1,19 m) são valores internos,
+  não aparecem na página.
+- **Render sob demanda** no passo 1 (uma vez e a cada resize); o loop com pausa entra no passo 3, junto
+  com o Lenis e a timeline de scroll.
+- Valores de apresentação em `src/data/carStage.js`, como `data/lapScene.js` faz para a volta.
+
 ## Abordagem técnica — canvas 3D fixo + timeline única
 
 - Um canvas Three.js `position: fixed` atrás das seções 1–5.

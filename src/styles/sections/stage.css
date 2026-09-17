@@ -9,13 +9,11 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-canvas);
-  /* Placeholder lighting until the 3D scene exists (Bloco 4). */
-  background:
-    radial-gradient(60% 45% at 50% 62%, rgb(31 61 43 / 0.55), transparent 70%),
-    var(--color-bg);
+  background: var(--color-bg);
 }
 
 .stage__canvas {
+  display: block;
   width: 100%;
   height: 100%;
 }
