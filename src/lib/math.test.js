@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { clamp, lastIndexAtOrBefore, lerp, lerpShot, shotAt } from './math.js';
+import { clamp, lastIndexAtOrBefore, lerp, lerpShot, normalizeStops, shotAt } from './math.js';
 
 describe('lastIndexAtOrBefore', () => {
   const cumulative = [0, 10, 20, 20, 35];
@@ -95,5 +95,53 @@ describe('shotAt', () => {
 
   it('works with a single shot', () => {
     expect(shotAt([shots[0]], 0.7).fov).toBe(30);
+  });
+});
+
+describe('normalizeStops', () => {
+  it('maps the first value to 0 and the last to 1', () => {
+    expect(normalizeStops([100, 300, 400])).toEqual([0, 2 / 3, 1]);
+  });
+
+  it('keeps the spacing between values, not their count', () => {
+    // the middle section sits close to the end: its stop is late
+    expect(normalizeStops([0, 900, 1000])).toEqual([0, 0.9, 1]);
+  });
+
+  it('falls back to even spacing when every value is the same', () => {
+    expect(normalizeStops([7, 7, 7])).toEqual([0, 0.5, 1]);
+  });
+
+  it('works with two values', () => {
+    expect(normalizeStops([-40, 60])).toEqual([0, 1]);
+  });
+});
+
+describe('shotAt with uneven stops', () => {
+  const shots = [
+    { id: 'one', position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 30 },
+    { id: 'two', position: { x: 10, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 40 },
+    { id: 'three', position: { x: 10, y: 10, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 50 },
+  ];
+  const stops = [0, 0.8, 1]; // a long hero section, then a short transition
+
+  it('lands on each shot at its own stop', () => {
+    expect(shotAt(shots, 0, stops).fov).toBe(30);
+    expect(shotAt(shots, 0.8, stops).fov).toBe(40);
+    expect(shotAt(shots, 1, stops).fov).toBe(50);
+  });
+
+  it('spreads the first segment over its whole stretch', () => {
+    expect(shotAt(shots, 0.4, stops).position).toEqual({ x: 5, y: 0, z: 0 });
+    expect(shotAt(shots, 0.9, stops).position).toEqual({ x: 10, y: 5, z: 0 });
+  });
+
+  it('clamps outside the range', () => {
+    expect(shotAt(shots, -2, stops)).toEqual(shotAt(shots, 0, stops));
+    expect(shotAt(shots, 9, stops)).toEqual(shotAt(shots, 1, stops));
+  });
+
+  it('matches the even spacing when the stops are even', () => {
+    expect(shotAt(shots, 0.25, [0, 0.5, 1])).toEqual(shotAt(shots, 0.25));
   });
 });

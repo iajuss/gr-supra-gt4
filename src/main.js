@@ -39,10 +39,29 @@ async function initStage(root) {
     const car = await createCar(carStage);
     view.add(car.object3D);
 
-    // ?shot=<id> holds one chapter's framing, to check it on its own. Scroll takes over in step 3.
+    // ?shot=<id> holds one chapter's framing, to check it on its own, instead of following the scroll.
     const requested = new URLSearchParams(window.location.search).get('shot');
-    view.setShot(cameraShots.find((shot) => shot.id === requested) ?? cameraShots[0]);
-    view.render();
+    const frozen = cameraShots.find((shot) => shot.id === requested);
+    if (frozen) {
+      view.setShot(frozen);
+      view.render();
+      return;
+    }
+
+    const [{ createSmoothScroll }, { createCameraRig }] = await Promise.all([
+      import('./lib/scroll.js'),
+      import('./scene/cameraRig.js'),
+    ]);
+    createSmoothScroll();
+    createCameraRig({
+      shots: cameraShots,
+      root: document,
+      onShot(shot) {
+        view.setShot(shot);
+        view.requestRender();
+      },
+      onActive: view.setActive,
+    });
   } catch (error) {
     // Bloco 4 step 4 turns this into the lite fallback; for now the stage just stays out of the way.
     console.warn('[vulcan] 3D stage unavailable', error);

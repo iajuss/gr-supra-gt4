@@ -36,7 +36,7 @@ export function createStage(canvas, config) {
   const { renderer, dispose: disposeRenderer } = createRenderer(canvas, (width, height) => {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    render();
+    requestRender();
   });
 
   // A procedural room stands in for an HDRI: soft reflections with nothing to download.
@@ -83,6 +83,34 @@ export function createStage(canvas, config) {
     renderer.render(scene, camera);
   }
 
+  // Nothing here animates on its own: a frame is drawn only after something changes, and only
+  // while the stage is active (the 3D zone on screen) and the tab in the foreground.
+  let active = true;
+  let frame = 0;
+
+  function requestRender() {
+    if (frame || !active || document.hidden) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      render();
+    });
+  }
+
+  function cancelFrame() {
+    cancelAnimationFrame(frame);
+    frame = 0;
+  }
+
+  /** @param {boolean} next */
+  function setActive(next) {
+    active = next;
+    if (active) requestRender();
+    else cancelFrame();
+  }
+
+  const onVisibility = () => (document.hidden ? cancelFrame() : requestRender());
+  document.addEventListener('visibilitychange', onVisibility);
+
   /**
    * Points the camera at a shot (or anything lerpShot returns).
    * @param {{ position: { x: number, y: number, z: number }, target: { x: number, y: number, z: number }, fov: number }} shot
@@ -104,7 +132,11 @@ export function createStage(canvas, config) {
       scene.add(object);
     },
     render,
+    requestRender,
+    setActive,
     dispose() {
+      cancelFrame();
+      document.removeEventListener('visibilitychange', onVisibility);
       disposeRenderer();
       environment.dispose();
       groundGeometry.dispose();

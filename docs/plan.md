@@ -3,17 +3,20 @@
 ## ▶ Retomada (atualizado em 2026-09-17, fim do passo 1 do Bloco 4)
 
 - **Onde paramos:** Blocos 1, 2, 2B e 3 concluídos e verificados no navegador; nada pendente para trás.
-  Os **passos 1 (palco com proxy) e 2 (pontos de câmera) do Bloco 4** estão feitos e verificados.
-  151 testes verdes.
-- **Próximo passo: Bloco 4, passo 3 (scroll)** — método combinado: `lib/scroll.js` sincroniza Lenis e
-  ScrollTrigger; uma única timeline com `scrub` move um progresso 0–1 e o `scene/cameraRig.js` chama
-  `shotAt()`. A matemática fica no código já testado e o GSAP só dá o ritmo.
-- **Passos 1 e 2, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
+  Os **passos 1 (palco com proxy), 2 (pontos de câmera) e 3 (scroll) do Bloco 4** estão feitos e
+  verificados. 159 testes verdes.
+- **Próximo passo: Bloco 4, passo 4 (preloader)** — `lib/loader.js` (GLB/HDR com progresso) e
+  `components/preloader.js` com progresso real; falha no carregamento cai para o modo lite. Método a
+  combinar: hoje não há nada pesado para carregar (o proxy é geometria), então vale decidir se o
+  preloader nasce junto com o modelo (passo 5) ou antes, com o carregamento simulado.
+- **Passos 1 a 3, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
   `scene/car.js` (proxy por trás da interface final) e o import dinâmico do palco no `main.js`.
   O gradiente placeholder saiu do `stage.css`. Depois, `lib/math.js` (`clamp`, `lerpShot`, `shotAt`),
   `data/cameraShots.js` e `?shot=<id>` para inspecionar um enquadramento por vez.
-  Build: `stage` 3,3 KB, `car` 1,0 KB, `carStage` 0,6 KB em chunks próprios, compartilhando
-  `renderer`/`three.core` com a volta 3D; principal 87 KB (34,7 gzip).
+  Por fim `lib/scroll.js` (Lenis + ScrollTrigger) e `scene/cameraRig.js` (scroll → `shotAt`), com o
+  palco desenhando só quando algo muda. Build: `stage` 3,7 KB, `scroll` 18,9 KB, `cameraRig` 1,0 KB,
+  `car` 1,0 KB e `carStage` 0,5 KB em chunks sob demanda, compartilhando `renderer`/`three.core` com a
+  volta 3D; principal 88,4 KB (35,2 gzip).
 - **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
   A entrada `sandbox/` continua no `.gitignore`, à toa.
 - **Dicas do ambiente:**
@@ -146,11 +149,25 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
      num capítulo (mecanismo de inspeção; o scroll assume no passo 3)
    - [x] 👁 Os cinco conferidos em 1440×900, console limpo. Com o proxy dá para julgar pouco: só o `v12`
      mudou (estava colado na lateral, recuou para caber com silhueta). O ajuste fino dos cinco é o passo 5
-3. **Scroll**
-   - [ ] `lib/scroll.js`: Lenis + ScrollTrigger sincronizados (scroll nativo no toque)
-   - [ ] `scene/cameraRig.js`: timeline única com `scrub`, ligada aos `data-shot`
-   - [ ] Pausa do render fora da zona 3D e com a aba em segundo plano
-   - [ ] 👁 Percorrer a página inteira: transições sem tranco, FPS, console limpo
+3. **Scroll** — concluído em 2026-09-17
+   - [x] 🧪 `normalizeStops` em `lib/math.js` e `shotAt` aceitando paradas irregulares: cada ponto é
+     alcançado quando a sua seção está centralizada, mesmo com seções de alturas diferentes
+   - [x] `lib/scroll.js`: Lenis + ScrollTrigger no mesmo ticker (importado só no modo full, então o
+     toque segue com o scroll nativo)
+   - [x] `scene/cameraRig.js`: timeline única com `scrub: 0.6` movendo um progresso 0–1, ligada aos
+     `data-shot`; quem calcula a câmera é o `shotAt`. Um segundo ScrollTrigger avisa quando a zona 3D
+     entra e sai da tela
+   - [x] `data-shot="hero"` e `data-shot="transition"` no `index.html` (faltavam os dois extremos)
+   - [x] Pausa do render: o palco só desenha quando algo muda (bandeira suja + um rAF), e nunca fora da
+     zona 3D ou com a aba em segundo plano
+   - [x] 👁 Percorrer a página inteira: transições sem tranco, console limpo
+     - Chamadas de desenho do WebGL contadas no console: **0** parado na zona 3D, 264 durante um trecho
+       de scroll de 2 s, **0** rolando 300 px dentro da SPECS (fora da zona).
+     - A câmera bate com o `?shot=` de cada capítulo quando a seção está centralizada, e continua batendo
+       depois de redimensionar de 1440×900 para 1280×720 sem recarregar.
+     - Âncoras do header funcionam com o Lenis ligado (scrollY = offsetTop em Specs e Aero).
+     - Lite em 375 px: nada de `lenis` nem de `ScrollTrigger` é baixado.
+     - Build: `scroll` 18,9 KB (5,6 gzip) e `cameraRig` 1,0 KB em chunks sob demanda; principal 88,4 KB.
 4. **Preloader**
    - [ ] `lib/loader.js` (GLB/HDR com progresso) + `components/preloader.js` com progresso real
    - [ ] Falha no carregamento cai para o modo lite, como o `main.js` já faz com o 3D da volta

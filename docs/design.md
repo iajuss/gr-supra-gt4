@@ -126,6 +126,23 @@ Fora da página: velocidade máxima e 0–100, porque as fontes divergem.
 - Enquadrar contra uma caixa tem limite: os cinco ângulos existem e são distintos, mas o ajuste fino
   (distância, altura, fov e luz) é o passo 5, com o modelo real.
 
+### Scroll (passo 3 — 2026-09-17)
+
+- **Lenis e ScrollTrigger no mesmo ticker** (`lib/scroll.js`), importados só no modo full: no toque a
+  página segue com o scroll nativo, como já estava decidido.
+- **Uma timeline com `scrub: 0.6`** move um progresso de 0 a 1 (`scene/cameraRig.js`); o GSAP só dá o
+  ritmo, e quem calcula a câmera é o `shotAt` testado. A timeline vai do centro do hero ao centro da
+  seção de transição.
+- **Paradas ancoradas às seções:** as seções têm alturas diferentes, então dividir o scroll em fatias
+  iguais faria a câmera chegar antes ou depois do capítulo. `normalizeStops` converte o centro de cada
+  `[data-shot]` numa parada 0–1 e o `shotAt` interpola entre elas; as paradas são recalculadas a cada
+  refresh do ScrollTrigger (resize incluído).
+- **O palco desenha só quando algo muda:** uma bandeira suja agenda um único rAF. Nada anima sozinho,
+  então parado o custo é zero. O render também para fora da zona 3D (um segundo ScrollTrigger avisa) e
+  com a aba em segundo plano. Medido no navegador contando as chamadas de desenho do WebGL: 0 parado,
+  0 fora da zona, centenas durante o scroll.
+- `data-shot` agora marca as cinco seções: hero, os três capítulos e a transição.
+
 ## Abordagem técnica — canvas 3D fixo + timeline única
 
 - Um canvas Three.js `position: fixed` atrás das seções 1–5.

@@ -42,15 +42,34 @@ export function lerpShot(a, b, t) {
 }
 
 /**
- * The camera along a list of shots, evenly spaced: 0 is the first shot, 1 the last.
- * @param {Array<Parameters<typeof lerpShot>[0] & { id: string }>} shots
- * @param {number} progress
+ * Ascending values (a section's place along the scroll, say) rescaled to 0–1.
+ * All-equal values fall back to even spacing.
+ * @param {number[]} values
  */
-export function shotAt(shots, progress) {
+export function normalizeStops(values) {
+  const span = values[values.length - 1] - values[0];
+  if (span <= 0) return values.map((_, i) => i / (values.length - 1));
+  return values.map((value) => (value - values[0]) / span);
+}
+
+/**
+ * The camera along a list of shots. Without `stops` the shots are evenly spaced;
+ * with them, each shot is reached at its own stop (see normalizeStops).
+ * @param {Array<Parameters<typeof lerpShot>[0] & { id: string }>} shots
+ * @param {number} progress 0 is the first shot, 1 the last
+ * @param {number[]} [stops] one ascending 0–1 value per shot
+ */
+export function shotAt(shots, progress, stops) {
   if (shots.length < 2) return lerpShot(shots[0], shots[0], 0);
 
   const segments = shots.length - 1;
-  const scaled = clamp(progress, 0, 1) * segments;
-  const index = Math.min(Math.floor(scaled), segments - 1);
-  return lerpShot(shots[index], shots[index + 1], scaled - index);
+  if (!stops) {
+    const scaled = clamp(progress, 0, 1) * segments;
+    const index = Math.min(Math.floor(scaled), segments - 1);
+    return lerpShot(shots[index], shots[index + 1], scaled - index);
+  }
+
+  const index = lastIndexAtOrBefore(stops, clamp(progress, 0, 1));
+  const stretch = stops[index + 1] - stops[index];
+  return lerpShot(shots[index], shots[index + 1], stretch > 0 ? (progress - stops[index]) / stretch : 1);
 }
