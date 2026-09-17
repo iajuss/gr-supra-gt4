@@ -45,10 +45,21 @@ Status: aprovado em 2026-09-17.
        chão escuro com grid racing green, neblina e bloom.
      - Carro representado por um bloco lime brilhante com luz (carro procedural testado e rejeitado).
        Rastro fino verde-escuro, abaixo do limiar do bloom, para não ofuscar a câmera próxima.
-     - Uma volta de 12 s ao entrar na tela (50% visível) → para na linha com o tempo final → Replay.
+     - Uma volta de 12 s ao entrar na tela (50% visível) → para na linha com o tempo final.
        O render pausa ao terminar e fora da tela.
-     - Câmeras Chase / Heli / Top em botões; começa na **Heli**. Minimapa some na Top.
+     - Botão **Restart** sempre visível (substitui o Replay que só aparecia no fim): zera a volta e a
+       câmera vai direto para a largada (aprovado no sandbox em 2026-09-17).
+     - Câmeras Chase / Heli / Top em botões; começa na **Heli**. Minimapa visível em todas
+       (antes sumia na Top; o usuário pediu o mapa também nela em 2026-09-17).
+     - **Top mais clara** (a ~1 km a neblina apagava ~70% da cor e o carro e o rastro ficavam abaixo do bloom):
+       só na Top, com transição suave, neblina desligada, bloco do carro 6× maior e rastro lime cheio de 6 m.
+       Chase e Heli mantêm o rastro fino verde-escuro.
      - Three.js e pós-processamento carregados sob demanda, só no modo full.
+     - Lógica pura separada da cena (2026-09-17): `lib/lapClock.js` (compartilhado com o 2D), `geometry.js`,
+       `centreline.js`, `ribbon.js` e `cameraRigs.js`, sem Three.js. Valores do protótipo em `data/lapScene.js`.
+       Coordenadas no chão do 3D (`{ x, z }`, y para cima); o `{ x, y }` do traçado só existe dentro do `centreline`.
+     - O relógio soma o tempo entre quadros com limite de 0,05 s: aba em segundo plano ou fora da tela
+       retoma a volta de onde parou, em vez de pular para o fim (vale para o 2D também).
    - **Modo lite (mobile, reduced-motion, sem WebGL): canvas 2D** com contorno fantasma cinza + rastro lime.
      Pista girada 90° em telas largas (4:3) e em pé no mobile (3:4).
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.

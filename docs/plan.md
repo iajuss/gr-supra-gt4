@@ -2,22 +2,28 @@
 
 ## ▶ Retomada (atualizado em 2026-09-17)
 
-- **Onde paramos:** Blocos 1, 2 e 3 concluídos e commitados. Bloco 2B (THE LAP em 3D) aprovado e planejado,
-  ainda **sem código**.
+- **Onde paramos:** Blocos 1, 2 e 3 concluídos e commitados. Bloco 2B: passos 1 a 5 com código (lógica, cena,
+  layout e ligação), 134 testes verdes, **aguardando o usuário ver a pista 3D na página** (painel ficou oculto
+  nos testes). Depois: passo 6 (verificação visual, FPS) e remoção do sandbox.
 - **Referência visual aprovada:** `sandbox/track3d/` (fora do git; rode `npm run dev` e abra `/sandbox/track3d/`).
+  Já importa `smoothClosed` e `circumradius` de `lib/geometry.js`.
 - **Ritmo combinado para o 2B:** passos 1 e 2 juntos (só lógica, TDD) → pausa com relatório → passos 3 a 5
   (cena, layout, ligação) → pausa para o usuário ver → verificação e limpeza.
-- **Próximo passo (1 + 2), módulos propostos:**
+- **Módulos prontos:**
 
   | Módulo | Responsabilidade |
   |---|---|
+  | `data/lapScene.js` | duração (12 s), limite do quadro, medidas da pista e das zebras, valores das câmeras |
   | `lib/lapClock.js` | tempo na tela → tempo simulado e `done` (usado pelo 2D e pelo 3D) |
-  | `lib/geometry.js` | `smoothClosed` e `circumradius` movidos de `telemetry.js` (os testes vão junto) |
-  | `lib/centreline.js` | linha central suavizada (tangentes, normais), `frameAt(progress)`, trechos com zebra |
-  | `lib/ribbon.js` | vértices e índices das fitas sem Three.js, com opção de pular segmentos (zebras sem rampas) |
-  | `lib/cameraRigs.js` | posição e alvo de Chase (atrás 24, alto 7,5, olha 30 à frente), Heli (atrás 90, alto 70, lado 40, olha 60 à frente) e Top (offset fixo −150, 950, 250), mais FOV por velocidade (Chase: 50 + v/300 × 18) |
+  | `lib/geometry.js` | `smoothClosed` e `circumradius` (saíram de `telemetry.js`) |
+  | `lib/centreline.js` | linha central `{ x, z }` com tangentes, normais e raios, `frameAt(progress)`, `kerbSamples` |
+  | `lib/ribbon.js` | `buildRibbon` (vértices, índices, cores; segmentos pulados), `indexCountUntil` (rastro), `stripeAt` |
+  | `lib/cameraRigs.js` | `cameraRig` (Chase / Heli / Top), `cameraFov` (Chase 50 → 68° a 300 km/h), `followFactor` |
 
-  Depois: refatorar `components/lapSection.js` (2D) para usar `lapClock`.
+- **Passos 3 a 5 (feitos):** `lib/lap.js` (`buildLap`), `components/lapPlayer.js` (loop + relógio + início a 50% +
+  pausa fora da tela + Restart, usado pelo 2D e pelo 3D), `components/lapSection3d.js`, `scene/renderer.js`,
+  `scene/lap/` (`lapStage`, `environment`, `track`, `trail`, `car`, `ribbonMesh`). Marcação do lite reaproveitada:
+  no 3D o HUD e o canvas 2D (minimapa) viram sobreposições. Sem Pause e sem atalhos de teclado.
 
 Ordem aprovada: **Fundação → Pista → Specs → 3D → Polimento**. Design em [design.md](design.md).
 Cada bloco é detalhado e combinado na conversa antes de começar; marque `[x]` ao concluir.
@@ -51,16 +57,18 @@ Legenda: 🧪 = teste escrito antes (TDD) · 👁 = verificação no navegador.
 
 ## Bloco 2B — THE LAP em 3D (modo full)
 Protótipo aprovado em `sandbox/track3d`. O 2D atual continua como modo lite.
-- [ ] 🧪 Extrair a lógica pura do protótipo:
+- [x] 🧪 Extrair a lógica pura do protótipo:
   - relógio da volta (tempo na tela → tempo simulado, fim da volta);
   - posição e direção ao longo da linha central;
   - geometria das fitas (vértices e índices, sem Three.js);
   - trechos com zebra (por raio de curva);
   - posição das 3 câmeras.
-- [ ] Refatorar `components/lapSection.js` (2D) para usar o relógio da volta
-- [ ] `scene/renderer.js` (fábrica compartilhada com o Bloco 4) + `scene/lap/` (pista, zebras, largada, rastro, carro, bloom, loop com pausa)
-- [ ] HTML/CSS do modo full: palco em tela cheia, HUD, minimapa, câmeras (padrão Heli), Replay
-- [ ] Ligação: import dinâmico no modo full; lite mantém o 2D
+- [x] Refatorar `components/lapSection.js` (2D) para usar o relógio da volta
+  - 👁 2D conferido pelo DOM (painel oculto): volta em ~12 s até 1:45.364, pausa sem pular, console sem erros
+- [x] `scene/renderer.js` (fábrica compartilhada com o Bloco 4) + `scene/lap/` (pista, zebras, largada, rastro, carro, bloom, loop com pausa)
+- [x] HTML/CSS do modo full: palco em tela cheia, HUD, minimapa, câmeras (padrão Heli), Restart
+- [x] Ligação: import dinâmico no modo full; lite mantém o 2D
+  - Build: `lapSection3d` em chunk separado (559 KB, 139 KB gzip); bundle principal 86 KB (34 KB gzip)
 - [ ] 👁 Desktop: 3 câmeras, replay, pausa fora da tela, FPS, tamanho do build · Lite: fallback 2D
 - [ ] Remover `sandbox/track3d`
 

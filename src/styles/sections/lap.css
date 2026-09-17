@@ -66,6 +66,24 @@
   font-size: 0.6875rem;
 }
 
+.lap__controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: var(--space-2);
+}
+
+/* Camera buttons and the 3D stage only exist in the 3D view. */
+.lap__cameras,
+.lap__stage {
+  display: none;
+}
+
+.button--toggle[aria-pressed='true'] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
 @media (min-width: 64rem) {
   .lap__canvas {
     aspect-ratio: 4 / 3;
@@ -75,4 +93,90 @@
     grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     align-items: start;
   }
+}
+
+/* ---------- Full mode: 3D stage (set by components/lapSection3d.js) ----------
+   Full-bleed, full-height stage; HUD bottom-left, minimap bottom-right, controls top-right.
+   The HUD aside stays in the flow for assistive tech: only its children are positioned. */
+
+.lap__layout[data-lap-view='3d'] {
+  position: relative;
+  display: block;
+  height: 100vh;
+  height: 100svh;
+  min-height: 36rem;
+  margin-inline: calc(-1 * var(--gutter));
+  overflow: hidden;
+  border-block: 1px solid var(--color-line);
+}
+
+[data-lap-view='3d'] .lap__stage {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-lap-view='3d'] .lap__cameras {
+  display: flex;
+  gap: var(--space-2);
+}
+
+[data-lap-view='3d'] .lap__controls,
+[data-lap-view='3d'] .hud__grid,
+[data-lap-view='3d'] .lap__track,
+[data-lap-view='3d'] .hud__note {
+  position: absolute;
+  z-index: var(--z-hud);
+}
+
+[data-lap-view='3d'] .lap__controls {
+  top: var(--space-5);
+  right: var(--gutter);
+}
+
+[data-lap-view='3d'] .hud__note {
+  top: var(--space-5);
+  left: var(--gutter);
+  color: var(--color-muted);
+}
+
+[data-lap-view='3d'] .hud__grid,
+[data-lap-view='3d'] .lap__track,
+[data-lap-view='3d'] .button:not(:hover, [aria-pressed='true']) {
+  background: rgb(10 11 10 / 0.72);
+  backdrop-filter: blur(6px);
+}
+
+[data-lap-view='3d'] .hud__grid {
+  left: var(--gutter);
+  bottom: var(--space-5);
+  width: min(22rem, 40%);
+}
+
+[data-lap-view='3d'] .hud__item {
+  padding: var(--space-3) var(--space-4);
+}
+
+[data-lap-view='3d'] .hud__value {
+  font-size: 2.5rem;
+}
+
+[data-lap-view='3d'] .hud__value--xl {
+  font-size: 4rem;
+}
+
+[data-lap-view='3d'] .lap__track {
+  right: var(--gutter);
+  bottom: var(--space-5);
+  width: 13.75rem;
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+}
+
+[data-lap-view='3d'] .lap__canvas {
+  aspect-ratio: 3 / 4;
+  background: none;
+  border: 0;
 }

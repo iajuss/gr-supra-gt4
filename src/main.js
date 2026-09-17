@@ -16,9 +16,24 @@ const motion = { reducedMotion: env.reducedMotion };
 initTextReveal(document, motion);
 
 const lap = document.querySelector('[data-lap]');
-if (lap) initLapSection(lap, motion);
+if (lap) initLap(lap);
 
 const specs = document.querySelector('.specs');
 if (specs) initSpecCounters(specs, motion);
 
 console.info(`[vulcan] mode=${mode}`, reasons);
+
+/** Full mode loads the 3D lap on demand; lite, or any failure loading it, keeps the 2D lap. */
+async function initLap(root) {
+  if (mode === 'full') {
+    try {
+      const { initLapSection3d } = await import('./components/lapSection3d.js');
+      initLapSection3d(root);
+      return;
+    } catch (error) {
+      console.warn('[vulcan] 3D lap unavailable, using 2D', error);
+      delete root.dataset.lapView;
+    }
+  }
+  initLapSection(root, motion);
+}

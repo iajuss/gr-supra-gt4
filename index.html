@@ -117,6 +117,9 @@
         </header>
 
         <div class="lap__layout" data-lap>
+          <!-- Full mode only: 3D stage (components/lapSection3d.js). In lite it stays hidden. -->
+          <canvas class="lap__stage" role="img" aria-label="3D view of the simulated lap around Silverstone" data-lap-stage></canvas>
+
           <figure class="lap__track">
             <canvas class="lap__canvas" role="img" aria-label="Animated map of the Silverstone circuit" data-lap-canvas></canvas>
             <figcaption class="label lap__caption">Silverstone GP circuit · clockwise</figcaption>
@@ -142,7 +145,14 @@
               </div>
             </dl>
             <p class="visually-hidden" role="status" data-hud="summary"></p>
-            <button class="button" type="button" data-lap-replay>Replay lap</button>
+            <div class="lap__controls">
+              <div class="lap__cameras" role="group" aria-label="Camera">
+                <button class="button button--toggle" type="button" data-lap-camera="chase" aria-pressed="false">Chase</button>
+                <button class="button button--toggle" type="button" data-lap-camera="heli" aria-pressed="false">Heli</button>
+                <button class="button button--toggle" type="button" data-lap-camera="top" aria-pressed="false">Top</button>
+              </div>
+              <button class="button" type="button" data-lap-restart>Restart lap</button>
+            </div>
             <p class="hud__note label">Telemetry simulated for illustration</p>
           </aside>
         </div>
