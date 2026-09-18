@@ -13,7 +13,7 @@
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
 1. ~~**Limpeza dos restos do Vulcan**~~ — feita em 2026-09-18.
-2. **Trajetória da câmera hero → aero.**
+2. ~~**Trajetória da câmera hero → aero**~~ — feita em 2026-09-18 (arco em volta do carro).
 3. Motion do hero/preloader, acessibilidade, Lighthouse.
 4. Créditos do footer e deploy na Vercel.
 
@@ -243,8 +243,18 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
 - [x] Limpeza dos restos do Vulcan: `name` do pacote (`gr-supra-gt4-landing`), `CLAUDE.md`, `design.md`
   (título, conceito, estrutura, pendências) e a constante do teste do `fitModel`
 - [ ] Transições do hero/preloader e ritmo do motion
-- [ ] Trajetória da câmera entre hero e aero: a interpolação linear da posição passa a ~3 m da lateral
-  (close que corta o carro no meio do scroll). Avaliar interpolar em arco ou um ponto intermediário
+- [x] 🧪 Trajetória da câmera em arco (2026-09-18): `lerpOrbit` em `lib/math.js` gira a posição em volta
+  do eixo vertical do carro (ângulo pelo caminho mais curto, distância ao eixo e altura lineares); o
+  `lerpShot` usa ele para a posição e mantém alvo, fov e offset lineares. Os dados seguem cartesianos.
+  - Menor distância à lataria no meio de cada trecho, linear → arco: hero→aero 2,5 → 3,8 m;
+    aero→chassis 1,9 → 3,8 m; chassis→engine 3,7 → 3,8 m. `data/cameraShots.test.js` garante que
+    nenhum trecho chega mais perto do carro do que os seus pontos de parada.
+  - 👁 1440×900: no meio das três primeiras transições o carro aparece inteiro de perfil; os pontos
+    de parada não mudaram (o arco devolve as pontas exatas). Console limpo; p95 de 12,4 ms rolando
+    (antes 12,2). As medições tiveram um quadro de ~1 s por rodada, coincidindo com o painel do
+    navegador sendo ocultado; não investigado além disso.
+- [ ] Enquadramento do aero: a traseira do carro passa por baixo da coluna de texto à direita (já era
+  assim antes do arco; visto com `?shot=aero`). Rever o `offset` ou a posição do ponto
 - [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
 - [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
 - [ ] Lighthouse no build (metas em design.md)

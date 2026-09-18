@@ -26,7 +26,32 @@ export function clamp(value, min, max) {
 }
 
 /**
- * Blends two camera shots. `t` outside [0, 1] sticks to the ends.
+ * Blends two points along an arc around the vertical axis through the origin (the car's centre):
+ * the angle in the ground plane takes the short way round, while the distance to the axis and the
+ * height blend linearly. A straight line between shots on opposite sides of the car would cut
+ * through it. `t` outside [0, 1] sticks to the ends, which come back exactly (as copies).
+ * @param {{ x: number, y: number, z: number }} a
+ * @param {typeof a} b
+ * @param {number} t
+ */
+export function lerpOrbit(a, b, t) {
+  const k = clamp(t, 0, 1);
+  if (k === 0) return { ...a };
+  if (k === 1) return { ...b };
+
+  const from = Math.atan2(a.z, a.x);
+  let turn = Math.atan2(b.z, b.x) - from;
+  if (turn > Math.PI) turn -= 2 * Math.PI;
+  if (turn < -Math.PI) turn += 2 * Math.PI;
+
+  const angle = from + turn * k;
+  const radius = lerp(Math.hypot(a.x, a.z), Math.hypot(b.x, b.z), k);
+  return { x: Math.cos(angle) * radius, y: lerp(a.y, b.y, k), z: Math.sin(angle) * radius };
+}
+
+/**
+ * Blends two camera shots: the position swings around the car (`lerpOrbit`), the rest is linear.
+ * `t` outside [0, 1] sticks to the ends.
  * @param {{ position: { x: number, y: number, z: number }, target: { x: number, y: number, z: number }, fov: number }} a
  * @param {typeof a} b
  * @param {number} t
@@ -35,7 +60,7 @@ export function lerpShot(a, b, t) {
   const k = clamp(t, 0, 1);
   const blend = (from, to) => ({ x: lerp(from.x, to.x, k), y: lerp(from.y, to.y, k), z: lerp(from.z, to.z, k) });
   return {
-    position: blend(a.position, b.position),
+    position: lerpOrbit(a.position, b.position, k),
     target: blend(a.target, b.target),
     fov: lerp(a.fov, b.fov, k),
     offset: lerp(a.offset ?? 0, b.offset ?? 0, k),

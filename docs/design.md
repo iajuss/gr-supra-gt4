@@ -134,6 +134,11 @@ da verdade; o JS só anima até eles. Conferido em 2026-09-17.
   que a página passa por eles: `hero`, `aero`, `chassis`, `engine` (era `v12`), `transition`. Orbital (azimute,
   elevação, distância) foi considerado e descartado: cartesiano é mais fácil de ler e de ajustar com o
   carro real. Se as transições do passo 3 ficarem retas demais, revisitamos.
+- **Revisitado em 2026-09-18: a posição agora anda em arco.** A câmera dá meia volta no carro (hero
+  à frente, aero atrás, chassis à frente de novo) e a reta entre pontos de lados opostos passava a
+  1,9–2,5 m da lataria, cortando o carro no meio do scroll. Os dados continuam cartesianos; só a
+  interpolação da posição é cilíndrica em volta do eixo vertical do carro (`lerpOrbit`). Alvo, fov e
+  offset seguem lineares.
 - A interpolação é código puro e testado, não do GSAP: `lerpShot(a, b, t)` e `shotAt(shots, progress)`
   em `lib/math.js`. No passo 3 o ScrollTrigger só move um progresso 0–1; quem calcula a câmera é o
   `shotAt`.
@@ -327,5 +332,3 @@ Os 429k triângulos são o preço, pago só no desktop — o mobile é lite, com
   candidatos Royalty Free verificados são o Supra MK5 "Hyper Realistic" (sem asa grande) e o
   Koenigsegg Jesko (asa enorme).
 - **Deploy na Vercel** (decisão de 2026-09-18).
-- Trajetória da câmera entre hero e aero: passa a ~3 m da lateral e corta o carro no meio do scroll
-  (Bloco 5).

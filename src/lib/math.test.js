@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { clamp, lastIndexAtOrBefore, lerp, lerpShot, normalizeStops, offsetTarget, shotAt } from './math.js';
+import { clamp, lastIndexAtOrBefore, lerp, lerpOrbit, lerpShot, normalizeStops, offsetTarget, shotAt } from './math.js';
 
 describe('lastIndexAtOrBefore', () => {
   const cumulative = [0, 10, 20, 20, 35];
@@ -42,6 +42,48 @@ describe('clamp', () => {
   });
 });
 
+describe('lerpOrbit', () => {
+  // Azimuth is measured in the ground plane (x, z) around the car's vertical axis at the origin.
+  const at = (degrees, radius, y) => {
+    const a = (degrees * Math.PI) / 180;
+    return { x: Math.cos(a) * radius, y, z: Math.sin(a) * radius };
+  };
+  const expectPoint = (actual, expected) => {
+    expect(actual.x).toBeCloseTo(expected.x);
+    expect(actual.y).toBeCloseTo(expected.y);
+    expect(actual.z).toBeCloseTo(expected.z);
+  };
+
+  it('returns each end exactly, as copies', () => {
+    const a = at(30, 8, 1.6);
+    const b = at(150, 6, 2.2);
+    expect(lerpOrbit(a, b, 0)).toEqual(a);
+    expect(lerpOrbit(a, b, 1)).toEqual(b);
+    expect(lerpOrbit(a, b, 0)).not.toBe(a);
+  });
+
+  it('moves along an arc around the car instead of cutting across it', () => {
+    const half = lerpOrbit(at(0, 10, 2), at(180 - 1e-9, 10, 2), 0.5);
+    expectPoint(half, at(90, 10, 2));
+  });
+
+  it('blends the distance to the axis and the height linearly', () => {
+    expectPoint(lerpOrbit(at(0, 8, 1), at(90, 4, 3), 0.25), at(22.5, 7, 1.5));
+  });
+
+  it('takes the short way round across ±180°', () => {
+    expectPoint(lerpOrbit(at(170, 5, 0), at(-170, 5, 0), 0.5), at(180, 5, 0));
+    expectPoint(lerpOrbit(at(-170, 5, 0), at(170, 5, 0), 0.5), at(180, 5, 0));
+  });
+
+  it('clamps t to the ends', () => {
+    const a = at(10, 5, 1);
+    const b = at(80, 7, 2);
+    expect(lerpOrbit(a, b, -1)).toEqual(a);
+    expect(lerpOrbit(a, b, 4)).toEqual(b);
+  });
+});
+
 describe('lerpShot', () => {
   const a = { id: 'hero', position: { x: 0, y: 2, z: 10 }, target: { x: 0, y: 1, z: 0 }, fov: 40 };
   const b = { id: 'aero', position: { x: -10, y: 4, z: 0 }, target: { x: -2, y: 2, z: 4 }, fov: 30 };
@@ -51,9 +93,11 @@ describe('lerpShot', () => {
     expect(lerpShot(a, b, 1)).toEqual({ position: b.position, target: b.target, fov: b.fov, offset: 0 });
   });
 
-  it('interpolates position, target and fov halfway', () => {
+  it('swings the position around the car and blends target and fov straight', () => {
     const half = lerpShot(a, b, 0.5);
-    expect(half.position).toEqual({ x: -5, y: 3, z: 5 });
+    expect(half.position.x).toBeCloseTo(-10 * Math.SQRT1_2);
+    expect(half.position.y).toBeCloseTo(3);
+    expect(half.position.z).toBeCloseTo(10 * Math.SQRT1_2);
     expect(half.target).toEqual({ x: -1, y: 1.5, z: 2 });
     expect(half.fov).toBe(35);
   });
