@@ -1,13 +1,17 @@
 // FBX → GLB straight from the converter is 9450 meshes and 5.3M triangles.
 // Merge by material, weld, simplify and compress, so the browser gets something it can draw.
+// The main bodywork is left unsimplified: simplifying it, even gently, wrinkles the glossy paint.
 
 import { NodeIO } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { dedup, flatten, join, weld, simplify, prune, draco } from '@gltf-transform/functions';
+import { dedup, flatten, join, weld, simplifyPrimitive, prune, draco } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import draco3d from 'draco3dgltf';
 
-const [input, output, ratio = '0.05', error = '0.001'] = process.argv.slice(2);
+const [input, output, ratio = '0.05', error = '0.001', keep = 'WHEELARCH RUBBER - black'] = process.argv.slice(2);
+// Materials whose meshes are never simplified, comma-separated. Despite its name, this one is most of the
+// bodywork: meshopt ignores the normals, so collapsing it leaves shading dents all over the paint.
+const keepIntact = keep.split(',').map((name) => name.trim()).filter(Boolean);
 
 const io = new NodeIO()
   .registerExtensions(ALL_EXTENSIONS)
@@ -57,7 +61,14 @@ await step(doc, 'dedup', dedup());
 await step(doc, 'flatten', flatten());
 await step(doc, 'join', join({ keepNamed: false }));
 await step(doc, 'weld', weld({ tolerance: 0.0001 }));
-await step(doc, 'simplify', simplify({ simplifier: MeshoptSimplifier, ratio: Number(ratio), error: Number(error) }));
+await MeshoptSimplifier.ready;
+await step(doc, 'simplify', (document) => {
+  for (const mesh of document.getRoot().listMeshes())
+    for (const prim of mesh.listPrimitives()) {
+      if (keepIntact.includes(prim.getMaterial()?.getName())) continue;
+      simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: Number(ratio), error: Number(error) });
+    }
+});
 await step(doc, 'prune', prune());
 await step(doc, 'draco', draco());
 

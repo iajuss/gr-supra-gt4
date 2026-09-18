@@ -251,8 +251,12 @@ O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abai
 - Veio como **cena de render completa**: além do carro, um fundo de estúdio (`Cylinder`, escala 7425),
   uma luz de área (`Area`, escala 8006) e uma `Camera`. Sem removê-los, o `fitToLength` escalava o
   cenário e o carro sumia — o "bloco cinza gigante" das primeiras tentativas era a parede do estúdio.
-- 9.450 malhas (uma por peça) e 5.310.866 triângulos → 13 malhas e 1.472.254 triângulos, 4,0 MB com
+- 9.450 malhas (uma por peça) e 5.310.866 triângulos → 13 malhas e 3.551.233 triângulos, 7,9 MB com
   Draco. Pipeline documentado em [tools/model/README.md](../tools/model/README.md).
+- **A lataria principal não é simplificada.** Simplificada, mesmo de leve, a pintura brilhante fica
+  cheia de amassados (o meshopt ignora as normais). Pagamos o dobro de peso (4,0 → 7,9 MB) e perdemos
+  uns 15% de FPS (137 → 118 rolando) por uma superfície lisa, que é o que a estética de reflexos
+  exige. As demais peças continuam simplificadas.
 - O conversor FBX2glTF **já corrige Z-up → Y-up**; só faltava um quarto de volta em y para o nariz
   apontar para +x. Uma permutação de eixos por cima disso embaralhou tudo e custou algumas rodadas.
 - O GLB chega quase todo off-white: a pintura é aplicada por nome de material em `data/carStage.js`
