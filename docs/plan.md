@@ -1,40 +1,52 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-17, fim do passo 1 do Bloco 4)
+## ▶ Retomada (atualizado em 2026-09-17, fim da sessão da troca de carro)
 
-- **Onde paramos:** Blocos 1, 2, 2B e 3 concluídos e verificados no navegador; nada pendente para trás.
-  Os **passos 1 (palco com proxy), 2 (pontos de câmera) e 3 (scroll) do Bloco 4** estão feitos e
-  verificados. 159 testes verdes.
-- **Passo 4 (preloader) adiado** para junto do passo 5: hoje não há nada pesado para carregar e o
-  progresso seria inventado.
-- **Modelo escolhido: Sohan3D** (429k tris, zero textura, CC-BY) — comparação em [design.md](design.md).
-  O download é do usuário (exige login no Sketchfab).
-- **Passo 6 (modo lite) feito** com o proxy: imagens em `public/shots/`, capturadas por
-  `tools/capture.html`. Basta rodar a captura de novo quando o carro real entrar.
-- **Próximo passo: passo 5 (modelo de verdade)**, assim que o GLB do Sohan3D estiver baixado —
-  otimizar com `gltf-transform`, trocar o proxy, ajustar materiais, luzes e os cinco enquadramentos,
-  e então o passo 4 (preloader com progresso real). Sem o modelo, sobra o Bloco 5 (polimento).
-- **Passos 1 a 3, o que ficou:** `lib/fitModel.js` (🧪 `fitToLength`), `data/carStage.js`, `scene/stage.js`,
-  `scene/car.js` (proxy por trás da interface final) e o import dinâmico do palco no `main.js`.
-  O gradiente placeholder saiu do `stage.css`. Depois, `lib/math.js` (`clamp`, `lerpShot`, `shotAt`),
-  `data/cameraShots.js` e `?shot=<id>` para inspecionar um enquadramento por vez.
-  Por fim `lib/scroll.js` (Lenis + ScrollTrigger) e `scene/cameraRig.js` (scroll → `shotAt`), com o
-  palco desenhando só quando algo muda. Build: `stage` 3,7 KB, `scroll` 18,9 KB, `cameraRig` 1,0 KB,
-  `car` 1,0 KB e `carStage` 0,5 KB em chunks sob demanda, compartilhando `renderer`/`three.core` com a
-  volta 3D; principal 88,4 KB (35,2 gzip).
-- **Sandbox:** o protótipo saiu do projeto e vive em `Desktop/track3d-sandbox` (nunca esteve no git).
-  A entrada `sandbox/` continua no `.gitignore`, à toa.
-- **Dicas do ambiente:**
-  - Com o painel do navegador oculto, `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` e
-    transições CSS não rodam, e as capturas saem pretas — mesmo com `visibilityState` dizendo `visible`.
-    Sintoma típico: o canvas do palco fica em 300×150 (o padrão), esticado pelo CSS.
-  - Para forçar o modo full: emular 1440×900 e recarregar. O app limpa a emulação quando a largura do
-    painel muda, então vale reemular antes de cada recarga.
-  - O buffer de rede da aba mistura as cargas anteriores: para provar que o lite não baixa Three.js,
-    abrir uma aba nova, emular 375 px e ler a rede só dela.
-  - Uma volta dura 12 s; entre duas chamadas de ferramenta ela pode terminar sozinha. Para pegá-la
-    correndo, agrupar clique + espera + leitura num único lote (ou orquestrar tudo em um script só).
-  - Clicar por referência de elemento rola a página antes do clique; clicar pelo DOM não mexe no scroll.
+- **O carro mudou: Vulcan → Toyota Supra MK5.** Não foi decisão de design: o Sketchfab quebrou o
+  cadastro na migração para a KitBash e não existe Vulcan gratuito com malha utilizável em nenhum
+  acervo. Motivos e alternativas verificadas em [design.md](design.md).
+- **Estado do código:** commitado até `32b973f` (blocos 1, 2, 2B, 3 e passos 1, 2, 3 e 6 do Bloco 4).
+  **Tudo da troca de carro está NÃO COMMITADO**, incluindo `public/models/supra.glb` (4 MB) e
+  `public/draco/` (760 KB). 159 testes verdes.
+- **O que já funciona:** o Supra carrega no palco (13 malhas, 1.472.254 triângulos, 4,0 MB), na escala
+  e orientação certas, pintado na paleta carbono + lime por nome de material, com sombra de contato.
+  Console limpo.
+
+### Próximos passos, em ordem
+
+1. **Luz e enquadramentos** — a lataria preta ficou escura demais contra o fundo e o spot lime bate
+   forte na dianteira; equilibrar key e rim em `data/carStage.js`. Depois reenquadrar os cinco pontos
+   de `data/cameraShots.js` para a silhueta do Supra (hoje calibrados para o Vulcan, 4,72 m) usando
+   `?shot=<id>`, e medir o FPS com a malha nova.
+2. **Recapturar as imagens do lite** — `http://localhost:<porta>/tools/capture.html` regrava
+   `public/shots/{aero,chassis,v12}.webp` a partir da cena.
+3. **Reescrever o conteúdo para o Supra** — a página ainda diz "VULCAN / Seven litres. Twelve
+   cylinders." com um Supra na tela. Trocar título, kicker (`// TRACK ONLY · V12 7.0 · 24 UNITS`), os
+   três capítulos e a SPECS, com números conferidos em fontes públicas e a tabela do design.md
+   atualizada. O 2JZ do MK4 não serve: o MK5 (A90) é B58 3.0 turbo.
+4. **Passo 4 do Bloco 4 (preloader)** — agora faz sentido, porque há 4 MB de GLB para carregar:
+   `lib/loader.js` com progresso real e `components/preloader.js`. O `createCar` já aceita
+   `{ onProgress }`.
+5. **Bloco 5** — polimento, créditos, acessibilidade, Lighthouse, deploy.
+
+### Pendências que bloqueiam o deploy
+
+- **Licença do modelo indeterminada:** "Custom License (no AI)" sem termos publicados. O usuário optou
+  por seguir assim; resolver antes de publicar (perguntar ao autor `mariobelmonte141` no CGTrader ou
+  trocar por um Royalty Free).
+- O footer precisa dos créditos finais, que dependem dessa decisão.
+
+### Dicas do ambiente
+
+- Com o painel do navegador oculto, `requestAnimationFrame`, `IntersectionObserver`, `ResizeObserver` e
+  o lazy loading de imagens não rodam, e as capturas saem pretas. **Aba em segundo plano mente igual**:
+  uma medição de downloads chegou a dar "0" falso por isso.
+- Para forçar o modo full: emular 1440×900 e recarregar. O app limpa a emulação quando a largura do
+  painel muda, então vale reemular antes de cada recarga.
+- A porta 5173 costuma estar ocupada por um dev server de outra sessão, que serve módulos em cache.
+  Use a entrada `vite-dev-auto` do `.claude/launch.json`, que sobe em 5174.
+- Capturar a cena antes do `ResizeObserver` enquadra contra o canvas padrão de 300×150.
+- Uma volta dura 12 s; para pegá-la correndo, agrupar clique + espera + leitura num único lote.
 
 ### Mapa do Bloco 2B
 
@@ -176,12 +188,15 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
 4. **Preloader** — adiado para junto do passo 5 (2026-09-17): sem o GLB, o progresso seria inventado
    - [ ] `lib/loader.js` (GLB/HDR com progresso) + `components/preloader.js` com progresso real
    - [ ] Falha no carregamento cai para o modo lite, como o `main.js` já faz com o 3D da volta
-5. **Modelo de verdade**
-   - [x] Comparar os candidatos (malha, texturas, licença) → **Sohan3D** escolhido em 2026-09-17
-   - [ ] Baixar o modelo (usuário; o Sketchfab exige login)
-   - [ ] Otimizar com `gltf-transform` (meta ≤ ~5 MB)
-   - [ ] Trocar o proxy pelo modelo e ajustar materiais
+5. **Modelo de verdade** — carro trocado para o Supra MK5 (ver [design.md](design.md))
+   - [x] Comparar candidatos em quatro acervos; Sketchfab inviável, Vulcan gratuito inexistente
+   - [x] Baixar o modelo (usuário) — Supra MK5 "personalized", FBX de 217 MB
+   - [x] Converter e otimizar: 9450 malhas / 5,3M tris → 13 malhas / 1,47M tris, 4,0 MB
+     (pipeline em [tools/model/README.md](../tools/model/README.md))
+   - [x] Trocar o proxy pelo modelo: `scene/car.js` carrega o GLB com Draco, orienta, escala pelo
+     `fitToLength`, pinta por nome de material e devolve a sombra de contato
    - [ ] 👁 Ajuste fino dos pontos de câmera e da iluminação, com o carro real
+   - [ ] Recapturar as imagens do modo lite
 6. **Modo lite** — feito com o proxy em 2026-09-17; as imagens são recapturadas no passo 5
    - [x] Ferramenta de captura: `tools/capture.html` + `tools/capture.js` montam o palco num canvas de
      1440×900 e postam cada shot; o plugin de dev `tools/shotServer.js` grava em `public/shots/`.

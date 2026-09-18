@@ -227,6 +227,45 @@ src/
 - **Navegador:** desktop e viewport de 375px, console sem erros, modo reduced-motion.
 - **Lighthouse** no build de produção.
 
+## Troca de carro: Vulcan → Toyota Supra MK5 (2026-09-17)
+
+O Aston Martin Vulcan foi abandonado por **falta de modelo 3D utilizável**, não por decisão de design:
+
+- O Sketchfab, única fonte com Vulcan em licença aberta, **quebrou o cadastro** durante a migração de
+  dono (a KitBash comprou Sketchfab e ArtStation da Epic em 10/08/2026). O login com a Epic abre uma
+  página vazia — os assets do portal de contas dão `ERR_CONNECTION_TIMED_OUT` — e o login social
+  conclui no provedor e falha no retorno. Reproduzido em navegador limpo, com Gmail e Outlook.
+- Fora do Sketchfab **não existe Vulcan gratuito**: zero no TurboSquid, zero no Free3D, zero no Poly
+  Pizza e em repositórios abertos. No CGTrader só pagos (US$ 2 a 100).
+- O único Vulcan gratuito encontrado (modelo de impressão 3D, CGTrader) tem a **dianteira degenerada**:
+  capô e para-lamas com superfícies fragmentadas, faróis inexistentes. Inviável para uma estética que
+  desenha arestas.
+
+**Escolhido: Toyota Supra MK5 "personalized"** (CGTrader, gratuito), com body kit widebody e asa GT —
+o carro que o usuário queria e que atende ao requisito de aerofólio grande.
+Licença: **"Custom License (no AI)", com termos não divulgados** nem na página nem no pacote baixado.
+O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abaixo.
+
+### O que o modelo exigiu
+
+- Veio como **cena de render completa**: além do carro, um fundo de estúdio (`Cylinder`, escala 7425),
+  uma luz de área (`Area`, escala 8006) e uma `Camera`. Sem removê-los, o `fitToLength` escalava o
+  cenário e o carro sumia — o "bloco cinza gigante" das primeiras tentativas era a parede do estúdio.
+- 9.450 malhas (uma por peça) e 5.310.866 triângulos → 13 malhas e 1.472.254 triângulos, 4,0 MB com
+  Draco. Pipeline documentado em [tools/model/README.md](../tools/model/README.md).
+- O conversor FBX2glTF **já corrige Z-up → Y-up**; só faltava um quarto de volta em y para o nariz
+  apontar para +x. Uma permutação de eixos por cima disso embaralhou tudo e custou algumas rodadas.
+- O GLB chega quase todo off-white: a pintura é aplicada por nome de material em `data/carStage.js`
+  (`paint` e `materialRoles`), mantendo a paleta carbono + lime da página.
+
+### Paleta: mantida
+
+O lime `#C6FF00` foi escolhido por ser o verde da Aston Martin Racing, vínculo que caiu com a troca de
+carro. Foi mantido mesmo assim (decisão do usuário, 2026-09-17): a página inteira já é coerente nele e
+ele funciona como cor de telemetria, não só de marca. Trocá-lo custaria quatro valores
+(`--color-accent` em `tokens.css`, mais três constantes em `data/carStage.js` e `data/lapScene.js`),
+e o caro seria reconferir as seções no navegador.
+
 ## Modelo 3D — comparação dos candidatos (2026-09-17)
 
 Levantado pela API pública do Sketchfab. O peso do `.zip` só aparece logado, então ele não entrou na
@@ -249,6 +288,10 @@ Os 429k triângulos são o preço, pago só no desktop — o mobile é lite, com
 
 ## Pendências
 
-- Usuário baixa o GLB do Sohan3D no Sketchfab (exige login).
+- **Licença do modelo indeterminada** (Custom License sem termos divulgados). Precisa ser esclarecida
+  antes do deploy, ou o modelo trocado por um Royalty Free — candidatos verificados: Supra MK5 "Hyper
+  Realistic" (sem asa grande) e Koenigsegg Jesko (asa enorme).
+- **Conteúdo ainda fala do Vulcan** com um Supra na tela: título, kicker, os três capítulos e a SPECS
+  inteira precisam ser reescritos com números do Supra MK5 conferidos em fontes públicas.
 - Preloader (passo 4) adiado para junto do modelo: hoje não há nada pesado para carregar, e o progresso
   seria inventado. Quando o GLB entrar, o `lib/loader.js` reporta bytes de verdade.
