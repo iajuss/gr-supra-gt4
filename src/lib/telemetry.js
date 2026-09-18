@@ -41,7 +41,7 @@ export function limitAcceleration(limits, ds, { accelerationMax, braking, topSpe
 
 /**
  * @param {ReturnType<import('./track.js').measurePath>} path path in metres
- * @param {typeof import('../data/vulcanDynamics.js').default} params
+ * @param {typeof import('../data/supraDynamics.js').default} params
  */
 export function createLapModel(path, params) {
   const n = Math.max(3, Math.round(path.total / params.sampleStep));

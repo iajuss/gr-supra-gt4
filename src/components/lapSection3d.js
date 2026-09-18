@@ -2,7 +2,7 @@
 // Loaded on demand (dynamic import) so Three.js never reaches lite devices.
 
 import circuit from '../data/circuit.js';
-import dynamics from '../data/vulcanDynamics.js';
+import dynamics from '../data/supraDynamics.js';
 import lapScene from '../data/lapScene.js';
 import { buildLap } from '../lib/lap.js';
 import { createCentreline } from '../lib/centreline.js';

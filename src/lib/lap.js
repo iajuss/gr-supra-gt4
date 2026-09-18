@@ -6,7 +6,7 @@ import { createLapModel } from './telemetry.js';
 
 /**
  * @param {typeof import('../data/circuit.js').default} circuit
- * @param {typeof import('../data/vulcanDynamics.js').default} dynamics
+ * @param {typeof import('../data/supraDynamics.js').default} dynamics
  */
 export function buildLap(circuit, dynamics) {
   const metres = rotateStart(projectCoordinates(circuit.coordinates), circuit.startProgress);

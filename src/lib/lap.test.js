@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import circuit from '../data/circuit.js';
-import dynamics from '../data/vulcanDynamics.js';
+import dynamics from '../data/supraDynamics.js';
 import { formatLapTime } from './format.js';
 import { buildLap } from './lap.js';
 
@@ -12,8 +12,8 @@ describe('buildLap', () => {
     expect(model.total).toBeCloseTo(5878, 0);
   });
 
-  it('builds the simulated lap shown on the page (1:45.364), with the circuit sectors', () => {
-    expect(formatLapTime(model.lapTime)).toBe('1:45.364');
+  it('builds the simulated lap shown on the page (2:10.222), with the circuit sectors', () => {
+    expect(formatLapTime(model.lapTime)).toBe('2:10.222');
     expect(model.params.sectorSplits).toEqual(circuit.sectorSplits);
   });
 });

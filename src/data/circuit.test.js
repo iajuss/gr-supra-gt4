@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import circuit from './circuit.js';
-import dynamics from './vulcanDynamics.js';
+import dynamics from './supraDynamics.js';
 import { projectCoordinates, measurePath, rotateStart } from '../lib/track.js';
 import { createLapModel } from '../lib/telemetry.js';
 
@@ -35,9 +35,9 @@ describe('circuit data (Silverstone)', () => {
     expect(fromClub).toBeLessThan(400);
   });
 
-  it('crosses the line at straight-line speed', () => {
+  it('crosses the line at straight-line speed, not in a corner', () => {
     const model = buildModel();
-    expect(model.speeds[0] * 3.6).toBeGreaterThan(200);
+    expect(model.speeds[0]).toBeGreaterThan(0.8 * Math.max(...model.speeds));
   });
 
   it('keeps three ordered sectors', () => {

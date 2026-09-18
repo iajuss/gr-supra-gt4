@@ -1,7 +1,7 @@
 // THE LAP, lite mode: the simulated lap played on the 2D canvas + HUD when the section comes into view.
 
 import circuit from '../data/circuit.js';
-import dynamics from '../data/vulcanDynamics.js';
+import dynamics from '../data/supraDynamics.js';
 import { buildLap } from '../lib/lap.js';
 import { sampleAtTime } from '../lib/telemetry.js';
 import { createLapTrack } from './lapTrack.js';

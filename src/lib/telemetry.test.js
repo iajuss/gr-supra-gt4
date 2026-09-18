@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import silverstone from '../data/silverstone.json';
-import dynamics from '../data/vulcanDynamics.js';
+import dynamics from '../data/supraDynamics.js';
 import { projectCoordinates, measurePath } from './track.js';
 import {
   cornerSpeedLimit,
@@ -91,10 +91,13 @@ describe('createLapModel', () => {
     const model = createLapModel(path, dynamics);
     const speedsKmh = model.speeds.map((v) => v * KMH);
 
-    expect(model.lapTime).toBeGreaterThan(100); // 1:40
-    expect(model.lapTime).toBeLessThan(110); // 1:50
-    expect(Math.min(...speedsKmh)).toBeGreaterThan(80);
-    expect(Math.max(...speedsKmh)).toBeGreaterThan(270);
+    // A GR Supra GT4 laps Silverstone GP around 2:09–2:11 (GT4 best in British GT 2024 qualifying:
+    // 2:08.984) and is limited to about 250 km/h.
+    expect(model.lapTime).toBeGreaterThan(127); // 2:07
+    expect(model.lapTime).toBeLessThan(133); // 2:13
+    expect(Math.min(...speedsKmh)).toBeGreaterThan(60);
+    expect(Math.max(...speedsKmh)).toBeGreaterThan(220);
+    expect(Math.max(...speedsKmh)).toBeLessThan(252);
     expect(Math.max(...speedsKmh)).toBeLessThanOrEqual(dynamics.topSpeed * KMH + 1e-6);
   });
 });
