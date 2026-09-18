@@ -1,24 +1,85 @@
-// The car on the stage. Until Bloco 4 step 5 it is a proxy box in the Vulcan's dimensions;
-// the real GLB will replace the body behind this same interface.
+// The car: a GLB loaded at runtime, placed at real-world size and dressed in the page's own palette.
+// The model arrives Z-up, in its own units and painted blue; everything here is about fixing that.
 
-import {
-  BoxGeometry,
-  EdgesGeometry,
-  Group,
-  LineBasicMaterial,
-  LineSegments,
-  Mesh,
-  MeshStandardMaterial,
-} from 'three';
+import { Box3, CanvasTexture, Color, DoubleSide, Group, LoadingManager, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 import { fitToLength } from '../lib/fitModel.js';
 
-// The proxy pretends to be authored in centimetres and off the ground, so the fit does real work.
-const PROXY_UNITS_PER_METRE = 100;
-const PROXY_LIFT = 60;
+const MODEL_URL = '/models/supra.glb';
+const DRACO_PATH = '/draco/';
+
+/** Which paint a material name gets; anything unlisted is bodywork. */
+function roleOf(name, roles) {
+  for (const [role, names] of Object.entries(roles)) {
+    if (names.includes(name)) return role;
+  }
+  return 'body';
+}
+
+/** Repaints the loaded model in the page's palette: it arrives almost entirely off-white. */
+function paintCar(model, { paint, materialRoles }) {
+  const seen = new Set();
+
+  model.traverse((child) => {
+    if (!child.isMesh) return;
+    child.castShadow = false;
+    child.receiveShadow = false;
+
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    for (const material of materials) {
+      if (!material || seen.has(material.uuid)) continue;
+      seen.add(material.uuid);
+
+      const recipe = paint[roleOf(material.name, materialRoles)];
+      material.color = new Color(recipe.color);
+      if (recipe.metalness !== undefined) material.metalness = recipe.metalness;
+      if (recipe.roughness !== undefined) material.roughness = recipe.roughness;
+      if (recipe.emissive !== undefined) {
+        material.emissive = new Color(recipe.emissive);
+        material.emissiveIntensity = recipe.emissiveIntensity ?? 1;
+      }
+      if (recipe.opacity !== undefined && recipe.opacity < 1) {
+        material.transparent = true;
+        material.opacity = recipe.opacity;
+      }
+      material.needsUpdate = true;
+    }
+  });
+}
+
+/** A soft dark ellipse under the car: without it the car reads as floating over the studio floor. */
+function buildContactShadow({ length, width }) {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+
+  const context = canvas.getContext('2d');
+  const gradient = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
+  gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.45)');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, size, size);
+
+  const geometry = new PlaneGeometry(length * 1.25, width * 1.5);
+  geometry.rotateX(-Math.PI / 2);
+
+  const material = new MeshBasicMaterial({
+    map: new CanvasTexture(canvas),
+    transparent: true,
+    depthWrite: false,
+    side: DoubleSide,
+  });
+
+  return new Mesh(geometry, material);
+}
 
 /**
  * @param {typeof import('../data/carStage.js').default} config
+ * @param {{ onProgress?: (ratio: number) => void }} [hooks]
  * @returns {Promise<{
  *   object3D: import('three').Group,
  *   dimensions: { length: number, width: number, height: number },
@@ -26,31 +87,40 @@ const PROXY_LIFT = 60;
  *   dispose: () => void,
  * }>}
  */
-export async function createCar(config) {
-  const { car, colors } = config;
+export async function createCar(config, { onProgress } = {}) {
+  const { car } = config;
 
-  const geometry = new BoxGeometry(
-    car.length * PROXY_UNITS_PER_METRE,
-    car.height * PROXY_UNITS_PER_METRE,
-    car.width * PROXY_UNITS_PER_METRE,
-  );
-  geometry.translate(0, car.height * PROXY_UNITS_PER_METRE / 2 + PROXY_LIFT, 0);
+  const manager = new LoadingManager();
+  if (onProgress) {
+    manager.onProgress = (_url, loaded, total) => onProgress(total > 0 ? loaded / total : 0);
+  }
 
-  const material = new MeshStandardMaterial({ color: colors.proxy, roughness: 0.4, metalness: 0.2 });
-  const body = new Mesh(geometry, material);
+  const draco = new DRACOLoader(manager).setDecoderPath(DRACO_PATH);
+  const loader = new GLTFLoader(manager).setDRACOLoader(draco);
 
-  const edgesGeometry = new EdgesGeometry(geometry);
-  const edgesMaterial = new LineBasicMaterial({ color: colors.proxyEdge });
-  const edges = new LineSegments(edgesGeometry, edgesMaterial);
+  const gltf = await loader.loadAsync(MODEL_URL);
+  const model = gltf.scene;
+
+  // FBX2glTF already rotates the Blender scene from Z-up to Y-up, so the car arrives upright with
+  // its length along z. One quarter turn puts the nose along +x, which is what the camera shots assume.
+  model.rotation.y = Math.PI / 2;
+  paintCar(model, config);
 
   const object3D = new Group();
-  object3D.add(body, edges);
+  object3D.add(model);
 
-  // Same path the GLB will take: measure what the author gave us, then place it at real size.
-  geometry.computeBoundingBox();
-  const { scale, offset, size } = fitToLength(geometry.boundingBox, car.length);
+  const bounds = new Box3().setFromObject(object3D);
+  const { scale, offset, size } = fitToLength({ min: bounds.min, max: bounds.max }, car.length);
   object3D.scale.setScalar(scale);
   object3D.position.set(offset.x, offset.y, offset.z);
+
+  // The shadow is added after the fit and sized in metres, so the pool never drags the measurement.
+  const shadow = buildContactShadow(size);
+  shadow.position.y = 0.01 / scale;
+  shadow.scale.setScalar(1 / scale);
+  object3D.add(shadow);
+
+  draco.dispose();
 
   return {
     object3D,
@@ -60,10 +130,13 @@ export async function createCar(config) {
       object3D.visible = visible;
     },
     dispose() {
-      geometry.dispose();
-      material.dispose();
-      edgesGeometry.dispose();
-      edgesMaterial.dispose();
+      shadow.material.map.dispose();
+      object3D.traverse((child) => {
+        if (!child.isMesh) return;
+        child.geometry.dispose();
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        for (const material of materials) material.dispose();
+      });
     },
   };
 }
