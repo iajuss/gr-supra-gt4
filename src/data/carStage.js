@@ -36,7 +36,8 @@ export default {
     environmentIntensity: 0.6, // procedural room environment (no HDR download)
   },
 
-  fog: { density: 0.022 },
+  // The car comes out of the fog once it is on stage: `veiled` hides it, the reveal eases back to `density`.
+  fog: { density: 0.022, veiled: 0.45, revealMs: 1400 },
 
   // The framing itself lives in data/cameraShots.js; fov here is only the value the camera starts with.
   camera: {

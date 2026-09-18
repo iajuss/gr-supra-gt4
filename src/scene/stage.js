@@ -17,7 +17,8 @@ import {
 } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-import { offsetTarget } from '../lib/math.js';
+import { easeOutCubic } from '../lib/counter.js';
+import { lerp, offsetTarget } from '../lib/math.js';
 import { createRenderer } from './renderer.js';
 
 /**
@@ -128,10 +129,38 @@ export function createStage(canvas, config) {
     camera.updateProjectionMatrix();
   }
 
+  let revealFrame = 0;
+
+  /** Thickens the fog until the car disappears into it (before it is ready to be seen). */
+  function veil() {
+    cancelAnimationFrame(revealFrame);
+    scene.fog.density = fog.veiled;
+    requestRender();
+  }
+
+  /**
+   * Thins the fog back to normal, so the car emerges from the dark.
+   * @param {{ instant?: boolean }} [options] instant for reduced motion
+   */
+  function reveal({ instant = false } = {}) {
+    cancelAnimationFrame(revealFrame);
+    const from = scene.fog.density;
+    const startedAt = performance.now();
+    const step = (now) => {
+      const progress = instant ? 1 : (now - startedAt) / fog.revealMs;
+      scene.fog.density = lerp(from, fog.density, easeOutCubic(progress));
+      requestRender();
+      if (progress < 1) revealFrame = requestAnimationFrame(step);
+    };
+    revealFrame = requestAnimationFrame(step);
+  }
+
   return {
     scene,
     camera,
     setShot,
+    veil,
+    reveal,
     /** @param {import('three').Object3D} object */
     add(object) {
       scene.add(object);
@@ -141,6 +170,7 @@ export function createStage(canvas, config) {
     setActive,
     dispose() {
       cancelFrame();
+      cancelAnimationFrame(revealFrame);
       document.removeEventListener('visibilitychange', onVisibility);
       disposeRenderer();
       environment.dispose();

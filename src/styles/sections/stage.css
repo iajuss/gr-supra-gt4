@@ -32,6 +32,18 @@
   display: none;
 }
 
+/* Fades out over the stage, where the car is coming out of the fog (components/preloader.js). */
+.preloader--leaving {
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out);
+}
+
+/* The page stays put while the preloader covers it. */
+.is-loading,
+.is-loading body {
+  overflow: hidden;
+}
+
 .preloader__value {
   color: var(--color-accent);
 }

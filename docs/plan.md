@@ -19,9 +19,7 @@
 3. ~~**Reescrever o conteúdo para o Supra**~~ — feito em 2026-09-17: a página apresenta o
    **GR Supra GT4**, com números conferidos (tabela em design.md), volta recalibrada (2:10.222),
    barra de potência por tonelada e o capítulo 03 renomeado para `engine`.
-4. **Passo 4 do Bloco 4 (preloader)** — agora faz sentido, porque há 7,9 MB de GLB para carregar:
-   `lib/loader.js` com progresso real e `components/preloader.js`. O `createCar` já aceita
-   `{ onProgress }`.
+4. ~~**Passo 4 do Bloco 4 (preloader)**~~ — feito em 2026-09-17.
 5. **Bloco 5** — polimento, créditos, acessibilidade, Lighthouse, deploy.
 
 ### Pendências que bloqueiam o deploy
@@ -181,8 +179,18 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
      - Lite em 375 px: nada de `lenis` nem de `ScrollTrigger` é baixado.
      - Build: `scroll` 18,9 KB (5,6 gzip) e `cameraRig` 1,0 KB em chunks sob demanda; principal 88,4 KB.
 4. **Preloader** — adiado para junto do passo 5 (2026-09-17): sem o GLB, o progresso seria inventado
-   - [ ] `lib/loader.js` (GLB/HDR com progresso) + `components/preloader.js` com progresso real
-   - [ ] Falha no carregamento cai para o modo lite, como o `main.js` já faz com o 3D da volta
+   - [x] 🧪 `lib/progress.js`: `byteRatio` (evento de download → 0–1, `null` sem tamanho) e
+     `percentShown` (nunca volta, segura em 99 até o carro estar no palco). Sem `lib/loader.js`: o
+     `createCar` passou a informar os bytes do próprio GLB (o `LoadingManager` contava arquivos e
+     pulava de terço em terço)
+   - [x] `components/preloader.js`: bloqueia a página (`.is-loading`) enquanto o carro carrega, mas abre
+     sozinho aos 8 s; sai com fade de 0,6 s. O palco ganhou `veil()`/`reveal()`: o carro sai da névoa
+     (densidade 0,45 → 0,022 em 1,4 s; instantâneo com reduced-motion)
+   - [x] Falha no carregamento: `preloader.fail()` e o `main.js` cai para o lite, como antes
+   - [x] 👁 Conferido em 1440×900: 34 eventos de progresso crescentes, com tamanho conhecido; o
+     preloader cobre a página e some ao fim; sem `finish`, abre aos 8,0 s e some aos 8,8 s; console
+     limpo. Não conferidos: o fade da névoa quadro a quadro (as capturas do painel não pegam o
+     intervalo) e o caminho de falha real (só o `catch` já existente)
 5. **Modelo de verdade** — carro trocado para o Supra MK5 (ver [design.md](design.md))
    - [x] Comparar candidatos em quatro acervos; Sketchfab inviável, Vulcan gratuito inexistente
    - [x] Baixar o modelo (usuário) — Supra MK5 "personalized", FBX de 217 MB
@@ -235,6 +243,8 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
 
 ## Bloco 5 — Polimento e entrega
 - [ ] Transições do hero/preloader e ritmo do motion
+- [ ] Trajetória da câmera entre hero e aero: a interpolação linear da posição passa a ~3 m da lateral
+  (close que corta o carro no meio do scroll). Avaliar interpolar em arco ou um ponto intermediário
 - [ ] Footer com créditos (modelo CC-BY, traçado, fontes)
 - [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
 - [ ] Lighthouse no build (metas em design.md)

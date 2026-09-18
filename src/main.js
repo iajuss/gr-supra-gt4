@@ -5,6 +5,7 @@ import './styles/main.css';
 import { decideMode, detectEnvironment } from './lib/capabilities.js';
 import { initChapterShots } from './components/chapterShots.js';
 import { initLapSection } from './components/lapSection.js';
+import { createPreloader } from './components/preloader.js';
 import { initSpecCounters } from './components/specCounters.js';
 import { initTextReveal } from './components/textReveal.js';
 
@@ -30,6 +31,7 @@ console.info(`[supra] mode=${mode}`, reasons);
 
 /** The fixed car stage, full mode only: Three.js is never fetched in lite. */
 async function initStage(root) {
+  const preloader = createPreloader(document.querySelector('.preloader'), motion);
   try {
     const [{ createStage }, { createCar }, { default: carStage }, { default: cameraShots }] = await Promise.all([
       import('./scene/stage.js'),
@@ -38,15 +40,22 @@ async function initStage(root) {
       import('./data/cameraShots.js'),
     ]);
     const view = createStage(root.querySelector('.stage__canvas'), carStage);
-    const car = await createCar(carStage);
+    view.veil();
+    const car = await createCar(carStage, { onProgress: preloader.setProgress });
     view.add(car.object3D);
+
+    // The car is on stage: the preloader lifts (if the timeout has not already) and the car emerges.
+    const showCar = () => {
+      preloader.finish();
+      view.reveal({ instant: motion.reducedMotion });
+    };
 
     // ?shot=<id> holds one chapter's framing, to check it on its own, instead of following the scroll.
     const requested = new URLSearchParams(window.location.search).get('shot');
     const frozen = cameraShots.find((shot) => shot.id === requested);
     if (frozen) {
       view.setShot(frozen);
-      view.render();
+      showCar();
       return;
     }
 
@@ -64,10 +73,11 @@ async function initStage(root) {
       },
       onActive: view.setActive,
     });
+    showCar();
   } catch (error) {
-    // Bloco 4 step 4 turns this into the full lite fallback; for now the stage steps aside and the
-    // chapters show their stills, so the page is never left without the car.
+    // The stage steps aside and the chapters show their stills, so the page is never left without the car.
     console.warn('[supra] 3D stage unavailable', error);
+    preloader.fail();
     root.hidden = true;
     document.documentElement.dataset.mode = 'lite';
     initChapterShots(document);
