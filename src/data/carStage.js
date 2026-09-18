@@ -49,7 +49,9 @@ export default {
   // How the loaded model is repainted, by material name. The GLB arrives almost entirely off-white,
   // so every part is dressed in the page's own palette instead.
   paint: {
-    body: { color: 0x101210, metalness: 0.85, roughness: 0.28 }, // carbon, with a controlled sheen
+    // Carbon, with a controlled sheen. Double-sided: some panels are single surfaces facing inwards
+    // (the rear wing's endplates vanished when seen from outside, 2026-09-17).
+    body: { color: 0x101210, metalness: 0.85, roughness: 0.28, doubleSided: true },
     glass: { color: 0x050705, metalness: 1, roughness: 0.06, opacity: 0.62 },
     rim: { color: 0x141614, metalness: 0.9, roughness: 0.35 },
     tyre: { color: 0x090a09, metalness: 0, roughness: 0.95 },

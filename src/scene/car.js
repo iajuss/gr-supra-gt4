@@ -41,6 +41,7 @@ function paintCar(model, { paint, materialRoles }) {
         material.emissive = new Color(recipe.emissive);
         material.emissiveIntensity = recipe.emissiveIntensity ?? 1;
       }
+      if (recipe.doubleSided) material.side = DoubleSide;
       if (recipe.opacity !== undefined && recipe.opacity < 1) {
         material.transparent = true;
         material.opacity = recipe.opacity;

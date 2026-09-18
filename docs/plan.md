@@ -186,6 +186,10 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
    - [x] `components/preloader.js`: bloqueia a página (`.is-loading`) enquanto o carro carrega, mas abre
      sozinho aos 8 s; sai com fade de 0,6 s. O palco ganhou `veil()`/`reveal()`: o carro sai da névoa
      (densidade 0,45 → 0,022 em 1,4 s; instantâneo com reduced-motion)
+   - [x] Placas laterais da asa invisíveis por fora (2026-09-17, visto pelo usuário): são superfícies de
+     face única com a normal para dentro (25 mil triângulos virados para o carro, área quase nula para
+     fora), no material da lataria. `paint.body.doubleSided` liga `DoubleSide` nos materiais pintados
+     como lataria. Render contínuo: 78 → 74 FPS, p95 15,4 → 16,9 ms. Lite recapturado
    - [x] Falha no carregamento: `preloader.fail()` e o `main.js` cai para o lite, como antes
    - [x] 👁 Conferido em 1440×900: 34 eventos de progresso crescentes, com tamanho conhecido; o
      preloader cobre a página e some ao fim; sem `finish`, abre aos 8,0 s e some aos 8,8 s; console
