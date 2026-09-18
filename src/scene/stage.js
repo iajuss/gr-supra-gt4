@@ -17,6 +17,7 @@ import {
 } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
+import { offsetTarget } from '../lib/math.js';
 import { createRenderer } from './renderer.js';
 
 /**
@@ -32,10 +33,12 @@ export function createStage(canvas, config) {
 
   const camera = new PerspectiveCamera(cameraConfig.fov, 1, cameraConfig.near, cameraConfig.far);
   const target = new Vector3();
+  let currentShot = null; // re-applied on resize: the sideways offset depends on the aspect ratio
 
   const { renderer, dispose: disposeRenderer } = createRenderer(canvas, (width, height) => {
     camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    if (currentShot) setShot(currentShot);
+    else camera.updateProjectionMatrix();
     requestRender();
   });
 
@@ -113,11 +116,13 @@ export function createStage(canvas, config) {
 
   /**
    * Points the camera at a shot (or anything lerpShot returns).
-   * @param {{ position: { x: number, y: number, z: number }, target: { x: number, y: number, z: number }, fov: number }} shot
+   * @param {Parameters<typeof offsetTarget>[0]} shot
    */
   function setShot(shot) {
+    currentShot = shot;
+    const look = offsetTarget(shot, camera.aspect);
     camera.position.set(shot.position.x, shot.position.y, shot.position.z);
-    target.set(shot.target.x, shot.target.y, shot.target.z);
+    target.set(look.x, look.y, look.z);
     camera.lookAt(target);
     camera.fov = shot.fov;
     camera.updateProjectionMatrix();

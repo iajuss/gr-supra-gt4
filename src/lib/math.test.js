@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { clamp, lastIndexAtOrBefore, lerp, lerpShot, normalizeStops, shotAt } from './math.js';
+import { clamp, lastIndexAtOrBefore, lerp, lerpShot, normalizeStops, offsetTarget, shotAt } from './math.js';
 
 describe('lastIndexAtOrBefore', () => {
   const cumulative = [0, 10, 20, 20, 35];
@@ -47,8 +47,8 @@ describe('lerpShot', () => {
   const b = { id: 'aero', position: { x: -10, y: 4, z: 0 }, target: { x: -2, y: 2, z: 4 }, fov: 30 };
 
   it('returns each end exactly', () => {
-    expect(lerpShot(a, b, 0)).toEqual({ position: a.position, target: a.target, fov: a.fov });
-    expect(lerpShot(a, b, 1)).toEqual({ position: b.position, target: b.target, fov: b.fov });
+    expect(lerpShot(a, b, 0)).toEqual({ position: a.position, target: a.target, fov: a.fov, offset: 0 });
+    expect(lerpShot(a, b, 1)).toEqual({ position: b.position, target: b.target, fov: b.fov, offset: 0 });
   });
 
   it('interpolates position, target and fov halfway', () => {
@@ -56,6 +56,11 @@ describe('lerpShot', () => {
     expect(half.position).toEqual({ x: -5, y: 3, z: 5 });
     expect(half.target).toEqual({ x: -1, y: 1.5, z: 2 });
     expect(half.fov).toBe(35);
+  });
+
+  it('interpolates the sideways offset, treating a missing one as 0', () => {
+    expect(lerpShot({ ...a, offset: 0.2 }, b, 0.5).offset).toBeCloseTo(0.1);
+    expect(lerpShot({ ...a, offset: 0.2 }, { ...b, offset: -0.2 }, 0.25).offset).toBeCloseTo(0.1);
   });
 
   it('clamps t to the ends instead of overshooting', () => {
@@ -67,6 +72,47 @@ describe('lerpShot', () => {
     const result = lerpShot(a, b, 0);
     result.position.x = 999;
     expect(a.position.x).toBe(0);
+  });
+});
+
+describe('offsetTarget', () => {
+  // Camera on +z looking at the origin: its right is +x. fov 90 and distance 10 make the frame
+  // half as wide as tall times the aspect, 10 m at aspect 1.
+  const shot = { position: { x: 0, y: 0, z: 10 }, target: { x: 0, y: 0, z: 0 }, fov: 90 };
+
+  it('returns the target unchanged (as a copy) without an offset', () => {
+    const result = offsetTarget(shot, 1);
+    expect(result).toEqual({ x: 0, y: 0, z: 0 });
+    expect(result).not.toBe(shot.target);
+    expect(offsetTarget({ ...shot, offset: 0 }, 1)).toEqual({ x: 0, y: 0, z: 0 });
+  });
+
+  it('moves the target left so the subject lands right of centre', () => {
+    const result = offsetTarget({ ...shot, offset: 0.25 }, 1);
+    expect(result.x).toBeCloseTo(-5);
+    expect(result.y).toBe(0);
+    expect(result.z).toBeCloseTo(0);
+  });
+
+  it('moves it right for a negative offset', () => {
+    expect(offsetTarget({ ...shot, offset: -0.25 }, 1).x).toBeCloseTo(5);
+  });
+
+  it('scales with the aspect ratio: a wider frame needs a longer move', () => {
+    expect(offsetTarget({ ...shot, offset: 0.25 }, 2).x).toBeCloseTo(-10);
+  });
+
+  it('follows the camera heading, not the world axes', () => {
+    // Camera on +x looking back at the origin: its right is -z.
+    const side = { position: { x: 10, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 90, offset: 0.25 };
+    const result = offsetTarget(side, 1);
+    expect(result.x).toBeCloseTo(0);
+    expect(result.z).toBeCloseTo(5);
+  });
+
+  it('leaves the target alone when the camera looks straight down', () => {
+    const top = { position: { x: 0, y: 10, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 90, offset: 0.25 };
+    expect(offsetTarget(top, 1)).toEqual({ x: 0, y: 0, z: 0 });
   });
 });
 

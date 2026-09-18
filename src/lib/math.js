@@ -38,7 +38,27 @@ export function lerpShot(a, b, t) {
     position: blend(a.position, b.position),
     target: blend(a.target, b.target),
     fov: lerp(a.fov, b.fov, k),
+    offset: lerp(a.offset ?? 0, b.offset ?? 0, k),
   };
+}
+
+/**
+ * Where the camera should look so the shot's subject (its `target`) sits `offset` of the frame
+ * width right (+) or left (-) of centre, leaving room for the page's text on the other side.
+ * The move is horizontal, along the camera's own right, so the height of the framing is kept.
+ * @param {{ position: { x: number, y: number, z: number }, target: { x: number, y: number, z: number }, fov: number, offset?: number }} shot
+ * @param {number} aspect the camera's width / height
+ */
+export function offsetTarget({ position, target, fov, offset = 0 }, aspect) {
+  const forward = { x: target.x - position.x, z: target.z - position.z };
+  const flat = Math.hypot(forward.x, forward.z);
+  if (!offset || flat === 0) return { ...target };
+
+  const distance = Math.hypot(forward.x, target.y - position.y, forward.z);
+  const halfWidth = distance * Math.tan((fov * Math.PI) / 360) * aspect;
+  const move = -offset * 2 * halfWidth; // looking left pushes the subject right
+  const right = { x: -forward.z / flat, z: forward.x / flat };
+  return { x: target.x + right.x * move, y: target.y, z: target.z + right.z * move };
 }
 
 /**

@@ -41,7 +41,8 @@ const context = target.getContext('2d');
 
 for (const id of SHOTS) {
   const shot = cameraShots.find((entry) => entry.id === id);
-  view.setShot(shot);
+  // Centred: the offset makes room for the page's text, and the lite figure stands on its own.
+  view.setShot({ ...shot, offset: 0 });
   view.render();
 
   // Read the drawing buffer in the same tick as the render, before the compositor clears it.
