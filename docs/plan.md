@@ -1,21 +1,37 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-18, início do Bloco 5)
+## ▶ Retomada (atualizado em 2026-09-18, fim da sessão)
 
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos e commitados até `91c065d`. 177 testes verdes, build ok.
-- **O que já funciona:** o Supra carrega no palco (13 malhas, 3.551.233 triângulos, 7,9 MB), pintado na
-  paleta carbono + lime por nome de material, com sombra de contato; conteúdo do GT4 com números
-  conferidos; volta simulada de 2:10.222; preloader com progresso real em bytes. Console limpo.
+- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 186 testes verdes, build ok.
+  Commits da sessão: limpeza do Vulcan, câmera em arco, enquadramento do aero e achados menores do
+  Lighthouse (favicon, robots.txt, reveal sem `aria-label`).
+- **Lighthouse** (2026-09-18, `vite preview` + Edge headless via `npx lighthouse@12`):
+  - Mobile (lite): **100 / 100 / 100 / 100** (Perf / A11y / Boas práticas / SEO). TBT 20 ms.
+  - Desktop (full): **Perf 66–70** (meta 85), A11y / BP / SEO 100. Só o TBT reprova: 1,0–1,7 s, com
+    tarefas longas de ~800–970 ms no carregamento. LCP 0,4 s (título), CLS 0,002.
+  - Mesma faixa com WebGL por software (`--use-angle=swiftshader --enable-unsafe-swiftshader`) e com a
+    GPU forçada (`--use-angle=d3d11 --ignore-gpu-blocklist --enable-gpu`): o trabalho é real.
 
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
-1. ~~**Limpeza dos restos do Vulcan**~~ — feita em 2026-09-18.
-2. ~~**Trajetória da câmera hero → aero**~~ — feita em 2026-09-18 (arco em volta do carro).
-3. Motion do hero/preloader, acessibilidade, Lighthouse.
+1. **TBT do desktop — medir e depois corrigir** (método escolhido pelo usuário):
+   - Instrumentar temporariamente com `performance.mark` (`createStage`, `createCar`, parse/upload do
+     GLB, `initLapSection3d`) para saber quanto pesa cada parte.
+   - Hipóteses, a atacar na ordem do ganho: (a) o GLB só começa a baixar ~1,4 s depois do início,
+     porque `createCar` espera o `createStage` síncrono (PMREM + compilação de shaders) — buscar em
+     paralelo; (b) o 3D da volta é montado no carregamento, longe da tela — adiar até perto da seção;
+     (c) compilar shaders sem bloquear (`compileAsync`).
+   - Revalidar com Lighthouse desktop (3 rodadas, a nota oscila).
+2. **Checagem manual de acessibilidade:** ordem do foco pelo teclado, foco visível, contraste do
+   texto sobre o palco 3D, alt das imagens do lite, `aria-live` do HUD e o preloader.
+3. Motion do hero/preloader.
 4. Créditos do footer e deploy na Vercel.
+- Não visto no navegador nesta sessão (painel oculto a maior parte do tempo): a animação do reveal
+  depois da troca do `aria-label` pelo texto oculto (a estrutura do DOM foi conferida) e as
+  transições hero→aero e aero→chassis com o novo ponto do aero (garantidas pelo teste).
 
 ### Decisões que destravam o deploy (2026-09-18)
 
@@ -34,6 +50,12 @@
   Use a entrada `vite-dev-auto` do `.claude/launch.json`, que sobe em 5174.
 - Capturar a cena antes do `ResizeObserver` enquadra contra o canvas padrão de 300×150.
 - Uma volta dura 12 s; para pegá-la correndo, agrupar clique + espera + leitura num único lote.
+- O painel pode ficar oculto no meio de uma medição (quadro de ~1 s no FPS, capturas com timeout ou
+  pretas). Conferir `document.visibilityState` antes de medir; `tabs_select` às vezes o traz de volta.
+- A primeira captura depois de recarregar costuma sair preta; a segunda sai certa.
+- Em 1440×900 a captura do painel mostra só uma parte da viewport: para ver o quadro inteiro, emular
+  1152×720 (mesmo aspecto 16:10).
+- Lighthouse no Windows termina com `EPERM` ao apagar a pasta temporária; os relatórios saem mesmo assim.
 
 ### Mapa do Bloco 2B
 
@@ -261,5 +283,9 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
     timeout); o `cameraShots.test.js` segue garantindo que não passam perto do carro.
 - [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
 - [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
-- [ ] Lighthouse no build (metas em design.md)
+- [ ] Lighthouse no build (metas em design.md) — medido em 2026-09-18: mobile 100 em tudo; desktop
+  Perf 66–70 pelo TBT (ver Retomada). Corrigidos os achados menores: `public/favicon.svg` (a barra lime
+  do header), `public/robots.txt` e o reveal, que punha `aria-label` num `<p>` (proibido pelo ARIA) e
+  agora usa uma cópia do texto em `.visually-hidden`, com as linhas em `aria-hidden`
+  - Entrada `vite-preview` (porta 4173) no `.claude/launch.json` para medir o build
 - [ ] Deploy na Vercel (decidido em 2026-09-18)

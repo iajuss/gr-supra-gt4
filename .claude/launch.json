@@ -23,6 +23,19 @@
       ],
       "port": 5174,
       "autoPort": true
+    },
+    {
+      "name": "vite-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "--",
+        "--port",
+        "4173",
+        "--strictPort"
+      ],
+      "port": 4173
     }
   ]
 }

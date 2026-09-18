@@ -57,7 +57,6 @@ function hiddenState(element) {
 function splitLines(element) {
   const text = element.textContent.trim().replace(/\s+/g, ' ');
   element.dataset.revealText = text;
-  element.setAttribute('aria-label', text);
 
   const words = text.split(' ').map((word) => {
     const span = document.createElement('span');
@@ -76,11 +75,14 @@ function splitLines(element) {
     line.append(inner);
     return line;
   });
-  // Spaces between the block-level lines keep textContent readable (copy, search).
-  element.replaceChildren(...lines.flatMap((line, i) => (i ? [' ', line] : [line])));
+  // Screen readers get the sentence once, from a hidden copy (aria-label is not allowed on every
+  // element, e.g. a <p>). Spaces between the block-level lines keep them readable for search.
+  const spoken = document.createElement('span');
+  spoken.className = 'visually-hidden';
+  spoken.textContent = text;
+  element.replaceChildren(spoken, ...lines.flatMap((line) => [' ', line]));
 }
 
 function unsplit(element) {
   element.textContent = element.dataset.revealText;
-  element.removeAttribute('aria-label');
 }
