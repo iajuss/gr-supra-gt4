@@ -16,23 +16,24 @@ export default {
     metalness: 0.85,
   },
 
-  // A soft studio: bright key, cool fill and a lime rim that draws the AMR edge.
+  // A soft studio: bright key, cool fill and a lime spot that paints a sheen over the roof.
   // The rim is a spot, not a directional: as a directional its specular lobe turned the whole
-  // metallic floor into a green pool (seen in the browser, 2026-09-17).
+  // metallic floor into a green pool (seen in the browser, 2026-09-17). It comes from above and
+  // behind and is aimed at the middle of the car, so what reaches the floor lands underneath it.
   lights: {
-    key: { color: 0xfff6e8, intensity: 1.6, position: { x: 6, y: 8, z: 6 } },
+    key: { color: 0xfff6e8, intensity: 2.2, position: { x: 6, y: 8, z: 6 } },
     fill: { color: 0x9fb0a0, intensity: 0.4, position: { x: -8, y: 4, z: -2 } },
     rim: {
       color: 0xc6ff00,
-      intensity: 85,
-      position: { x: -5.2, y: 3.6, z: -5.6 },
-      target: { x: 0.4, y: 1, z: 0.2 }, // aimed over the roof, so it grazes instead of flooding the tail
-      angle: 0.4,
-      penumbra: 0.85,
-      distance: 18,
+      intensity: 110,
+      position: { x: -3.2, y: 5.6, z: -3.4 },
+      target: { x: 0, y: 0.6, z: 0 },
+      angle: 0.38,
+      penumbra: 0.9,
+      distance: 11,
       decay: 2,
     },
-    environmentIntensity: 0.35, // procedural room environment (no HDR download)
+    environmentIntensity: 0.6, // procedural room environment (no HDR download)
   },
 
   fog: { density: 0.022 },
@@ -60,7 +61,9 @@ export default {
   materialRoles: {
     glass: ['GLASS - windshield', 'Mirror'],
     rim: ['Llanta', 'Cromado1'],
-    tyre: ['neumático', 'WHEELARCH RUBBER - black'],
+    // 'WHEELARCH RUBBER - black' is not listed on purpose: despite the name it is most of the
+    // bodywork (852k of the 1.47M triangles), and painting it as tyre made the car flat and matte.
+    tyre: ['neumático'],
     accent: ['Material.004', 'azul'],
     headlight: ['Luz blanca1'],
   },

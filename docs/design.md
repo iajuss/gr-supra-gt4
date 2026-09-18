@@ -258,6 +258,19 @@ O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abai
 - O GLB chega quase todo off-white: a pintura é aplicada por nome de material em `data/carStage.js`
   (`paint` e `materialRoles`), mantendo a paleta carbono + lime da página.
 
+### Luz e enquadramentos com o carro real (2026-09-17)
+
+- **Carbono brilhante, não fosco.** O carro parecia escuro demais porque o material que o modelo chama
+  de `WHEELARCH RUBBER - black` é a maior parte da carroceria, e ele era pintado como pneu. Pintado
+  como `body` (metalness 0.85, roughness 0.28), com key 2.2 e ambiente 0.6, a lataria ganha reflexos
+  e o body kit se lê contra o fundo.
+- **O lime é um brilho no carro, não uma poça no piso.** O spot vem de cima e de trás, mirando o
+  centro do carro, de modo que a luz que passa cai embaixo dele.
+- **O carro fica no lado livre do texto.** Cada ponto de câmera tem um `offset` (fração da largura do
+  quadro) que desloca o olhar para o lado oposto ao texto da seção: hero +0.22, aero −0.17,
+  chassis +0.25, v12 −0.15. É calculado pelo aspecto real da tela, e as imagens do lite saem
+  centralizadas (lá a figura aparece sozinha).
+
 ### Paleta: mantida
 
 O lime `#C6FF00` foi escolhido por ser o verde da Aston Martin Racing, vínculo que caiu com a troca de

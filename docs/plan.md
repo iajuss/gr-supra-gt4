@@ -5,19 +5,16 @@
 - **O carro mudou: Vulcan → Toyota Supra MK5.** Não foi decisão de design: o Sketchfab quebrou o
   cadastro na migração para a KitBash e não existe Vulcan gratuito com malha utilizável em nenhum
   acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** commitado até `32b973f` (blocos 1, 2, 2B, 3 e passos 1, 2, 3 e 6 do Bloco 4).
-  **Tudo da troca de carro está NÃO COMMITADO**, incluindo `public/models/supra.glb` (4 MB) e
-  `public/draco/` (760 KB). 159 testes verdes.
+- **Estado do código:** a troca de carro foi commitada em `1c364f5` + `93ae51e`. O ajuste de luz e
+  enquadramentos (passo 5 do Bloco 4) veio depois; confira com `git log` se já foi commitado.
+  166 testes verdes.
 - **O que já funciona:** o Supra carrega no palco (13 malhas, 1.472.254 triângulos, 4,0 MB), na escala
   e orientação certas, pintado na paleta carbono + lime por nome de material, com sombra de contato.
   Console limpo.
 
 ### Próximos passos, em ordem
 
-1. **Luz e enquadramentos** — a lataria preta ficou escura demais contra o fundo e o spot lime bate
-   forte na dianteira; equilibrar key e rim em `data/carStage.js`. Depois reenquadrar os cinco pontos
-   de `data/cameraShots.js` para a silhueta do Supra (hoje calibrados para o Vulcan, 4,72 m) usando
-   `?shot=<id>`, e medir o FPS com a malha nova.
+1. ~~**Luz e enquadramentos**~~ — feito em 2026-09-17 (ver passo 5 do Bloco 4).
 2. **Recapturar as imagens do lite** — `http://localhost:<porta>/tools/capture.html` regrava
    `public/shots/{aero,chassis,v12}.webp` a partir da cena.
 3. **Reescrever o conteúdo para o Supra** — a página ainda diz "VULCAN / Seven litres. Twelve
@@ -28,6 +25,12 @@
    `lib/loader.js` com progresso real e `components/preloader.js`. O `createCar` já aceita
    `{ onProgress }`.
 5. **Bloco 5** — polimento, créditos, acessibilidade, Lighthouse, deploy.
+
+### Pendências visuais
+
+- **Ondulações na lataria** (capô e dianteira), visíveis desde que a carroceria ficou brilhante.
+  Comparar o GLB otimizado com o FBX original para saber se vêm do modelo ou do pipeline
+  (normais recalculadas / simplificação em `tools/model`).
 
 ### Pendências que bloqueiam o deploy
 
@@ -195,7 +198,21 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
      (pipeline em [tools/model/README.md](../tools/model/README.md))
    - [x] Trocar o proxy pelo modelo: `scene/car.js` carrega o GLB com Draco, orienta, escala pelo
      `fitToLength`, pinta por nome de material e devolve a sombra de contato
-   - [ ] 👁 Ajuste fino dos pontos de câmera e da iluminação, com o carro real
+   - [x] 👁 Ajuste fino dos pontos de câmera e da iluminação, com o carro real (2026-09-17)
+     - A lataria estava escura por **mapeamento**, não por luz: o material `WHEELARCH RUBBER - black`
+       é a maior parte da carroceria (852 mil dos 1,47M triângulos) e era pintado como pneu fosco.
+       Saiu da lista `tyre`; key 1.6 → 2.2, ambiente 0.35 → 0.6.
+     - O spot lime atravessava o teto e fazia uma poça no piso à frente do carro. Agora vem de cima e
+       de trás mirando o centro do carro (intensidade 110, alcance 11): brilho lime no teto e no capô,
+       e o que chega ao piso cai embaixo do carro.
+     - 🧪 `offsetTarget` em `lib/math.js` (+ `offset` no `lerpShot`): cada ponto guarda o alvo no carro
+       e um `offset` em fração da largura do quadro; o palco desloca o olhar pelo aspecto real da
+       câmera e reaplica no resize. O carro fica no lado livre do texto de cada seção; a captura do
+       lite usa `offset: 0` (carro centralizado).
+     - Conferido em 1440×900 nos cinco pontos e em 1280×1000 sem recarregar; console limpo.
+       FPS rolando a zona 3D: média 137, p95 12,2 ms, pior quadro 18,3 ms.
+     - Prévias feitas com um helper temporário que renderizava folhas de contato pelo `/__shot/`
+       (gravar em `public/` recarrega a página do dev server: renderizar tudo antes de postar).
    - [ ] Recapturar as imagens do modo lite
 6. **Modo lite** — feito com o proxy em 2026-09-17; as imagens são recapturadas no passo 5
    - [x] Ferramenta de captura: `tools/capture.html` + `tools/capture.js` montam o palco num canvas de
