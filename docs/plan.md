@@ -16,11 +16,10 @@
 
 1. ~~**Luz e enquadramentos**~~ — feito em 2026-09-17 (ver passo 5 do Bloco 4).
 2. ~~**Recapturar as imagens do lite**~~ — feito em 2026-09-17.
-3. **Reescrever o conteúdo para o Supra** — a página ainda diz "VULCAN / Seven litres. Twelve
-   cylinders." com um Supra na tela. Trocar título, kicker (`// TRACK ONLY · V12 7.0 · 24 UNITS`), os
-   três capítulos e a SPECS, com números conferidos em fontes públicas e a tabela do design.md
-   atualizada. O 2JZ do MK4 não serve: o MK5 (A90) é B58 3.0 turbo.
-4. **Passo 4 do Bloco 4 (preloader)** — agora faz sentido, porque há 4 MB de GLB para carregar:
+3. ~~**Reescrever o conteúdo para o Supra**~~ — feito em 2026-09-17: a página apresenta o
+   **GR Supra GT4**, com números conferidos (tabela em design.md), volta recalibrada (2:10.222),
+   barra de potência por tonelada e o capítulo 03 renomeado para `engine`.
+4. **Passo 4 do Bloco 4 (preloader)** — agora faz sentido, porque há 7,9 MB de GLB para carregar:
    `lib/loader.js` com progresso real e `components/preloader.js`. O `createCar` já aceita
    `{ onProgress }`.
 5. **Bloco 5** — polimento, créditos, acessibilidade, Lighthouse, deploy.

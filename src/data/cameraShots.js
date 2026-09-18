@@ -30,8 +30,8 @@ export default [
     offset: 0.25,
   },
   {
-    // 03 — Side profile at hip height, the whole car in view. Text on the right.
-    id: 'v12',
+    // 03 — Engine: side profile at hip height, the whole car in view. Text on the right.
+    id: 'engine',
     position: { x: 0.9, y: 0.9, z: 7.6 },
     target: { x: 0, y: 0.55, z: 0 },
     fov: 38,

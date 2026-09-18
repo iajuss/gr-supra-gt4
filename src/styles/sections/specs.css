@@ -35,19 +35,20 @@
   font-size: 0.6875rem;
 }
 
-/* Downforce vs weight bar. Filled by default (no JS); specCounters.js empties it, then fills it. */
-.downforce {
+/* Power-to-weight bar: the GT4 fills the track, a tick marks the road car at --mark.
+   Filled by default (no JS); specCounters.js empties it, then fills it. */
+.ratio {
   display: grid;
   gap: var(--space-4);
   margin-top: var(--space-8);
 }
 
-.downforce__caption {
+.ratio__caption {
   display: grid;
   gap: var(--space-3);
 }
 
-.downforce__statement {
+.ratio__statement {
   max-width: 24ch;
   font-family: var(--font-display);
   font-weight: var(--weight-heading);
@@ -58,39 +59,55 @@
   font-variant-numeric: tabular-nums;
 }
 
-.downforce__track {
+.ratio__track {
   position: relative;
   height: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
   background: var(--color-surface);
   border: 1px solid var(--color-line);
 }
 
-.downforce__fill {
+.ratio__fill {
   position: absolute;
   inset: 0;
   background: var(--color-accent);
-  transform: scaleX(var(--fill));
   transform-origin: left center;
 }
 
-[data-bar-state='empty'] .downforce__fill {
+[data-bar-state='empty'] .ratio__fill {
   transform: scaleX(0);
 }
 
-[data-bar-state='filled'] .downforce__fill {
+[data-bar-state='filled'] .ratio__fill {
   transition: transform 1.4s var(--ease-out);
 }
 
-.downforce__scale {
+.ratio__mark {
+  position: absolute;
+  top: -0.375rem;
+  bottom: -0.375rem;
+  left: calc(var(--mark) * 100%);
+  width: 2px;
+  background: var(--color-text);
+}
+
+.ratio__scale {
+  position: relative;
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
   font-size: 0.6875rem;
 }
 
-.downforce__scale span:nth-child(2) {
-  margin-left: auto;
+.ratio__scale span:last-child {
   color: var(--color-accent);
+}
+
+/* The road-car label ends just left of its tick, clear of the GT4 label on narrow screens. */
+.ratio__scale-mark {
+  position: absolute;
+  left: calc(var(--mark) * 100%);
+  transform: translateX(calc(-100% - var(--space-2)));
+  white-space: nowrap;
 }
 
 @media (min-width: 64rem) {

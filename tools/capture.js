@@ -6,7 +6,7 @@ import cameraShots from '../src/data/cameraShots.js';
 import { createStage } from '../src/scene/stage.js';
 import { createCar } from '../src/scene/car.js';
 
-const SHOTS = ['aero', 'chassis', 'v12']; // the chapters with a figure in index.html
+const SHOTS = ['aero', 'chassis', 'engine']; // the chapters with a figure in index.html
 const SIZE = { width: 1440, height: 900 }; // 16:10, the aspect ratio of .chapter__shot
 const QUALITY = 0.82;
 

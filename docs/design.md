@@ -74,23 +74,37 @@ Status: aprovado em 2026-09-17.
 
 ## Fontes dos números
 
-Os valores exibidos ficam no `index.html` (atributo `data-count` na SPECS), que é a única fonte da verdade.
-O JS só anima até esses valores. Conferido em 2026-09-17.
+A página apresenta o **Toyota GR Supra GT4** (decisão de 2026-09-17): o Supra de corrida da Toyota Gazoo
+Racing, só pista, com asa e splitter — casa com o modelo widebody e com a estrutura Aero / Chassis /
+Engine. Os valores exibidos ficam no `index.html` (atributo `data-count` na SPECS), que é a única fonte
+da verdade; o JS só anima até eles. Conferido em 2026-09-17.
 
 | Dado | Valor na página | Fontes |
 |---|---|---|
-| Motor | 7.0 L V12 aspirado (6.949 cc) | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan), [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12) |
-| Potência | 820 hp @ 7,750 rpm (= 831 PS; oficial: "800-plus bhp") | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan), [Aston Martin Pressroom](https://media.astonmartin.com/vulcan/), [Motor1](https://www.motor1.com/news/53403/aston-martin-vulcan-unveiled-with-800-bhp/) |
-| Torque | 780 Nm @ 6,500 rpm | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
-| Peso | ~1,350 kg (algumas fontes: 1,360) | [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
-| Downforce | 1,300+ kg perto de 200 mph → 96% do peso | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12) (Wikipedia: 1,362 kg na velocidade máxima) |
-| Câmbio | Xtrac sequencial de 6 marchas (transaxle) | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12), [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
-| Freios | Brembo carbono-cerâmica, 380/360 mm | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12), [Wikipedia](https://en.wikipedia.org/wiki/Aston_Martin_Vulcan) |
-| Chassi | Monocoque e carroceria de fibra de carbono (Multimatic) | [evo](https://www.evo.co.uk/features/15364/aston-martin-vulcan-preview-hear-its-800bhp-v12), [Stratstone](https://www.stratstone.com/blog/spotlight/aston-martin-vulcan/) |
-| Escape | Saída lateral (Inconel e titânio) | [TopSpeed](https://www.topspeed.com/cars/aston-martin/2016-aston-martin-vulcan-ar167713.html) |
-| Produção | 24 unidades (2015–2016) | todas as fontes acima |
+| Motor | 3.0 L, 6 em linha (2.998 cm³), um turbo twin-scroll | [TGR GT4](https://toyotagazooracing.com/gt4/cars/); B58 pela [Wikipedia](https://en.wikipedia.org/wiki/Toyota_GR_Supra) |
+| Potência | 430 hp (320 kW), "varia com o BoP" | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Torque | 650 Nm | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Peso | 1,350 kg, "varia com o BoP" (EVO2: 1.360) | [TGR GT4](https://toyotagazooracing.com/gt4/cars/), [gr-supra-gt4.com](https://gr-supra-gt4.com/) |
+| Câmbio | automático de 7 marchas com borboletas, tração traseira, autoblocante | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Freios | Brembo, 6 pistões / disco de aço 390 mm (diant.), 4 pistões / 355 mm (tras.) | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Suspensão | MacPherson (diant.), multilink (tras.), amortecedores KW | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Tanque | célula de segurança de 120 L | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Asa e splitter | compósito de fibra natural | [TGR GT4](https://toyotagazooracing.com/gt4/cars/) |
+| Produção | 100 unidades (marco de 2023), lançado em março de 2020 → "100+ units, since 2020" | [Toyota Europe](https://newsroom.toyota.eu/new-limited-series-gr-supra-celebrating-gt4-customer-motorsport-milestone/) |
+| Potência por tonelada | 318 hp/t (320 kW / 1.350 kg) contra 224 hp/t do GR Supra 3.0 de rua (250 kW / 1.495 kg sem motorista) → 42% a mais | conta em `lib/units.js`; carro de rua pela [ficha técnica da Toyota UK](https://media.toyota.co.uk/wp-content/uploads/sites/5/2021/03/1614278028210223MGRSupraTechSpec.pdf) (fev/2021) |
 
-Fora da página: velocidade máxima e 0–100, porque as fontes divergem.
+- A comparação usa kW para fugir da ambiguidade hp/PS: a Toyota escreve "320kW (430hp)" para o GT4 e
+  "335/340/250" (bhp / DIN hp / kW) para o carro de rua.
+- Fora da página: velocidade máxima (250 km/h só em fonte secundária, [UltimateSpecs](https://www.ultimatespecs.com/car-specs/Toyota/137259/Toyota-GR-Supra-30-GT4.html))
+  e 0–100 km/h.
+- **Volta simulada:** `data/supraDynamics.js` calibrado para 2:10.222 em Silverstone GP, 78–226 km/h,
+  7 marchas, mantendo as 18 zonas de frenagem. Referência: melhor tempo GT4 no qualifying da British GT
+  2024 em Silverstone, 2:08.984 (McLaren Artura GT4). Os valores de aderência e aceleração são
+  calibrados pelo resultado, não medidos — o modelo suaviza a curvatura e usa aceleração constante,
+  como já acontecia com o Vulcan (2,8 G para 1:45).
+- A barra do downforce (96% do peso, dado do Vulcan) virou a barra de **potência por tonelada**: o
+  GT4 enche a trilha e um traço marca o carro de rua em 224 / 318 = 0,70.
+- O capítulo 03 mudou de `v12` para `engine` (âncora, `data-shot`, ponto de câmera, imagem do lite).
 
 ## Palco do carro (Bloco 4, passo 1 — 2026-09-17)
 

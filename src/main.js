@@ -26,7 +26,7 @@ if (lap) initLap(lap);
 const specs = document.querySelector('.specs');
 if (specs) initSpecCounters(specs, motion);
 
-console.info(`[vulcan] mode=${mode}`, reasons);
+console.info(`[supra] mode=${mode}`, reasons);
 
 /** The fixed car stage, full mode only: Three.js is never fetched in lite. */
 async function initStage(root) {
@@ -67,7 +67,7 @@ async function initStage(root) {
   } catch (error) {
     // Bloco 4 step 4 turns this into the full lite fallback; for now the stage steps aside and the
     // chapters show their stills, so the page is never left without the car.
-    console.warn('[vulcan] 3D stage unavailable', error);
+    console.warn('[supra] 3D stage unavailable', error);
     root.hidden = true;
     document.documentElement.dataset.mode = 'lite';
     initChapterShots(document);
@@ -82,7 +82,7 @@ async function initLap(root) {
       initLapSection3d(root);
       return;
     } catch (error) {
-      console.warn('[vulcan] 3D lap unavailable, using 2D', error);
+      console.warn('[supra] 3D lap unavailable, using 2D', error);
       delete root.dataset.lapView;
     }
   }

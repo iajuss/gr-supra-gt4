@@ -1,4 +1,4 @@
-// SPECS: numbers count up from zero and the downforce bar fills, once, when the section comes into view.
+// SPECS: numbers count up from zero and the power-to-weight bar fills, once, when the section comes into view.
 // Final values are written in the HTML ([data-count]); without JS or with reduced motion they stay as is.
 
 import { countAt, decimalsOf, formatCount } from '../lib/counter.js';

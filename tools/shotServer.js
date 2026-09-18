@@ -8,7 +8,7 @@ const SAFE_ID = /^[a-z0-9-]+$/;
 
 export default function shotServer({ outDir = 'public/shots' } = {}) {
   return {
-    name: 'vulcan-shot-server',
+    name: 'supra-shot-server',
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use('/__shot/', async (req, res, next) => {
