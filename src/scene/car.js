@@ -79,7 +79,7 @@ function buildContactShadow({ length, width }) {
 
 /**
  * @param {typeof import('../data/carStage.js').default} config
- * @param {{ onProgress?: (ratio: number) => void }} [hooks]
+ * @param {{ onProgress?: (ratio: number) => void, url?: string }} [options] url swaps the model (tools compare variants with it)
  * @returns {Promise<{
  *   object3D: import('three').Group,
  *   dimensions: { length: number, width: number, height: number },
@@ -87,7 +87,7 @@ function buildContactShadow({ length, width }) {
  *   dispose: () => void,
  * }>}
  */
-export async function createCar(config, { onProgress } = {}) {
+export async function createCar(config, { onProgress, url = MODEL_URL } = {}) {
   const { car } = config;
 
   const manager = new LoadingManager();
@@ -98,7 +98,7 @@ export async function createCar(config, { onProgress } = {}) {
   const draco = new DRACOLoader(manager).setDecoderPath(DRACO_PATH);
   const loader = new GLTFLoader(manager).setDRACOLoader(draco);
 
-  const gltf = await loader.loadAsync(MODEL_URL);
+  const gltf = await loader.loadAsync(url);
   const model = gltf.scene;
 
   // FBX2glTF already rotates the Blender scene from Z-up to Y-up, so the car arrives upright with

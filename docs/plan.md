@@ -8,7 +8,7 @@
 - **Estado do código:** a troca de carro foi commitada em `1c364f5` + `93ae51e`. O ajuste de luz e
   enquadramentos (passo 5 do Bloco 4) veio depois; confira com `git log` se já foi commitado.
   166 testes verdes.
-- **O que já funciona:** o Supra carrega no palco (13 malhas, 1.472.254 triângulos, 4,0 MB), na escala
+- **O que já funciona:** o Supra carrega no palco (13 malhas, 3.551.233 triângulos, 7,9 MB), na escala
   e orientação certas, pintado na paleta carbono + lime por nome de material, com sombra de contato.
   Console limpo.
 
@@ -24,12 +24,6 @@
    `lib/loader.js` com progresso real e `components/preloader.js`. O `createCar` já aceita
    `{ onProgress }`.
 5. **Bloco 5** — polimento, créditos, acessibilidade, Lighthouse, deploy.
-
-### Pendências visuais
-
-- **Ondulações na lataria** (capô e dianteira), visíveis desde que a carroceria ficou brilhante.
-  Comparar o GLB otimizado com o FBX original para saber se vêm do modelo ou do pipeline
-  (normais recalculadas / simplificação em `tools/model`).
 
 ### Pendências que bloqueiam o deploy
 
@@ -213,7 +207,21 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
      - Prévias feitas com um helper temporário que renderizava folhas de contato pelo `/__shot/`
        (gravar em `public/` recarrega a página do dev server: renderizar tudo antes de postar).
    - [x] Recapturar as imagens do modo lite (2026-09-17): 22 / 24 / 16 KB, carro centralizado
-     (`offset: 0`); conferidas em 375 px, carregadas, sem overflow, console limpo
+     (`offset: 0`); conferidas em 375 px, carregadas, sem overflow, console limpo. Recapturadas de
+     novo depois da correção da lataria (20 / 22 / 16 KB)
+   - [x] Ondulações na lataria corrigidas (2026-09-17): vinham do `simplify`, não do modelo nem do Draco
+     - Diagnóstico por variantes, na mesma câmera: sem simplify → lisa; sem Draco → amassada; lataria
+       simplificada com erro 0.0002 ou 0.0005 → amassada; normais recalculadas depois → facetada
+       (a malha não compartilha vértices entre faces). O meshopt ignora as normais ao colapsar.
+     - Solução: `optimize.mjs` deixa intacto o material `WHEELARCH RUBBER - black` (a lataria
+       principal) e simplifica o resto. 3.551.233 tris, 7,9 MB (antes 1.472.254 e 4,0 MB). O script
+       versionado reproduz o `supra.glb` byte a byte.
+     - Preservar também as outras peças pintadas como body (V1: 4,7M tris, 10,3 MB) não mudava nada
+       visível e custava mais FPS: render contínuo 61 × 70 (V5, escolhida) × 90 (antes).
+     - Página real, rolando a zona 3D em 1440×900: média 118 FPS (antes 137), p95 18,2 ms (antes
+       12,2), pior quadro 36,3 ms. GLB de 7,9 MB em 273 ms no servidor local; o preloader (passo 4)
+       passa a importar mais.
+     - `createCar` ganhou a opção `url` (padrão `supra.glb`), usada para comparar variantes.
 6. **Modo lite** — feito com o proxy em 2026-09-17; as imagens são recapturadas no passo 5
    - [x] Ferramenta de captura: `tools/capture.html` + `tools/capture.js` montam o palco num canvas de
      1440×900 e postam cada shot; o plugin de dev `tools/shotServer.js` grava em `public/shots/`.
