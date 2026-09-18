@@ -16,10 +16,10 @@ export default [
   {
     // 01 — Aero: rear wing and diffuser, from behind and above. Text on the right.
     id: 'aero',
-    position: { x: -5.4, y: 2.2, z: 3.0 },
+    position: { x: -5.8, y: 2.35, z: 3.3 },
     target: { x: -1.6, y: 0.8, z: 0 },
     fov: 34,
-    offset: -0.17,
+    offset: -0.22,
   },
   {
     // 02 — Chassis: front splitter, low and close. Text on the left.

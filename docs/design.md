@@ -292,7 +292,7 @@ O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abai
 - **O lime é um brilho no carro, não uma poça no piso.** O spot vem de cima e de trás, mirando o
   centro do carro, de modo que a luz que passa cai embaixo dele.
 - **O carro fica no lado livre do texto.** Cada ponto de câmera tem um `offset` (fração da largura do
-  quadro) que desloca o olhar para o lado oposto ao texto da seção: hero +0.22, aero −0.17,
+  quadro) que desloca o olhar para o lado oposto ao texto da seção: hero +0.22, aero −0.22 (era −0.17 até 2026-09-18),
   chassis +0.25, engine −0.15. É calculado pelo aspecto real da tela, e as imagens do lite saem
   centralizadas (lá a figura aparece sozinha).
 

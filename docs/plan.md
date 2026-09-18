@@ -253,8 +253,12 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
     de parada não mudaram (o arco devolve as pontas exatas). Console limpo; p95 de 12,4 ms rolando
     (antes 12,2). As medições tiveram um quadro de ~1 s por rodada, coincidindo com o painel do
     navegador sendo ocultado; não investigado além disso.
-- [ ] Enquadramento do aero: a traseira do carro passa por baixo da coluna de texto à direita (já era
-  assim antes do arco; visto com `?shot=aero`). Rever o `offset` ou a posição do ponto
+- [x] Enquadramento do aero (2026-09-18): a traseira do carro passava por baixo da coluna de texto à
+  direita (já era assim antes do arco). Câmera 10% mais longe, (−5,4; 2,2; 3,0) → (−5,8; 2,35; 3,3), e
+  `offset` −0,17 → −0,22.
+  - 👁 `?shot=aero` em 1152×720 (mesmo aspecto de 1440×900): carro de ~0,06 a ~0,63 da largura, texto
+    a partir de 0,67. Console limpo. As transições vizinhas não foram capturadas (screenshots dando
+    timeout); o `cameraShots.test.js` segue garantindo que não passam perto do carro.
 - [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
 - [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
 - [ ] Lighthouse no build (metas em design.md)
