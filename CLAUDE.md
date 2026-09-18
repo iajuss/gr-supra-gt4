@@ -1,6 +1,7 @@
-# LP_piloto — Aston Martin Vulcan (fan-made landing page)
+# LP_piloto — Toyota GR Supra GT4 (fan-made landing page)
 
-Landing page conceitual, não oficial, do Aston Martin Vulcan. Inspirada na LP "Kimi Antonelli, driver_012"
+Landing page conceitual, não oficial, do Toyota GR Supra GT4 (começou como Aston Martin Vulcan; o motivo
+da troca está em docs/design.md). Inspirada na LP "Kimi Antonelli, driver_012"
 (Three.js + motion + storytelling). Decisões de design aprovadas em [docs/design.md](docs/design.md).
 
 ## Acordo de trabalho

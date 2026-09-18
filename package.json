@@ -1,8 +1,8 @@
 {
-  "name": "vulcan-landing",
+  "name": "gr-supra-gt4-landing",
   "private": true,
   "version": "0.1.0",
-  "description": "Unofficial fan-made landing page for the Aston Martin Vulcan.",
+  "description": "Unofficial fan-made landing page for the Toyota GR Supra GT4.",
   "type": "module",
   "scripts": {
     "dev": "vite",

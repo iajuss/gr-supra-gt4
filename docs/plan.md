@@ -1,33 +1,27 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-17, fim da sessão da troca de carro)
+## ▶ Retomada (atualizado em 2026-09-18, início do Bloco 5)
 
-- **O carro mudou: Vulcan → Toyota Supra MK5.** Não foi decisão de design: o Sketchfab quebrou o
-  cadastro na migração para a KitBash e não existe Vulcan gratuito com malha utilizável em nenhum
-  acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** a troca de carro foi commitada em `1c364f5` + `93ae51e`. O ajuste de luz e
-  enquadramentos (passo 5 do Bloco 4) veio depois; confira com `git log` se já foi commitado.
-  166 testes verdes.
-- **O que já funciona:** o Supra carrega no palco (13 malhas, 3.551.233 triângulos, 7,9 MB), na escala
-  e orientação certas, pintado na paleta carbono + lime por nome de material, com sombra de contato.
-  Console limpo.
+- **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
+  design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
+  malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
+- **Estado do código:** Blocos 1–4 concluídos e commitados até `91c065d`. 177 testes verdes, build ok.
+- **O que já funciona:** o Supra carrega no palco (13 malhas, 3.551.233 triângulos, 7,9 MB), pintado na
+  paleta carbono + lime por nome de material, com sombra de contato; conteúdo do GT4 com números
+  conferidos; volta simulada de 2:10.222; preloader com progresso real em bytes. Console limpo.
 
-### Próximos passos, em ordem
+### Próximos passos, em ordem (combinado em 2026-09-18)
 
-1. ~~**Luz e enquadramentos**~~ — feito em 2026-09-17 (ver passo 5 do Bloco 4).
-2. ~~**Recapturar as imagens do lite**~~ — feito em 2026-09-17.
-3. ~~**Reescrever o conteúdo para o Supra**~~ — feito em 2026-09-17: a página apresenta o
-   **GR Supra GT4**, com números conferidos (tabela em design.md), volta recalibrada (2:10.222),
-   barra de potência por tonelada e o capítulo 03 renomeado para `engine`.
-4. ~~**Passo 4 do Bloco 4 (preloader)**~~ — feito em 2026-09-17.
-5. **Bloco 5** — polimento, créditos, acessibilidade, Lighthouse, deploy.
+1. ~~**Limpeza dos restos do Vulcan**~~ — feita em 2026-09-18.
+2. **Trajetória da câmera hero → aero.**
+3. Motion do hero/preloader, acessibilidade, Lighthouse.
+4. Créditos do footer e deploy na Vercel.
 
-### Pendências que bloqueiam o deploy
+### Decisões que destravam o deploy (2026-09-18)
 
-- **Licença do modelo indeterminada:** "Custom License (no AI)" sem termos publicados. O usuário optou
-  por seguir assim; resolver antes de publicar (perguntar ao autor `mariobelmonte141` no CGTrader ou
-  trocar por um Royalty Free).
-- O footer precisa dos créditos finais, que dependem dessa decisão.
+- **Licença do modelo:** seguir sem consultar o autor. O footer credita `mariobelmonte141` (link para o
+  modelo no CGTrader) e cita a "Custom License (no AI)" como publicada.
+- **Hospedagem:** Vercel.
 
 ### Dicas do ambiente
 
@@ -246,10 +240,12 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
        padrão de 300×150, e em aba de segundo plano o lazy loading não roda (a medição mente).
 
 ## Bloco 5 — Polimento e entrega
+- [x] Limpeza dos restos do Vulcan: `name` do pacote (`gr-supra-gt4-landing`), `CLAUDE.md`, `design.md`
+  (título, conceito, estrutura, pendências) e a constante do teste do `fitModel`
 - [ ] Transições do hero/preloader e ritmo do motion
 - [ ] Trajetória da câmera entre hero e aero: a interpolação linear da posição passa a ~3 m da lateral
   (close que corta o carro no meio do scroll). Avaliar interpolar em arco ou um ponto intermediário
-- [ ] Footer com créditos (modelo CC-BY, traçado, fontes)
+- [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
 - [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
 - [ ] Lighthouse no build (metas em design.md)
-- [ ] Deploy (definir: Vercel / Netlify / GitHub Pages)
+- [ ] Deploy na Vercel (decidido em 2026-09-18)

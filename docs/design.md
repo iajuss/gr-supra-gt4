@@ -1,21 +1,23 @@
-# Design — Aston Martin Vulcan LP
+# Design — Toyota GR Supra GT4 LP
 
 Status: aprovado em 2026-09-17.
 
 ## Conceito
 
-- Landing page **fan-made** do **Aston Martin Vulcan** (V12, só para pista, com aerofólio grande).
-- Escolhido em vez do Vantage AMR Pro porque o Vulcan tem modelos 3D gratuitos em GLB (CC-BY) no Sketchfab.
-- Conteúdo em inglês. Sem logos oficiais; aviso "Unofficial fan-made concept. Not affiliated with Aston Martin."
+- Landing page **fan-made** do **Toyota GR Supra GT4** (só para pista, 6 em linha turbo, asa grande).
+- Nasceu como LP do Aston Martin Vulcan; o carro mudou por falta de modelo 3D utilizável
+  (ver "Troca de carro: Vulcan → Toyota Supra MK5").
+- Conteúdo em inglês. Sem logos oficiais; aviso "Unofficial fan-made concept. Not affiliated with,
+  endorsed by or connected to Toyota Motor Corporation or Toyota Gazoo Racing."
 - Objetivo: peça de portfólio para divulgar no LinkedIn.
 
-## Direção visual — Carbono + Lime AMR
+## Direção visual — Carbono + Lime
 
 | Token        | Valor     | Uso                          |
 |--------------|-----------|------------------------------|
 | `--bg`       | `#0A0B0A` | fundo carbono                |
 | `--text`     | `#F2F2EE` | texto off-white              |
-| `--accent`   | `#C6FF00` | lime Aston Martin Racing     |
+| `--accent`   | `#C6FF00` | lime de telemetria (ver "Paleta: mantida") |
 | `--support`  | `#1F3D2B` | racing green escuro          |
 
 - Títulos e números: **Big Shoulders Display** (variável 100–900; hero 900, títulos 800, números 700).
@@ -27,16 +29,16 @@ Status: aprovado em 2026-09-17.
 ## Estrutura da página
 
 0. **Preloader** — `LOADING_TELEMETRY — NN%` com progresso real do modelo; abre revelando o hero.
-1. **Hero** — Vulcan em 3/4 de frente, piso escuro reflexivo, "VULCAN" gigante,
-   `// TRACK ONLY · V12 7.0 · 24 UNITS`, `SCROLL TO DRIVE ↓`.
+1. **Hero** — Supra em 3/4 de frente, piso escuro reflexivo, "SUPRA" gigante,
+   `// UNOFFICIAL CONCEPT · TRACK ONLY · 3.0 TURBO · 100+ BUILT`, `SCROLL TO DRIVE ↓`.
 2. **01 — AERO** — close da asa traseira e difusor.
-3. **02 — CHASSIS** — dianteira, splitter, monocoque de carbono.
-4. **03 — V12** — escapes laterais e motor.
+3. **02 — CHASSIS** — dianteira e splitter, rente ao chão.
+4. **03 — ENGINE** — 3.0 L, 6 em linha, um turbo (era `V12` na versão Vulcan).
 5. **Transição** — câmera se afasta, carro escurece, render 3D pausa.
 6. **THE LAP** — traçado real de Silverstone (GeoJSON `bacinger/f1-circuits`, MIT) em Canvas 2D, ponto lime
    percorrendo a volta + HUD (velocidade, marcha, setor, tempo). Inicia ao entrar na tela; botão `REPLAY`.
    Telemetria **simulada**, identificada como tal.
-   - Velocidade derivada da curvatura do traçado (suavizado). Volta de ~1:45, animada em 12 s.
+   - Velocidade derivada da curvatura do traçado (suavizado). Volta de 2:10.222 (era ~1:45 com o Vulcan), animada em 12 s.
    - Largada na Hamilton Straight (atual). O GeoJSON começa na reta pré-2011, então o laço é reordenado.
    - **Modo full (desktop): pista 3D** (decidido em 2026-09-17, após protótipo em `sandbox/track3d`):
      - Palco em tela cheia (100% × 100vh) abaixo do título, com HUD (inferior esquerdo), minimapa 2D
@@ -70,7 +72,7 @@ Status: aprovado em 2026-09-17.
    - **Modo lite (mobile, reduced-motion, sem WebGL): canvas 2D** com contorno fantasma cinza + rastro lime.
      Pista girada 90° em telas largas (4:3) e em pé no mobile (3:4).
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.
-8. **Footer** — aviso fan-made, crédito CC-BY do modelo 3D, crédito do traçado.
+8. **Footer** — aviso fan-made, crédito do modelo 3D (autor, link e licença como publicada), crédito do traçado e das fontes.
 
 ## Fontes dos números
 
@@ -129,7 +131,7 @@ da verdade; o JS só anima até eles. Conferido em 2026-09-17.
 ### Pontos de câmera (passo 2 — 2026-09-17)
 
 - Cada ponto é **posição + alvo + fov** em coordenadas absolutas (`data/cameraShots.js`), na ordem em
-  que a página passa por eles: `hero`, `aero`, `chassis`, `v12`, `transition`. Orbital (azimute,
+  que a página passa por eles: `hero`, `aero`, `chassis`, `engine` (era `v12`), `transition`. Orbital (azimute,
   elevação, distância) foi considerado e descartado: cartesiano é mais fácil de ler e de ajustar com o
   carro real. Se as transições do passo 3 ficarem retas demais, revisitamos.
 - A interpolação é código puro e testado, não do GSAP: `lerpShot(a, b, t)` e `shotAt(shots, progress)`
@@ -286,7 +288,7 @@ O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abai
   centro do carro, de modo que a luz que passa cai embaixo dele.
 - **O carro fica no lado livre do texto.** Cada ponto de câmera tem um `offset` (fração da largura do
   quadro) que desloca o olhar para o lado oposto ao texto da seção: hero +0.22, aero −0.17,
-  chassis +0.25, v12 −0.15. É calculado pelo aspecto real da tela, e as imagens do lite saem
+  chassis +0.25, engine −0.15. É calculado pelo aspecto real da tela, e as imagens do lite saem
   centralizadas (lá a figura aparece sozinha).
 
 ### Paleta: mantida
@@ -319,10 +321,11 @@ Os 429k triângulos são o preço, pago só no desktop — o mobile é lite, com
 
 ## Pendências
 
-- **Licença do modelo indeterminada** (Custom License sem termos divulgados). Precisa ser esclarecida
-  antes do deploy, ou o modelo trocado por um Royalty Free — candidatos verificados: Supra MK5 "Hyper
-  Realistic" (sem asa grande) e Koenigsegg Jesko (asa enorme).
-- **Conteúdo ainda fala do Vulcan** com um Supra na tela: título, kicker, os três capítulos e a SPECS
-  inteira precisam ser reescritos com números do Supra MK5 conferidos em fontes públicas.
-- Preloader (passo 4) adiado para junto do modelo: hoje não há nada pesado para carregar, e o progresso
-  seria inventado. Quando o GLB entrar, o `lib/loader.js` reporta bytes de verdade.
+- **Licença do modelo: seguir sem consultar o autor** (decisão do usuário, 2026-09-18). A "Custom
+  License (no AI)" não tem termos publicados; a página dá o crédito ao autor (`mariobelmonte141`, com
+  link para o modelo no CGTrader) e cita a licença como publicada. Se um dia for preciso trocar, os
+  candidatos Royalty Free verificados são o Supra MK5 "Hyper Realistic" (sem asa grande) e o
+  Koenigsegg Jesko (asa enorme).
+- **Deploy na Vercel** (decisão de 2026-09-18).
+- Trajetória da câmera entre hero e aero: passa a ~3 m da lateral e corta o carro no meio do scroll
+  (Bloco 5).
