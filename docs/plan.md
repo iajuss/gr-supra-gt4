@@ -15,8 +15,7 @@
 ### Próximos passos, em ordem
 
 1. ~~**Luz e enquadramentos**~~ — feito em 2026-09-17 (ver passo 5 do Bloco 4).
-2. **Recapturar as imagens do lite** — `http://localhost:<porta>/tools/capture.html` regrava
-   `public/shots/{aero,chassis,v12}.webp` a partir da cena.
+2. ~~**Recapturar as imagens do lite**~~ — feito em 2026-09-17.
 3. **Reescrever o conteúdo para o Supra** — a página ainda diz "VULCAN / Seven litres. Twelve
    cylinders." com um Supra na tela. Trocar título, kicker (`// TRACK ONLY · V12 7.0 · 24 UNITS`), os
    três capítulos e a SPECS, com números conferidos em fontes públicas e a tabela do design.md
@@ -213,7 +212,8 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
        FPS rolando a zona 3D: média 137, p95 12,2 ms, pior quadro 18,3 ms.
      - Prévias feitas com um helper temporário que renderizava folhas de contato pelo `/__shot/`
        (gravar em `public/` recarrega a página do dev server: renderizar tudo antes de postar).
-   - [ ] Recapturar as imagens do modo lite
+   - [x] Recapturar as imagens do modo lite (2026-09-17): 22 / 24 / 16 KB, carro centralizado
+     (`offset: 0`); conferidas em 375 px, carregadas, sem overflow, console limpo
 6. **Modo lite** — feito com o proxy em 2026-09-17; as imagens são recapturadas no passo 5
    - [x] Ferramenta de captura: `tools/capture.html` + `tools/capture.js` montam o palco num canvas de
      1440×900 e postam cada shot; o plugin de dev `tools/shotServer.js` grava em `public/shots/`.
