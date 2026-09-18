@@ -1,11 +1,12 @@
 // The car: a GLB loaded at runtime, placed at real-world size and dressed in the page's own palette.
 // The model arrives Z-up, in its own units and painted blue; everything here is about fixing that.
 
-import { Box3, CanvasTexture, Color, DoubleSide, Group, LoadingManager, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
+import { Box3, CanvasTexture, Color, DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 import { fitToLength } from '../lib/fitModel.js';
+import { byteRatio } from '../lib/progress.js';
 
 const MODEL_URL = '/models/supra.glb';
 const DRACO_PATH = '/draco/';
@@ -79,7 +80,9 @@ function buildContactShadow({ length, width }) {
 
 /**
  * @param {typeof import('../data/carStage.js').default} config
- * @param {{ onProgress?: (ratio: number) => void, url?: string }} [options] url swaps the model (tools compare variants with it)
+ * @param {{ onProgress?: (ratio: number | null) => void, url?: string }} [options]
+ *   onProgress: share of the model's bytes downloaded (null if the size is unknown);
+ *   url swaps the model (tools compare variants with it)
  * @returns {Promise<{
  *   object3D: import('three').Group,
  *   dimensions: { length: number, width: number, height: number },
@@ -90,15 +93,12 @@ function buildContactShadow({ length, width }) {
 export async function createCar(config, { onProgress, url = MODEL_URL } = {}) {
   const { car } = config;
 
-  const manager = new LoadingManager();
-  if (onProgress) {
-    manager.onProgress = (_url, loaded, total) => onProgress(total > 0 ? loaded / total : 0);
-  }
+  const draco = new DRACOLoader().setDecoderPath(DRACO_PATH);
+  const loader = new GLTFLoader().setDRACOLoader(draco);
 
-  const draco = new DRACOLoader(manager).setDecoderPath(DRACO_PATH);
-  const loader = new GLTFLoader(manager).setDRACOLoader(draco);
-
-  const gltf = await loader.loadAsync(url);
+  // Progress in bytes of the GLB itself: it is almost the whole download, while a LoadingManager
+  // would only count files (GLB, Draco wrapper, Draco wasm) and jump in thirds.
+  const gltf = await loader.loadAsync(url, onProgress && ((event) => onProgress(byteRatio(event))));
   const model = gltf.scene;
 
   // FBX2glTF already rotates the Blender scene from Z-up to Y-up, so the car arrives upright with
