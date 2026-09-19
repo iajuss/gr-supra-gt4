@@ -28,7 +28,8 @@ Status: aprovado em 2026-09-17.
 
 ## Estrutura da página
 
-0. **Preloader** — `LOADING_TELEMETRY — NN%` com progresso real do modelo; abre revelando o hero.
+0. **Preloader** — `LOADING_TELEMETRY — NN%` com progresso real do modelo; depois dele, a tela de som
+   (ver "Tela de som"); a página abre revelando o hero.
 1. **Hero** — Supra em 3/4 de frente, piso escuro reflexivo, "SUPRA" gigante,
    `// UNOFFICIAL CONCEPT · TRACK ONLY · 3.0 TURBO · 100+ BUILT`, `SCROLL TO DRIVE ↓`.
 2. **01 — AERO** — close da asa traseira e difusor.
@@ -102,6 +103,32 @@ real (laboratório temporário, já apagado): **A** título e dados sobre o palc
 - **Lite:** empilhado — transição, label e dados, volta 2D.
 - O fundo opaco passou da seção para o `.lap__layout`, e no full a seção não tem padding embaixo: senão
   o carro fixo apareceria no respiro sob o palco e o título sairia antes do palco.
+
+### Tela de som (2026-09-19)
+
+Pedido do usuário: depois do carregamento, uma tela pedindo som; tecla, clique ou toque liga o motor.
+
+- **Texto** (centralizado, a pedido do usuário): `// Turn your sound up`, título **"Born to be heard."**
+  (escolhido entre quatro frases), "Press any key, click or tap to start the engine" e dois botões:
+  **Start the engine** (com foco) e **Enter without sound**.
+- **Fluxo:** a tela é a segunda fase do preloader (mesma camada: página `inert`, rolagem travada). Ela
+  aparece quando o carro está no palco, aos 8 s numa linha lenta ou numa falha; no lite, logo ao abrir.
+  **Espera pela escolha** (é o gesto que libera o áudio no navegador). Qualquer tecla, clique ou toque
+  liga o motor; o botão silencioso ou Esc entram sem som; Tab, Shift e atalhos não contam
+  (`lib/soundGate.js`). O carro sai da névoa quando a página abre.
+- **Sem memória da escolha** (a tela aparece em toda visita) e **sem botão de som no header**: só existe o
+  clipe da partida. Decisões do usuário.
+- **Áudio:** Web Audio, porque o fade precisa de um nó de ganho (no iOS o `volume` do `<audio>` é só
+  leitura). O arquivo é baixado e decodificado antes, num `OfflineAudioContext`; no gesto só se cria o
+  contexto e toca: medido 0 ms entre criar o contexto e tocar. Decodificar depois do gesto atrasava o
+  som em ~2 s com o arquivo provisório. Recorte e fades em `lib/envelope.js`; se o áudio não chegar em
+  1,5 s depois do gesto, a página abre em silêncio.
+- **Áudio provisório** (`data/engineSound.js`): prévia do Pixabay de um BMW M4 (S55, seis em linha
+  biturbo, parente do B58), trecho 0–5 s, tocada direto do CDN (CORS aberto). Nenhum B58 com licença
+  aberta encontrado: Freesound fora do ar (502) na busca, Wikimedia Commons sem Supra, Sample Focus com
+  licença voltada a música. Candidatas em `tools/soundLab.html`. Pendente: escolher a gravação final,
+  salvar o recorte em `public/audio/` (o MP3 provisório tem 4 MB e aparece no peso da página) e o
+  crédito no footer, se a licença pedir.
 
 ## Fontes dos números
 

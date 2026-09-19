@@ -8,7 +8,7 @@
 - **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 203 testes verdes, build ok.
   Sessão de 2026-09-19: **abertura da volta em cortina** — a transição virou a abertura da seção da
   volta e "The circuit." vai para o canto do palco enquanto ele sobe (design.md, "Abertura da volta:
-  cortina"). Sessão anterior (2026-09-18): TBT do desktop corrigido, checagem de acessibilidade (contraste
+  cortina") — e **tela de som** ("Born to be heard.", design.md "Tela de som"), com áudio provisório. Sessão anterior (2026-09-18): TBT do desktop corrigido, checagem de acessibilidade (contraste
   sobre o 3D, Pause na volta, preloader `inert`), crédito do modelo no footer e o carro refeito a
   pedido do usuário — pipeline do modelo corrigido (o `dedup` fundia os materiais), acabamento por
   peça, detalhes (letreiro cromado, pinças e calotas lime, luzes acesas, lanternas vermelhas, sem
@@ -22,9 +22,10 @@
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
 1. ~~Ritmo entre "The circuit." e a volta~~ — feito em 2026-09-19 (cortina, variante C).
-2. **Tela de som depois do carregamento** (ideia do usuário; nos dois modos): "turn your sound up",
-   tecla/clique/toque toca o motor (B58, seis em linha) e abre a página; saída sem som. Precisa achar
-   um áudio com licença que permita o uso.
+2. ~~Tela de som~~ — feita em 2026-09-19. **Falta o áudio final**: tentar o Freesound de novo (B58,
+   A90, M340i; CC0 ou CC-BY), ouvir no `tools/soundLab.html`, salvar o recorte em `public/audio/`,
+   apontar `data/engineSound.js` para ele e dar crédito no footer se a licença pedir. Depois, apagar o
+   `soundLab.html`.
 3. Motion do hero/preloader.
 4. Deploy na Vercel.
 - Opcionais, sem efeito na nota: baixar o GLB em paralelo com o `createStage` (carro ~1 s antes);
@@ -330,8 +331,15 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
     375 px empilhado, sem overflow; console limpo. Movimento contínuo não visto (painel oculto): medido
     em pontos da rolagem.
   - Lighthouse: desktop 100 × 4 (TBT 44–49 ms), mobile 100 × 4.
-- [ ] Tela de som depois do carregamento (pedido do usuário): "turn your sound up", tecla/clique/toque
-  toca o motor, saída sem som; nos dois modos
+- [x] Tela de som depois do carregamento (pedido do usuário, 2026-09-19): segunda fase do preloader, nos
+  dois modos, centralizada, "Born to be heard." Detalhes em design.md ("Tela de som").
+  - 🧪 `lib/soundGate.js` (teclas → escolha) e `lib/envelope.js` (recorte e fades): 19 testes.
+  - 👁 1152×720 (full) e 375 px (lite): tela depois do 100%, foco no Start, página `inert`; clique e
+    tecla K tocam o recorte (contexto `running`, 0 ms até tocar) e abrem a página; "Enter without sound"
+    e Esc abrem sem criar `AudioContext`. Uma rodada de Esc não abriu e não se repetiu (provável foco
+    no painel do app); vale conferir num navegador de verdade.
+  - Lighthouse: desktop 100 × 4 (TBT 35–66 ms), mobile 100 × 4; peso mobile 4,1 MB pelo MP3 provisório.
+- [ ] Áudio final do motor (ver "Próximos passos")
 - [x] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura (2026-09-18)
   - Roteiro manual no build (1152×720 full, 375 px lite). Passaram: ordem do foco, foco visível,
     âncoras pelo teclado, `alt` do lite, anúncio do HUD, reduced motion → lite.
