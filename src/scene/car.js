@@ -23,6 +23,10 @@ import { wheelContacts } from '../lib/wheelContacts.js';
 const MODEL_URL = '/models/supra.glb';
 const DRACO_PATH = '/draco/';
 
+// The lights the ignition switches on (components/ignitionShow.js), by material role.
+const FRONT_LIGHTS = ['headlight', 'lamp'];
+const REAR_LIGHTS = ['tailLight', 'tailBar', 'reflector', 'rainLight'];
+
 /** Which paint a material name gets; anything unlisted is bodywork. */
 function roleOf(name, roles) {
   for (const [role, names] of Object.entries(roles)) {
@@ -82,7 +86,10 @@ function paintCar(model, { paint, materialRoles }) {
     const dress = (material) => {
       if (!material) return material;
       if (!painted.has(material.uuid)) {
-        painted.set(material.uuid, paintMaterial(material, paint[roleOf(material.name, materialRoles)]));
+        const role = roleOf(material.name, materialRoles);
+        const dressed = paintMaterial(material, paint[role]);
+        dressed.userData.role = role;
+        painted.set(material.uuid, dressed);
       }
       return painted.get(material.uuid);
     };
@@ -193,12 +200,40 @@ export async function createCar(config, { onProgress, url = MODEL_URL } = {}) {
 
   draco.dispose();
 
+  // Each light as dressed (its glow and colour), to dim from.
+  const lamps = new Map();
+  object3D.traverse((child) => {
+    if (!child.isMesh) return;
+    for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
+      const { role } = material.userData;
+      const front = FRONT_LIGHTS.includes(role);
+      if (!front && !REAR_LIGHTS.includes(role)) continue;
+      lamps.set(material, {
+        front,
+        glow: material.emissiveIntensity,
+        on: material.color.clone(),
+        off: new Color(front ? config.lightsOff.front : config.lightsOff.rear),
+      });
+    }
+  });
+
   return {
     object3D,
     dimensions: size,
     /** @param {boolean} visible */
     setVisible(visible) {
       object3D.visible = visible;
+    },
+    /**
+     * Dims the lights: 0 is off, 1 as dressed.
+     * @param {{ front: number, rear: number }} levels
+     */
+    setLights({ front, rear }) {
+      for (const [material, lamp] of lamps) {
+        const level = lamp.front ? front : rear;
+        material.emissiveIntensity = lamp.glow * level;
+        material.color.lerpColors(lamp.off, lamp.on, level);
+      }
     },
     dispose() {
       for (const shadow of shadows) shadow.material.map.dispose();

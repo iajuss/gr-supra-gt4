@@ -45,19 +45,53 @@
   cursor: pointer;
 }
 
-.gate:not([hidden]) {
-  animation: gate-in var(--dur-base) var(--ease-out) both;
+/* Loading → sound screen: the gate's lines come in one after the other, the title from behind a mask. */
+.gate__title {
+  overflow: hidden;
+  padding-block: 0.04em;
+  margin-block: -0.04em;
 }
 
-@keyframes gate-in {
+.gate__title-inner {
+  display: block;
+}
+
+.gate:not([hidden]) > * {
+  animation: gate-line-in var(--dur-slow) var(--ease-out) both;
+}
+
+.gate:not([hidden]) > :nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.gate:not([hidden]) > :nth-child(3) {
+  animation-delay: 200ms;
+}
+
+.gate:not([hidden]) > :nth-child(4) {
+  animation-delay: 280ms;
+}
+
+.gate:not([hidden]) .gate__title-inner {
+  animation: gate-title-in var(--dur-slow) var(--ease-out) 80ms both;
+}
+
+@keyframes gate-line-in {
   from {
     opacity: 0;
-    transform: translateY(1rem);
+    transform: translateY(0.75rem);
+  }
+}
+
+@keyframes gate-title-in {
+  from {
+    transform: translateY(110%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gate:not([hidden]) {
+  .gate:not([hidden]) > *,
+  .gate:not([hidden]) .gate__title-inner {
     animation: none;
   }
 }

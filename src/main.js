@@ -4,8 +4,11 @@ import './styles/main.css';
 
 import { decideMode, detectEnvironment } from './lib/capabilities.js';
 import engineSound from './data/engineSound.js';
+import opening from './data/opening.js';
 import { initChapterShots } from './components/chapterShots.js';
 import { createEngineSound } from './components/engineSound.js';
+import { createHeroEntrance } from './components/heroEntrance.js';
+import { createIgnitionShow } from './components/ignitionShow.js';
 import { initLapSection } from './components/lapSection.js';
 import { createPreloader } from './components/preloader.js';
 import { openSoundGate } from './components/soundGate.js';
@@ -25,13 +28,34 @@ initTextReveal(document, motion);
 const preloaderRoot = document.querySelector('.preloader');
 const preloader = createPreloader(preloaderRoot, motion);
 const engine = createEngineSound(engineSound);
+const catchAt = engineSound.catchAt - engineSound.start;
+
+// The hero comes in as the page opens, its title landing when the engine catches.
+const entrance = createHeroEntrance(document.querySelector('.hero'), { reducedMotion: motion.reducedMotion, catchAt });
+let ignition = null; // full mode, once the car is on stage: its lights, the rim and the camera
+
 preloader.ready.then(() => {
   engine.preload();
+  // Opening the audio device blocks for a moment: do it on the visitor's first move towards the
+  // buttons rather than while the page loads (or, with a key, inside the gesture itself).
+  const warmUp = () => engine.warmUp();
+  for (const type of ['pointermove', 'pointerdown', 'keydown']) {
+    window.addEventListener(type, warmUp, { once: true, passive: true, capture: true });
+  }
   openSoundGate(preloaderRoot.querySelector('.gate'), {
     surface: preloaderRoot,
     onChoice(choice) {
-      if (choice === 'sound') engine.play();
+      // With the car on stage the page opens as a car starts (data/opening.js): the lights blink on,
+      // then the engine. Without it (lite, or a car still loading) the engine starts at once.
+      const gesture = performance.now();
+      const engineAt = ignition ? opening.engineAt : 0;
+      const heard = choice === 'sound' ? engine.play({ delay: engineAt }) : Promise.resolve(null);
       preloader.close();
+      heard.then((startAt) => {
+        const clipStart = startAt ?? gesture + engineAt * 1000; // silent: the clip's would-be clock
+        entrance.play(clipStart);
+        ignition?.play({ clipStart, lightsOn: gesture + opening.keyAt * 1000 });
+      });
     },
   });
 });
@@ -66,12 +90,23 @@ async function initStage(root) {
     const car = await createCar(carStage, { onProgress: preloader.setProgress });
     await view.prepare(car.object3D);
     view.add(car.object3D);
+    // Only if the page has not opened yet (a slow line lets the visitor in before the car arrives).
+    if (!preloader.isOpen) {
+      ignition = createIgnitionShow({
+        view,
+        car,
+        duration: engineSound.end - engineSound.start,
+        loudness: engine.loudness(),
+      });
+    }
 
     // The car is on stage: the sound screen can take over, and the car emerges once the page opens
-    // (at once if the visitor is already in, after the slow-line timeout).
+    // (at once if the visitor is already in, after the slow-line timeout). Opening on it, the fog clears
+    // quickly, so the car is in view before its lights blink on.
     const showCar = () => {
       preloader.finish();
-      preloader.closed.then(() => view.reveal({ instant: motion.reducedMotion }));
+      const fog = ignition ? { ms: opening.fogMs } : {};
+      preloader.closed.then(() => view.reveal({ instant: motion.reducedMotion, ...fog }));
     };
 
     // ?shot=<id> holds one chapter's framing, to check it on its own, instead of following the scroll.

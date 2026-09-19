@@ -1,5 +1,6 @@
 // The screen over the page before it opens, in two phases:
-// 1. loading (full mode): "Loading_telemetry — NN%" with the real download progress of the car. It is
+// 1. loading (full mode): "Loading_telemetry — NN%" and a lime line, with the real download progress
+//    of the car. It is
 //    ready when the car is on stage, when loading fails, or after READY_AFTER_MS on a slow line (the car
 //    then emerges when it arrives);
 // 2. once ready, the sound screen takes over (components/soundGate.js) and the page opens on the
@@ -9,6 +10,7 @@ import { percentShown } from '../lib/progress.js';
 
 const READY_AFTER_MS = 8000;
 const LEAVE_MS = 600; // matches the opacity transition in stage.css
+const LOADED_MS = 400; // the loading phase steps out (stage.css, --dur-base) before the sound screen
 
 /**
  * @param {HTMLElement} root .preloader
@@ -39,14 +41,20 @@ export function createPreloader(root, { reducedMotion }) {
   function write(percent) {
     shown = percent;
     if (value) value.textContent = String(percent);
+    root.style.setProperty('--progress', String(percent / 100)); // the lime line (stage.css)
   }
 
   function becomeReady() {
     if (isReady) return;
     isReady = true;
     clearTimeout(timeout);
-    if (loading) loading.hidden = true;
-    markReady();
+    const handOver = () => {
+      if (loading) loading.hidden = true;
+      markReady();
+    };
+    if (reducedMotion || !loading) return handOver();
+    root.classList.add('preloader--loaded');
+    setTimeout(handOver, LOADED_MS);
   }
 
   /** Lifts the screen off the page; safe to call more than once. */

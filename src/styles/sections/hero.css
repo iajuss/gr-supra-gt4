@@ -22,3 +22,18 @@
 .hero__cue {
   margin-top: var(--space-6);
 }
+
+/* Entrance masks (components/heroEntrance.js): the title rises from behind them as the page opens.
+   Room above for the tall caps (line-height is 0.8). */
+.hero__title-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-top: 0.12em;
+  margin-top: -0.12em;
+  vertical-align: bottom;
+}
+
+.hero__title-part {
+  display: inline-block;
+  will-change: transform;
+}

@@ -58,3 +58,34 @@
 .preloader__value {
   color: var(--color-accent);
 }
+
+/* Loading phase: the label and a lime line that grows with the download (--progress, 0–1, from
+   components/preloader.js). Once loaded it steps up and out before the sound screen. */
+.preloader__loading {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.preloader--loaded .preloader__loading {
+  opacity: 0;
+  transform: translateY(-0.75rem);
+}
+
+.preloader__line {
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: left;
+  transition: transform var(--dur-fast) linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader__loading,
+  .preloader__line {
+    transition: none;
+  }
+}

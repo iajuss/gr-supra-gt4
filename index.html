@@ -17,13 +17,16 @@
 
     <!-- Full mode only: fixed WebGL stage and loading screen (Bloco 4). -->
     <div class="preloader" hidden>
-      <p class="label preloader__loading" role="status">
-        Loading_telemetry — <span class="preloader__value">0</span>%
-      </p>
+      <div class="preloader__loading">
+        <p class="label preloader__label" role="status">
+          Loading_telemetry — <span class="preloader__value">0</span>%
+        </p>
+        <div class="preloader__line" aria-hidden="true"></div>
+      </div>
       <!-- Once loaded: the sound screen (components/soundGate.js). -->
       <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-hint" hidden>
         <p class="label gate__kicker"><span class="accent" aria-hidden="true">//</span> Turn your sound up</p>
-        <p class="gate__title" id="gate-title">Born to be heard.</p>
+        <p class="gate__title" id="gate-title"><span class="gate__title-inner">Born to be heard.</span></p>
         <p class="label gate__hint" id="gate-hint">Press any key, click or tap to start the engine</p>
         <div class="gate__actions">
           <button class="button button--solid" type="button" data-gate-sound>Start the engine</button>

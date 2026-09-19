@@ -9,6 +9,11 @@ export default {
     height: 1.29,
   },
 
+  // The lights when the car is switched off (components/ignitionShow.js): the lamps' own colours are
+  // near white and red, and lit by the studio they read as on even with no glow, so off they darken.
+  // (A glare sprite over each headlight was tried and dropped at the user's request, 2026-09-19.)
+  lightsOff: { front: 0x111214, rear: 0x1a0606 },
+
   ground: {
     size: 400, // the fog swallows the edge long before this
     // Nearly metal, so the floor mirrors the dark room instead of catching a diffuse pool of light.

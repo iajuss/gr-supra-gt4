@@ -52,12 +52,14 @@ export async function createStage(canvas, config) {
   }
 
   // Spots: the lime rim over the roof and the cool edge light that cuts the outline out of the dark.
+  const spots = {};
   for (const key of ['rim', 'edge']) {
     const { color, intensity, distance, angle, penumbra, decay, position, target } = lights[key];
     const spot = new SpotLight(color, intensity, distance, angle, penumbra, decay);
     spot.position.set(position.x, position.y, position.z);
     spot.target.position.set(target.x, target.y, target.z);
     rig.add(spot, spot.target);
+    spots[key] = spot;
   }
 
   const groundGeometry = new PlaneGeometry(groundConfig.size, groundConfig.size);
@@ -75,8 +77,16 @@ export async function createStage(canvas, config) {
 
   scene.add(rig);
 
+  // The camera leans in while the engine revs (components/ignitionShow.js), on top of the current shot:
+  // metres along its view.
+  let dolly = 0;
+  const lean = new Vector3();
+
   function render() {
+    camera.getWorldDirection(lean).multiplyScalar(dolly);
+    camera.position.add(lean);
     renderer.render(scene, camera);
+    camera.position.sub(lean);
   }
 
   // Nothing here animates on its own: a frame is drawn only after something changes, and only
@@ -142,14 +152,14 @@ export async function createStage(canvas, config) {
 
   /**
    * Thins the fog back to normal, so the car emerges from the dark.
-   * @param {{ instant?: boolean }} [options] instant for reduced motion
+   * @param {{ instant?: boolean, ms?: number }} [options] instant for reduced motion; ms to take
    */
-  function reveal({ instant = false } = {}) {
+  function reveal({ instant = false, ms = fog.revealMs } = {}) {
     cancelAnimationFrame(revealFrame);
     const from = scene.fog.density;
     const startedAt = performance.now();
     const step = (now) => {
-      const progress = instant ? 1 : (now - startedAt) / fog.revealMs;
+      const progress = instant ? 1 : (now - startedAt) / ms;
       scene.fog.density = lerp(from, fog.density, easeOutCubic(progress));
       requestRender();
       if (progress < 1) revealFrame = requestAnimationFrame(step);
@@ -171,6 +181,16 @@ export async function createStage(canvas, config) {
     setShot,
     veil,
     reveal,
+    /** @param {number} metres how far the camera leans in along its view (0 puts it back) */
+    setDolly(metres) {
+      dolly = metres;
+      requestRender();
+    },
+    /** @param {number} scale the lime rim's intensity against its configured value */
+    setRim(scale) {
+      spots.rim.intensity = lights.rim.intensity * scale;
+      requestRender();
+    },
     /** @param {import('three').Object3D} object */
     add(object) {
       scene.add(object);
