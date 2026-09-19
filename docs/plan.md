@@ -52,7 +52,8 @@ pelo P0 (prévia do link), antes de o post do LinkedIn circular.
   `?shots=` (capítulos e closes `nose`, `tail`, `wheel`, `headlight`), `?model=` (GLB candidato em
   `public/models/`). Compara variantes lado a lado, destaca materiais e mede onde o carro cai no quadro.
 - `tools/capture.html` regrava as imagens do lite (`public/shots/*.webp`) depois de qualquer mudança no
-  carro.
+  carro. `tools/shareCard.html` faz o mesmo com a imagem de compartilhamento (`?save=a` →
+  `public/shots/og.jpg`).
 - Pipeline do modelo: FBX original em `Downloads/supra+personalizated(1).fbx`; passos em
   `tools/model/README.md`. As ferramentas ficam fora do projeto (instalar numa pasta temporária).
 
@@ -419,11 +420,14 @@ alternadas (3 pares por modo). FPS com o painel visível em 1152×720 (média, p
 a zona 3D e parado num capítulo.
 
 ### Dia 1 — prévia do link, CI e peso
-- [ ] **P0** Prévia do link: `og:title`, `og:description`, `og:url` e `og:image` absolutos, `og:type`,
-  `twitter:card=summary_large_image`. Imagem 1200×630 tirada da cena pelo `tools/capture` (hero com
-  "SUPRA" composto por cima); grava em `public/` → pedir autorização
-  - 👁 conferir as tags no build; depois do deploy, LinkedIn Post Inspector
-- [ ] **P0** Comentário truncado no topo de `components/ignitionShow.js`
+- [x] **P0** Prévia do link (2026-09-19): `og:*` com URLs absolutas, `twitter:card=summary_large_image`
+  e `canonical` no `index.html`. Imagem `public/shots/og.jpg` (1200×630, 57 KB) gerada por
+  `tools/shareCard.html`: renderiza a cena e compõe o kicker (encurtado para "// Unofficial concept ·
+  Track only"), "SUPRA" e o endereço com as fontes da página. Variantes A (hero), B (frente baixa) e
+  C (perfil) comparadas; escolhida a **A**. `?save=<id>` grava pelo `shotServer`, que passou a aceitar
+  `.jpg`. Regravar quando o carro mudar (bloom, peso)
+  - 👁 tags e imagem no `dist`; 240 testes. Falta: LinkedIn Post Inspector depois do deploy
+- [x] **P0** Comentário truncado no topo de `components/ignitionShow.js`
 - [ ] CI no GitHub Actions: `npm ci`, `npm test`, `npm run build` a cada push; selo no README
 - [ ] Carro mais leve (meta ≤ 5 MB, ideal 3–4 MB). O GLB já usa Draco e só tem `POSITION` + `NORMAL`: o
   peso é a lataria não simplificada (pintura 1,65 MB, blackout 1,73, `WHEELARCH` 1,89, carbono 0,71)

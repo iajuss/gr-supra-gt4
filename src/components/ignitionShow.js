@@ -1,7 +1,6 @@
-// The car waking up (full mode): its lights blink on when the key turns, and
-// while the engine revs
-// it revs the lime rim swells with the sound's loudness and the camera leans in, easing back once the
-// clip ends. Driven by the clip's clock, from the decoded file, so it runs the same without sound.
+// The car waking up (full mode): its lights blink on when the key turns, and while the engine revs
+// the lime rim swells with the sound's loudness and the camera leans in, easing back once the clip
+// ends. Driven by the clip's clock, from the decoded file, so it runs the same without sound.
 
 import { LOUDNESS_WINDOW } from './engineSound.js';
 import { dollyAt, lightsAt } from '../lib/ignition.js';

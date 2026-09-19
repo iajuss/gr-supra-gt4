@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Share card</title>
+    <style>
+      body { margin: 0; background: #0a0b0a; color: #f2f2ee; font: 14px/1.5 monospace; }
+      /* The stage renders off to the side at the card's size; only the finished cards are shown. */
+      #stage { position: absolute; left: -9999px; top: 0; width: 1200px; height: 630px; }
+      #cards { display: grid; gap: 24px; padding: 24px; }
+      figure { margin: 0; }
+      figure img { display: block; width: 100%; max-width: 1200px; outline: 1px solid #232522; }
+      figcaption { padding: 6px 0; color: #c9cbc4; }
+      pre { padding: 0 24px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <div id="cards"></div>
+    <pre id="log">starting…</pre>
+    <script type="module" src="./shareCard.js"></script>
+  </body>
+</html>

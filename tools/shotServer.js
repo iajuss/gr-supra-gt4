@@ -1,5 +1,5 @@
-// Dev-only Vite plugin: receives a captured chapter image and writes it to public/shots/.
-// Used by tools/capture.html; it never runs in a build.
+// Dev-only Vite plugin: receives a captured image and writes it to public/shots/.
+// Used by tools/capture.html and tools/shareCard.html; it never runs in a build.
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -14,22 +14,24 @@ export default function shotServer({ outDir = 'public/shots' } = {}) {
       server.middlewares.use('/__shot/', async (req, res, next) => {
         if (req.method !== 'POST') return next();
 
-        const id = req.url.replace(/^\//, '').replace(/\.webp$/, '');
-        if (!SAFE_ID.test(id)) {
+        // Chapter stills are WebP (the default); the share card (tools/shareCard.js) is a JPEG.
+        const [, id, ext = 'webp'] = req.url.match(/^\/([^.]*)(?:\.(webp|jpg))?$/) ?? [];
+        if (!id || !SAFE_ID.test(id)) {
           res.statusCode = 400;
-          return res.end(`bad shot id: ${id}`);
+          return res.end(`bad shot id: ${req.url}`);
         }
 
         const chunks = [];
         for await (const chunk of req) chunks.push(chunk);
 
-        const file = resolve(server.config.root, outDir, `${id}.webp`);
+        const name = `${id}.${ext}`;
+        const file = resolve(server.config.root, outDir, name);
         await mkdir(dirname(file), { recursive: true });
         await writeFile(file, Buffer.concat(chunks));
 
-        server.config.logger.info(`[shots] wrote ${outDir}/${id}.webp (${Buffer.concat(chunks).length} bytes)`);
+        server.config.logger.info(`[shots] wrote ${outDir}/${name} (${Buffer.concat(chunks).length} bytes)`);
         res.statusCode = 200;
-        res.end(`${id}.webp`);
+        res.end(name);
       });
     },
   };
