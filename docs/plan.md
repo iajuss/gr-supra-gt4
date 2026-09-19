@@ -5,7 +5,9 @@
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 222 testes verdes, build ok.
+- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 240 testes verdes, build ok.
+  Última sessão (2026-09-19, tarde): **abertura como partida do motor** — carregamento em linha, faróis
+  piscando, motor, "SUPRA" na pega, som com ambiente (design.md "Abertura: partida do motor").
   Sessão de 2026-09-19: **abertura da volta em cortina** — a transição virou a abertura da seção da
   volta e "The circuit." vai para o canto do palco enquanto ele sobe (design.md, "Abertura da volta:
   cortina") — e **tela de som** ("Born to be heard.", design.md "Tela de som"), com o áudio final (BMW Z3,
@@ -15,17 +17,20 @@
   peça, detalhes (letreiro cromado, pinças e calotas lime, luzes acesas, lanternas vermelhas, sem
   placa), sombras por roda e box de pit no piso. Tudo em design.md ("Carregamento sem tarefas longas",
   "Acessibilidade", "Leitura do carro", "Profundidade", "Detalhes").
-- **Lighthouse** (2026-09-19, depois do áudio final; `vite preview` + Edge headless via `npx lighthouse@12`):
-  - Mobile (lite): **100 / 100 / 100 / 100** nas 3 rodadas (TBT 9–32 ms); peso 289 KB (era 4,1 MB com o MP3 provisório).
-  - Desktop (full): **100 / 100 / 100 / 100** nas 3 rodadas (TBT 39–82 ms). Rodadas isoladas de 83–87 aparecem com
+- **Lighthouse** (2026-09-19, depois da abertura; `vite preview` + Edge headless via `npx lighthouse@12`):
+  - Mobile (lite): **100 / 100 / 100 / 100** nas 3 rodadas (TBT 12–13 ms); peso 346 KB.
+  - Desktop (full): **97–99 / 100 / 100 / 100** (TBT 81–140 ms). Comparado lado a lado com o commit
+    anterior (build do HEAD numa worktree, rodadas alternadas): 100 / TBT 55–82 contra 99–100 / TBT 81–97.
+    ~20 ms a mais, numa tarefa do chunk `stage` aos ~0,4 s; não investigado. Rodadas isoladas de 83–87 aparecem com
     a máquina ocupada (captura de imagens, laboratório aberto); repetir sem carga antes de concluir.
 
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
 1. ~~Ritmo entre "The circuit." e a volta~~ — feito em 2026-09-19 (cortina, variante C).
 2. ~~Tela de som~~ — feita em 2026-09-19, com o áudio final (BMW Z3, `public/audio/engine-start.mp3`).
-3. Motion do hero/preloader.
+3. ~~Motion do hero/preloader~~ — feito em 2026-09-19 (abertura como partida do motor).
 4. Deploy na Vercel.
+- Opcional: os ~20 ms de TBT a mais no desktop depois da abertura (tarefa no chunk `stage`).
 - Opcionais, sem efeito na nota: baixar o GLB em paralelo com o `createStage` (carro ~1 s antes);
   pré-compilar o palco da volta (bloqueia ~380 ms ao chegar perto); GLB de 7,7 MB acima da meta de ~5 MB.
 - Em aberto por decisão: o preloader anuncia cada porcentagem (`role="status"`); emblema da Toyota
@@ -371,4 +376,17 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
   - 👁 1152×720: hero com os reflexos e o lime como antes; a volta monta só ao rolar até perto dela
     (0 → 1 montagem) e roda. Com o cache frio, o console mostra um aviso de precisão do compilador
     HLSL (`X4122`) num programa não identificado; inofensivo, não verificado se já aparecia antes.
+- [x] Motion do hero/preloader (pedido do usuário, 2026-09-19): variantes comparadas lado a lado na página
+  real (laboratório temporário, apagado); escolhidos carregamento em linha e título "ignição"; depois,
+  quatro refinamentos (som com ambiente e cauda, faróis piscando, "respira", abertura em etapas).
+  Detalhes em design.md ("Abertura: partida do motor").
+  - 🧪 `lib/heroEntrance.js` (4), `lib/ignition.js` (6), `lib/loudness.js` (4), `lib/impulse.js` (4).
+  - 👁 1152×720: som agendado para 1,5 s, grafo com graves e reverb, título aos ~1,95 s do clique e
+    restaurado como texto; faróis medidos apagados até 0,72 s, acesos 0,15 s, apagados 0,2 s, acesos de
+    vez; capturas apagado × aceso distintas. 375 px (lite): som no clique, título aos ~0,45 s, sem
+    overflow. Console limpo. O movimento contínuo foi visto pelo usuário no navegador dele.
+  - Corrigido no caminho: o `AudioContext` criado no clique travava ~200 ms (som atrasado); passou a ser
+    criado no primeiro movimento do ponteiro/toque/tecla (15 ms do clique ao som, TBT intacto).
+  - Recorte do som refeito: 0–9 s, 145 KB. Imagens do lite não regravadas (o carro aceso não mudou).
+  - Lighthouse: mobile 100 × 3; desktop 97–99 (ver "Retomada").
 - [ ] Deploy na Vercel (decidido em 2026-09-18)

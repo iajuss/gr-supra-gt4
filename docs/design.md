@@ -28,8 +28,9 @@ Status: aprovado em 2026-09-17.
 
 ## Estrutura da página
 
-0. **Preloader** — `LOADING_TELEMETRY — NN%` com progresso real do modelo; depois dele, a tela de som
-   (ver "Tela de som"); a página abre revelando o hero.
+0. **Preloader** — `LOADING_TELEMETRY — NN%` e uma linha lime com o progresso real do modelo; depois
+   dele, a tela de som (ver "Tela de som"); a página abre como um carro dando partida (ver "Abertura:
+   partida do motor").
 1. **Hero** — Supra em 3/4 de frente, piso escuro reflexivo, "SUPRA" gigante,
    `// UNOFFICIAL CONCEPT · TRACK ONLY · 3.0 TURBO · 100+ BUILT`, `SCROLL TO DRIVE ↓`.
 2. **01 — AERO** — close da asa traseira e difusor.
@@ -115,25 +116,62 @@ Pedido do usuário: depois do carregamento, uma tela pedindo som; tecla, clique 
   aparece quando o carro está no palco, aos 8 s numa linha lenta ou numa falha; no lite, logo ao abrir.
   **Espera pela escolha** (é o gesto que libera o áudio no navegador). Qualquer tecla, clique ou toque
   liga o motor; o botão silencioso ou Esc entram sem som; Tab, Shift e atalhos não contam
-  (`lib/soundGate.js`). O carro sai da névoa quando a página abre.
+  (`lib/soundGate.js`). O que acontece depois está em "Abertura: partida do motor".
 - **Sem memória da escolha** (a tela aparece em toda visita) e **sem botão de som no header**: só existe o
   clipe da partida. Decisões do usuário.
 - **Áudio:** Web Audio, porque o fade precisa de um nó de ganho (no iOS o `volume` do `<audio>` é só
-  leitura). O arquivo é baixado e decodificado antes, num `OfflineAudioContext`; no gesto só se cria o
-  contexto e toca: medido 0 ms entre criar o contexto e tocar. Decodificar depois do gesto atrasava o
+  leitura). O arquivo é baixado e decodificado antes, num `OfflineAudioContext`. **Criar o
+  `AudioContext` trava a thread** (~200 ms no navegador do app, ~500 ms no Lighthouse: é o dispositivo
+  de áudio abrindo): criado no clique, atrasava o som e congelava a imagem; criado na carga, subia o TBT
+  (mobile 12 → ~220 ms). Ele é criado **suspenso no primeiro sinal de intenção** (mover o ponteiro,
+  tocar, tecla) e o gesto só dá `resume()`: 15 ms do clique ao som. Decodificar depois do gesto atrasava o
   som em ~2 s com o arquivo provisório. Recorte e fades em `lib/envelope.js`; se o áudio não chegar em
   1,5 s depois do gesto, a página abre em silêncio.
-- **Áudio final (2026-09-19):** BMW Z3, "car-start" de Erdie no Freesound (**CC BY 4.0**), trecho 0–5,5 s:
-  pega logo no início e acelera. O usuário pediu partida e acelerada rápidas dentro do tempo da tela.
+- **Áudio final (2026-09-19):** BMW Z3, "car-start" de Erdie no Freesound (**CC BY 4.0**): pega logo no
+  início e acelera. O usuário pediu partida e acelerada rápidas dentro do tempo da tela. Primeiro com o
+  trecho 0–5,5 s; depois (ver "Abertura") a gravação até 9 s, voltando à lenta.
   - Busca: nenhum B58/A90/M340i com licença aberta no Freesound. Comparadas no laboratório (temporário)
     gravações curtas com partida e acelerada (Z3, Mercedes 190E-16V, Lotus Elise, BMW M6, todas CC0
     menos a Z3) e uma montagem de dois trechos com crossfade (partida e acelerada do M4, cujo original
     no Freesound é CC0). Escolha do usuário: a Z3, sem edição.
   - Arquivo: `public/audio/engine-start.mp3`, recortado com ffmpeg da prévia HQ pública (o original, MP3
-    de 160 kbps, exige login), estéreo 128 kbps, 89 KB (o provisório tinha 4 MB e vinha do CDN do Pixabay).
-    Os fades continuam no código (`lib/envelope.js`), não no arquivo.
+    de 160 kbps, exige login), estéreo 128 kbps, 145 KB com 9 s (o provisório tinha 4 MB e vinha do CDN
+    do Pixabay). Os fades continuam no código (`lib/envelope.js`), não no arquivo.
   - Crédito no footer, **só porque a licença pede** (decisão do usuário: CC0 ficaria sem crédito): título,
     autor com link, licença com link e "trimmed" (a CC BY exige indicar a alteração).
+
+### Abertura: partida do motor (2026-09-19)
+
+Pedido do usuário: motion do hero e do preloader. Variantes comparadas lado a lado na página real
+(laboratório temporário com iframes, apagado): carregamento **L1 linha** / L2 contador / L3 shift light;
+título **H1 ignição** / H2 letra a letra / H3 tranco (escala e solavanco da câmera). Escolhas: **L1 e H1**.
+O usuário achou o resultado "cru" e o som "seco"; vieram quatro refinamentos, todos aprovados.
+
+- **Carregamento:** o label e uma linha lime de 2 px que cresce com o download (`--progress`). Ao
+  chegar a 100% o carregamento sobe e some (400 ms) e as linhas da tela de som entram em sequência, o
+  título por trás de uma máscara (`gate.css`).
+- **A sequência** (`data/opening.js`, segundos a partir do clique), como um carro dando partida:
+  1. 0–0,7 s: a tela sai (fade de 600 ms) e a névoa se dissipa em 700 ms; o carro aparece **apagado**.
+  2. 0,7 s: **a chave vira** — faróis acesos 0,15 s, apagados 0,2 s, acesos de vez; as lanternas sobem
+     depois (`lib/ignition.js`, `lightsAt`).
+  3. 1,5 s: o motor dá partida; na **pega** (0,4 s no clipe, o ponto mais alto do volume, medido no
+     arquivo: `engineSound.catchAt`) o "SUPRA" sobe de trás da máscara (`lib/heroEntrance.js`); depois o
+     kicker, a frase e o "Scroll to drive". No fim o título volta a ser texto simples.
+  4. Enquanto o motor gira, **"respira"**: a luz lime do teto cresce com o volume e a câmera se aproxima
+     0,35 m, voltando ao enquadramento em 1,5 s depois do clipe (`components/ignitionShow.js`). O volume
+     vem da curva do arquivo decodificado (`lib/loudness.js`), então roda igual **sem som**.
+  - A primeira tentativa abria a tela e acendia os faróis juntos na pega: "rápido demais, muita
+    informação", a piscada não era vista. Separar os momentos resolveu.
+- **Faróis apagados de verdade:** zerar só o `emissive` não bastava — a cor base (quase branca nos
+  faróis, vermelha nas lanternas) iluminada pelo estúdio continuava parecendo acesa. Apagados, as cores
+  vão a `lightsOff` (`data/carStage.js`). Testados e **retirados** a pedido do usuário: um facho de spot
+  no chão (virava uma mancha oval longe do nariz) e um halo sobre cada farol ("bolinha de luz demais").
+- **Som com espaço:** a gravação inteira (9 s, fade de 2,5 s), num ambiente gerado no navegador — reverb
+  por convolução com ruído decaindo (`lib/impulse.js`, semente fixa, sem download) — e +4 dB de graves
+  abaixo de 140 Hz. O contexto só fecha depois do eco.
+- **Lite** (sem carro 3D): sem luzes nem "respira"; o motor toca no clique e o título sobe na pega.
+  Numa linha lenta (a tela de som abre aos 8 s, antes do carro) vale o mesmo.
+- **Reduced motion:** cai no lite, e o título e os textos aparecem parados.
 
 ## Fontes dos números
 
