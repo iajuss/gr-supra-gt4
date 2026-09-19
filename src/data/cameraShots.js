@@ -19,7 +19,7 @@ export default [
     position: { x: -5.8, y: 2.35, z: 3.3 },
     target: { x: -1.6, y: 0.8, z: 0 },
     fov: 34,
-    offset: -0.22,
+    offset: -0.245,
   },
   {
     // 02 — Chassis: front splitter, low and close. Text on the left.
@@ -27,7 +27,7 @@ export default [
     position: { x: 5.5, y: 0.6, z: 2.9 },
     target: { x: 1.8, y: 0.4, z: 0 },
     fov: 34,
-    offset: 0.25,
+    offset: 0.29,
   },
   {
     // 03 — Engine: side profile at hip height, the whole car in view. Text on the right.

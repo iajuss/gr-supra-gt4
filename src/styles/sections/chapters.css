@@ -63,8 +63,11 @@
   }
 }
 
+/* The camera reaches a chapter's shot with the chapter centred in the viewport (scene/cameraRig.js):
+   the nav's anchors land there too, instead of at the top, where the camera is still on its way. */
 [data-mode='full'] .chapter {
   min-height: 140svh;
+  scroll-margin-top: -20svh;
 }
 
 [data-mode='full'] .chapter__shot {
