@@ -301,44 +301,37 @@ Um modo é escolhido na inicialização por `src/lib/capabilities.js`:
 
 ## Arquitetura
 
+Atualizada em 2026-09-19 (o esboço inicial previa `vulcan.glb`, HDRI e um `loader.js`, que não
+vieram a existir).
+
 ```
 index.html
 public/
-  models/vulcan.glb        modelo comprimido (Draco/meshopt, meta ≤ ~5 MB)
-  env/studio.hdr           HDRI leve de estúdio
+  models/supra.glb         modelo com Draco (7,7 MB; meta ≤ 5 MB no Bloco 6)
+  draco/                   decodificador Draco
+  audio/engine-start.mp3   partida do motor (tela de som)
   shots/*.webp             imagens estáticas por capítulo (modo lite)
 src/
-  main.js                  ponto de entrada: escolhe modo, inicia módulos
-  data/
-    cameraShots.js         [{ id, position, target, fov }]
-    specs.js               números + fontes
-    silverstone.json       traçado normalizado
-  lib/
-    capabilities.js        decide full | lite
-    scroll.js              Lenis + ScrollTrigger sincronizados
-    loader.js              carrega GLB/HDR com progresso
-    math.js                lerp, normalização, interpolação
-  scene/
-    renderer.js            renderer, limite de resolução, loop que pausa
-    stage.js               piso, luzes, ambiente
-    car.js                 monta o modelo e ajusta materiais
-    cameraRig.js           timeline de scroll → câmera
-  components/
-    preloader.js
-    textReveal.js
-    lapTrack.js            Canvas 2D: traçado + ponto
-    telemetryHud.js        só exibe { progress, speed, gear, sector }
-    specCounters.js
-  styles/
-    tokens.css · base.css · sections/*.css
+  main.js                  ponto de entrada: escolhe o modo, inicia os módulos
+  data/                    números e ajustes: câmeras, palco, volta, som, abertura, traçado
+  lib/                     lógica pura, cada arquivo com o seu teste (capabilities, math, track,
+                           telemetry, lapClock, ignition, loudness, curtain…)
+  scene/                   Three.js: renderer, stage, studioEnvironment, car, pitBox, cameraRig,
+                           lap/ (palco 3D da volta, com bloom)
+  components/              comportamento da página: preloader, soundGate, ignitionShow, heroEntrance,
+                           lapSection(3d), lapCurtain, specCounters, textReveal, chapterShots…
+  styles/                  tokens, base e um arquivo por seção
+tools/                     laboratório, capturas do lite, pipeline do modelo (model/)
 ```
 
 ## Performance
 
-- Modelo ≤ ~5 MB, texturas ≤ 2K. Se vier pesado, simplificar com `gltf-transform`.
-- Resolução do 3D limitada a 1,5x. Sem sombras em tempo real: sombra do chão em textura fixa.
-- Render pausa fora da zona 3D e com a aba em segundo plano.
-- Lighthouse desktop: Performance ≥ 85, Acessibilidade ≥ 95. Mobile (lite): Performance ≥ 90.
+- Metas atuais (desde 2026-09-18): Lighthouse **mobile 100** em tudo; **desktop ≥ 97**, idealmente 100
+  (o desktop oscila com a carga da máquina: medir contra um build de referência, em rodadas alternadas).
+- Modelo: meta ≤ 5 MB (ideal 3–4 MB); hoje 7,7 MB pela lataria não simplificada (Bloco 6).
+- Resolução do 3D limitada a 1,5x. Sem sombras em tempo real: sombras de contato em textura fixa.
+- Render sob demanda; pausa fora da zona 3D e com a aba em segundo plano. O que desenhar sem parar
+  (câmera na mão, fluxo de ar) tem limite explícito: ver "Rodada de upgrades".
 
 ### Carregamento sem tarefas longas (2026-09-18)
 
@@ -566,4 +559,30 @@ Os 429k triângulos são o preço, pago só no desktop — o mobile é lite, com
   link para o modelo no CGTrader) e cita a licença como publicada. Se um dia for preciso trocar, os
   candidatos Royalty Free verificados são o Supra MK5 "Hyper Realistic" (sem asa grande) e o
   Koenigsegg Jesko (asa enorme).
-- **Deploy na Vercel** (decisão de 2026-09-18).
+- ~~Deploy na Vercel~~ — feito em 2026-09-19 (https://gr-supra-gt4.vercel.app).
+
+## Rodada de upgrades (planejada em 2026-09-19)
+
+Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano em
+[plan.md](plan.md) (Bloco 6). Decisões do usuário, todas pelas recomendações:
+
+- **Celular: vídeo curto no hero do lite**, não 3D. O GLB tem 3,55M triângulos e 7,7 MB; 3D no celular
+  exigiria outra versão do carro e poria o Three.js (e a compilação de shaders) na emulação mobile do
+  Lighthouse. O vídeo (loop mudo de 4–6 s, ~1 MB) só carrega depois do clique na tela de som, então
+  o lite continua sem Three.js e o Lighthouse mobile não o vê. Com reduced motion fica a imagem.
+- **Grão e vinheta em CSS, nos dois modos**, numa camada entre o palco e o texto: custo zero de GPU,
+  mantém o render sob demanda e chega ao celular. No WebGL fica só o bloom, e só no full.
+- **Bloom discreto e físico:** limiar alto, para brilharem as fontes de luz (LEDs, lanternas, luz de
+  chuva) e não a lataria; sem halo em sprite nem facho no chão (os dois já rejeitados). O composer perde
+  o antialias do canvas (render target com `samples: 4`) e as passadas são pré-compiladas, senão o TBT
+  volta. Orçamento: `lib/quality.js` desliga o bloom ou baixa a resolução dele se os primeiros quadros
+  depois da abertura passarem de ~20 ms no p95.
+- **Câmera na mão só com o palco visível:** liga com a zona 3D na tela e a aba ativa, entra suave e
+  desliga fora dela e com reduced motion. É a primeira coisa que desenha sem parar em repouso.
+- **Spline:** a câmera já anda em arco (`lerpOrbit`); a spline só tira a quebra de velocidade nas
+  paradas. Se o laboratório não mostrar diferença, fica o arco.
+- **Carro mais leve:** o GLB já usa Draco e só tem posição e normal; o peso é a lataria, que não é
+  simplificada porque o meshopt ignorava as normais. Tentativa: `simplifyWithAttributes` pesando as
+  normais, escolhida pelo olho no `lookLab`.
+- **Case:** seção "Making of" no README; sem página nova e sem versão em português nesta rodada.
+- **Fora da rodada:** o Supra na pista da volta e o som seguindo a telemetria.

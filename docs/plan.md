@@ -28,6 +28,11 @@
     ~20 ms a mais, numa tarefa do chunk `stage` aos ~0,4 s; não investigado. Rodadas isoladas de 83–87 aparecem com
     a máquina ocupada (captura de imagens, laboratório aberto); repetir sem carga antes de concluir.
 
+### ▶ Próxima rodada: Bloco 6 — upgrades (planejado em 2026-09-19)
+
+Plano aprovado em 3 dias, no fim deste arquivo. Decisões em design.md ("Rodada de upgrades"). Começar
+pelo P0 (prévia do link), antes de o post do LinkedIn circular.
+
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
 1. ~~Ritmo entre "The circuit." e a volta~~ — feito em 2026-09-19 (cortina, variante C).
@@ -398,3 +403,71 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
   - Conferido no ar: página, GLB (`model/gltf-binary`), áudio, Draco `wasm`; modo full abre, console limpo.
   - Lighthouse em produção, rodadas alternadas com o build local para separar a máquina do site: as
     duas oscilam juntas (89–91 numa dupla, 99–100 na outra; produção 100 com TBT 39 ms). Mobile 92–100.
+
+## Bloco 6 — Upgrades de qualidade (3 dias, planejado em 2026-09-19)
+
+Ponto de partida: `6768e5c`, 240 testes. Decisões e motivos em design.md ("Rodada de upgrades").
+Cada item visual passa pelo laboratório (`?lab-...` temporário, iframes da página real), uma coisa de
+cada vez; os parâmetros saem depois da escolha. Push para o `main` publica: confirmar antes de cada um.
+
+**Não pode regredir:** Lighthouse mobile 100 e desktop ≥ 97; contraste ≥ 4,5:1 no quadro renderizado;
+reduced motion → página parada; Pause na volta; ordem do foco; lite sem Three.js; `AudioContext` no
+primeiro movimento.
+
+**Referência para medir:** worktree de `6768e5c` servida em outra porta; Lighthouse em rodadas
+alternadas (3 pares por modo). FPS com o painel visível em 1152×720 (média, p95, pior quadro), rolando
+a zona 3D e parado num capítulo.
+
+### Dia 1 — prévia do link, CI e peso
+- [ ] **P0** Prévia do link: `og:title`, `og:description`, `og:url` e `og:image` absolutos, `og:type`,
+  `twitter:card=summary_large_image`. Imagem 1200×630 tirada da cena pelo `tools/capture` (hero com
+  "SUPRA" composto por cima); grava em `public/` → pedir autorização
+  - 👁 conferir as tags no build; depois do deploy, LinkedIn Post Inspector
+- [ ] **P0** Comentário truncado no topo de `components/ignitionShow.js`
+- [ ] CI no GitHub Actions: `npm ci`, `npm test`, `npm run build` a cada push; selo no README
+- [ ] Carro mais leve (meta ≤ 5 MB, ideal 3–4 MB). O GLB já usa Draco e só tem `POSITION` + `NORMAL`: o
+  peso é a lataria não simplificada (pintura 1,65 MB, blackout 1,73, `WHEELARCH` 1,89, carbono 0,71)
+  - variantes no `optimize.mjs`: lataria com `simplifyWithAttributes` do meshoptimizer (pesando as
+    normais, a causa dos amassados) em 2–3 níveis; quantização do Draco
+  - 👁 `lookLab.html?model=` lado a lado, closes da lataria com o verniz; usuário escolhe
+  - 📏 bytes, triângulos, FPS rolando; `tools/model/README.md` atualizado
+
+### Dia 2 — imagem de cinema
+- [ ] Bloom no palco do hero: limiar alto (LEDs, lanternas, luz de chuva; a lataria não), composer com
+  MSAA (`samples: 4`), render sob demanda mantido, passadas pré-compiladas (como o PMREM) para o TBT
+  - 👁 laboratório: 2–3 intensidades · 📏 TBT, FPS
+- [ ] 🧪 `lib/quality.js`: pelos primeiros quadros depois da abertura, p95 acima de ~20 ms desliga o bloom
+  ou baixa a resolução dele (orçamento explícito)
+- [ ] Grão e vinheta em CSS, nos dois modos, numa camada entre o palco e o texto (ruído fixo, sem
+  animação com reduced motion)
+  - 👁 laboratório: 2 intensidades · 📏 contraste de novo no quadro renderizado (percentil 98)
+- [ ] 🧪 Câmera em spline (Catmull-Rom sobre as paradas, preservando o arco do `lerpOrbit`): passa
+  exatamente pelas paradas; `cameraShots.test.js` cobre a spline (nenhum trecho mais perto do carro
+  que as paradas)
+  - 👁 laboratório: arco atual × spline; sem diferença visível, fica o arco
+- [ ] 🧪 Câmera na mão nas paradas: `lib/handheld.js` (soma de senos determinística, amplitude limitada,
+  entrada suave). Só com a zona 3D visível e a aba ativa; nunca com reduced motion
+  - 👁 amplitude no laboratório · 📏 FPS parado
+- Profundidade de campo: fora, a menos que sobre tempo (caro, borra perto do texto)
+
+### Dia 3 — aero, celular e entrega
+- [ ] 🧪 Fluxo de ar no capítulo aero: `lib/airflow.js` (linhas de corrente a partir do perfil do carro,
+  nunca dentro da bounding box, laço contínuo, posição por tempo); cena com linhas instanciadas,
+  desenhando só com o capítulo na tela; parado com reduced motion
+  - 👁 laboratório: linhas × partículas · 📏 FPS
+- [ ] Vídeo curto no hero do lite: loop mudo de 4–6 s, `playsinline`, ~0,6–1 MB (H.264, e WebM se
+  compensar), a imagem atual como pôster; carregado só depois do clique na tela de som; com reduced
+  motion fica a imagem
+  - gerado pela ferramenta de captura quadro a quadro + ffmpeg (sem Playwright); grava em `public/` →
+    pedir autorização
+  - 🧪 regra de quem recebe vídeo ou imagem (`lib/heroMedia.js` ou em `capabilities`)
+  - 👁 375 px, console · 📏 Lighthouse mobile 100
+- [ ] Imagens do lite regravadas com `tools/capture.html`, uma vez, depois das mudanças visuais do
+  carro (pedir autorização)
+- [ ] Lighthouse CI no workflow, **informativo** (não bloqueia: o runner oscila)
+- [ ] 📏 Rodada final: Lighthouse alternado contra a referência, FPS, peso da página; números na Retomada
+- [ ] README: seção "Making of" (bastidores, métricas, antes e depois, link para o vídeo)
+- [ ] Vídeos de divulgação regravados (Playwright é download → pedir autorização)
+
+**Fora desta rodada:** o Supra na pista da volta, o som seguindo a telemetria (com botão de som no
+header), a página de case e a versão em português.
