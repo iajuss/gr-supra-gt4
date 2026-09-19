@@ -1,0 +1,69 @@
+/* Film finish over the car's imagery: a vignette and a moving grain. Full mode lays it over the fixed 3D
+   stage, under all the text; lite over the chapters' stills. Strength chosen side by side at 1:1
+   (vignette 50%, grain of the "B" strength, 2026-09-19). CSS rather than a WebGL pass: no GPU work of
+   the stage's own, and the stage still draws only when something moves. Both only darken, so the
+   text over the stage keeps its contrast. */
+
+:root {
+  /* Grey fractal noise, 160 px tile, no download, remapped to ~60–100% grey and multiplied: the
+     grain only ever darkens. As overlay (the first version) it also lightened, and on the brightest
+     patch of floor it pulled the hero's labels under 4.5:1 (kicker 5.25 → 3.90, measured on the
+     rendered frame, 2026-09-19). */
+  --film-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.9' intercept='0.217'/%3E%3CfeFuncG type='linear' slope='0.9' intercept='0.217'/%3E%3CfeFuncB type='linear' slope='0.9' intercept='0.217'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --film-grain-opacity: 0.3;
+  --film-vignette: radial-gradient(75% 75% at 50% 50%, transparent 50%, rgb(0 0 0 / 0.5) 100%);
+}
+
+[data-mode='full'] .stage,
+.chapter__shot {
+  overflow: hidden;
+}
+
+.chapter__shot {
+  position: relative;
+}
+
+[data-mode='full'] .stage::before,
+.chapter__shot::before,
+[data-mode='full'] .stage::after,
+.chapter__shot::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+[data-mode='full'] .stage::before,
+.chapter__shot::before {
+  inset: 0;
+  background: var(--film-vignette);
+}
+
+/* Twice the size of the frame, so shifting it never shows an edge. */
+[data-mode='full'] .stage::after,
+.chapter__shot::after {
+  inset: -50%;
+  background: var(--film-grain);
+  opacity: var(--film-grain-opacity);
+  mix-blend-mode: multiply;
+  animation: film-grain 1s steps(1) infinite;
+}
+
+/* Eight jumps a second, like film running through a gate. Offsets are not multiples of the tile, so
+   each step shows a different grain. Transform only: the compositor moves it, nothing is repainted. */
+@keyframes film-grain {
+  0% { transform: translate(0, 0); }
+  12.5% { transform: translate(-37px, 21px); }
+  25% { transform: translate(53px, -44px); }
+  37.5% { transform: translate(-71px, -13px); }
+  50% { transform: translate(29px, 67px); }
+  62.5% { transform: translate(-19px, -58px); }
+  75% { transform: translate(64px, 33px); }
+  87.5% { transform: translate(-48px, 76px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-mode='full'] .stage::after,
+  .chapter__shot::after {
+    animation: none;
+  }
+}

@@ -479,9 +479,19 @@ a zona 3D e parado num capítulo.
     segue por construção)
 - [ ] 🧪 `lib/quality.js`: pelos primeiros quadros depois da abertura, p95 acima de ~20 ms desliga o bloom
   ou baixa a resolução dele (orçamento explícito)
-- [ ] Grão e vinheta em CSS, nos dois modos, numa camada entre o palco e o texto (ruído fixo, sem
-  animação com reduced motion)
-  - 👁 laboratório: 2 intensidades · 📏 contraste de novo no quadro renderizado (percentil 98)
+- [x] Grão e vinheta em CSS (2026-09-19, `styles/sections/film.css`): pseudo-elementos do palco fixo
+  (full, abaixo de todo o texto) e das figuras dos capítulos (lite). Ruído SVG embutido, sem download;
+  o grão se mexe 8×/s só por `transform` (compositor) e para com reduced motion
+  - 👁 variantes montadas em canvas com o mesmo ruído e a mesma mistura, sobre o quadro real, em 1:1 e
+    ampliadas (pelo celular o grão não aparecia em tamanho real). **Escolha do usuário: B** (vinheta 50%)
+    e grão se mexendo; avaliar de novo no notebook
+  - 📏 contraste no quadro renderizado (p98 atrás de cada texto do hero, pior caso do ruído): a primeira
+    versão, com `overlay`, clareava o piso e derrubava kicker 5,25 → 3,90, "Track only" 4,96 → 3,69 e
+    frase 5,40 → 4,27. Trocada por `multiply` com o ruído em tons claros: o filme só escurece, e todos
+    sobem (kicker 5,46, "Track only" 5,16, frase 5,57). Escurecimento do grão 0,7–10,6%, média 5%
+  - 📏 FPS rolando em 1152×720: 78, mediana 12,1 ms, p95 18,2 ms (igual). Lighthouse no build: desktop
+    93 / 99 / 99 (a primeira rodada fria), mobile 100 / 100, CLS 0
+  - 👁 375 px: vinheta nas figuras, grão animado, sem rolagem horizontal; console limpo
 - [ ] 🧪 Câmera em spline (Catmull-Rom sobre as paradas, preservando o arco do `lerpOrbit`): passa
   exatamente pelas paradas; `cameraShots.test.js` cobre a spline (nenhum trecho mais perto do carro
   que as paradas)

@@ -571,8 +571,15 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
   exigiria outra versão do carro e poria o Three.js (e a compilação de shaders) na emulação mobile do
   Lighthouse. O vídeo (loop mudo de 4–6 s, ~1 MB) só carrega depois do clique na tela de som, então
   o lite continua sem Three.js e o Lighthouse mobile não o vê. Com reduced motion fica a imagem.
-- **Grão e vinheta em CSS, nos dois modos**, numa camada entre o palco e o texto: custo zero de GPU,
-  mantém o render sob demanda e chega ao celular. No WebGL fica só o bloom, e só no full.
+- **Grão e vinheta em CSS, nos dois modos (feito):** sobre a imagem do carro e abaixo de todo o texto
+  (full: o palco fixo; lite: as figuras dos capítulos). Custo zero de GPU do palco, que continua
+  desenhando só sob demanda. Vinheta radial de 50% nas bordas; grão em ruído SVG embutido que se mexe
+  8×/s por `transform`, parado com reduced motion.
+  - **O filme só escurece:** o grão é multiplicado (ruído em tons claros), não sobreposto. Com `overlay`
+    ele clareava o piso atrás do texto do hero e derrubava o contraste para 3,7–4,3:1; multiplicado, o
+    contraste sobe (medido no quadro renderizado, pior caso do ruído). Custo: ~5% de escurecimento médio.
+  - É acabamento, não destaque: aparece na tela grande e em movimento; nas imagens mandadas ao celular
+    só se via ampliado. O usuário escolheu a intensidade B e vai reavaliar no notebook.
 - **Bloom discreto e físico, só nas luzes (feito):** brilham LEDs, lanternas, neblinas e luz de chuva, e
   nunca a lataria; sem halo em sprite nem facho no chão (os dois já rejeitados).
   - **Por que seletivo:** um limiar de brilho não separa as luzes do verniz. Os reflexos dos spots no
