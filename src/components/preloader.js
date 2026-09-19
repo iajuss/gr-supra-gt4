@@ -17,8 +17,13 @@ export function createPreloader(root, { reducedMotion }) {
   let shown = 0;
   let open = false;
 
+  // While the screen covers the page, what is behind it can be neither focused nor read.
+  const page = [...document.body.children].filter((element) => element !== root && element.tagName !== 'SCRIPT');
+  const setPageInert = (inert) => page.forEach((element) => (element.inert = inert));
+
   root.hidden = false;
   html.classList.add('is-loading');
+  setPageInert(true);
   const timeout = setTimeout(close, OPEN_AFTER_MS);
 
   function write(percent) {
@@ -32,6 +37,7 @@ export function createPreloader(root, { reducedMotion }) {
     open = true;
     clearTimeout(timeout);
     html.classList.remove('is-loading');
+    setPageInert(false);
 
     if (reducedMotion) {
       root.hidden = true;

@@ -140,7 +140,11 @@
 [data-lap-view='3d'] .hud__note {
   top: calc(var(--header-h) + var(--space-3));
   left: var(--gutter);
-  color: var(--color-muted);
+}
+
+/* Over the moving stage, even on the HUD panels, the muted grey fell under 4.5:1 (see stage.css). */
+[data-lap-view='3d'] .label {
+  color: var(--color-text-soft);
 }
 
 [data-lap-view='3d'] .hud__grid,

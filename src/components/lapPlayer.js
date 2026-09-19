@@ -1,14 +1,16 @@
 // Plays one lap per start: frame loop + lap clock. Starts when the view is half visible, pauses while it is
-// off screen, stops on the line. Shared by the 2D (lite) and 3D (full) views.
+// off screen or on demand ([data-lap-pause]), stops on the line. Shared by the 2D (lite) and 3D (full) views.
+// The rules of when to move live in lib/lapPlayback.js; this file only follows them.
 
 import lapScene from '../data/lapScene.js';
 import { createLapClock } from '../lib/lapClock.js';
+import * as playback from '../lib/lapPlayback.js';
 import { sampleAtTime } from '../lib/telemetry.js';
 
 const START_VISIBILITY = 0.5;
 
 /**
- * @param {HTMLElement} root element watched for visibility
+ * @param {HTMLElement} root element watched for visibility, holding the [data-lap-pause] button
  * @param {{
  *   model: ReturnType<import('../lib/telemetry.js').createLapModel>,
  *   onFrame: (sample: ReturnType<typeof sampleAtTime>, dt: number) => void,
@@ -18,12 +20,11 @@ const START_VISIBILITY = 0.5;
  */
 export function createLapPlayer(root, { model, onFrame, onFinish, onRestart }) {
   const clock = createLapClock({ lapTime: model.lapTime, duration: lapScene.duration, maxStep: lapScene.maxStep });
+  const pauseButton = root.querySelector('[data-lap-pause]');
+  let state = playback.initialPlayback;
   let frame = 0;
   let last = 0;
   let running = false;
-  let started = false;
-  let finished = false;
-  let visible = false;
 
   function tick(now) {
     const dt = Math.min(lapScene.maxStep, Math.max(0, (now - last) / 1000));
@@ -31,7 +32,7 @@ export function createLapPlayer(root, { model, onFrame, onFinish, onRestart }) {
     const { simTime, done } = clock.advance(dt);
     if (done) {
       running = false;
-      finished = true;
+      state = playback.finish(state);
       onFinish();
       return;
     }
@@ -39,36 +40,42 @@ export function createLapPlayer(root, { model, onFrame, onFinish, onRestart }) {
     frame = requestAnimationFrame(tick);
   }
 
-  function resume() {
-    if (running || !started || finished || !visible) return;
-    running = true;
-    last = performance.now();
-    frame = requestAnimationFrame(tick);
-  }
-
-  function stop() {
-    cancelAnimationFrame(frame);
-    running = false;
+  /** Starts or stops the loop to match the state, and shows the state on the pause button. */
+  function sync() {
+    pauseButton?.setAttribute('aria-pressed', String(state.paused));
+    const run = playback.shouldRun(state);
+    if (run === running) return;
+    running = run;
+    if (run) {
+      last = performance.now();
+      frame = requestAnimationFrame(tick);
+    } else {
+      cancelAnimationFrame(frame);
+    }
   }
 
   function restart() {
-    stop();
+    cancelAnimationFrame(frame);
+    running = false;
     clock.reset();
-    started = true;
-    finished = false;
+    state = playback.restart(state);
     onRestart?.();
-    resume();
+    sync();
   }
+
+  function togglePause() {
+    state = playback.togglePause(state);
+    sync();
+  }
+
+  pauseButton?.addEventListener('click', togglePause);
 
   const observer = new IntersectionObserver(
     ([entry]) => {
-      visible = entry.isIntersecting;
-      if (!visible) {
-        stop();
-        return;
-      }
-      if (entry.intersectionRatio >= START_VISIBILITY) started = true;
-      resume();
+      // An edge-on intersection reports ratio 0 while still intersecting: it counts as in view.
+      const ratio = entry.isIntersecting ? Math.max(entry.intersectionRatio, Number.MIN_VALUE) : 0;
+      state = playback.see(state, ratio, START_VISIBILITY);
+      sync();
     },
     { threshold: [0, START_VISIBILITY] },
   );

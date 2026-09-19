@@ -19,6 +19,7 @@ export function initLapSection(root, { reducedMotion }) {
   });
   const hud = createTelemetryHud(root);
   const restart = root.querySelector('[data-lap-restart]');
+  const pause = root.querySelector('[data-lap-pause]');
 
   function showFinish() {
     track.render(1);
@@ -27,7 +28,9 @@ export function initLapSection(root, { reducedMotion }) {
   }
 
   if (reducedMotion) {
+    // The lap is shown finished, nothing moves: no playback controls.
     restart.hidden = true;
+    pause.hidden = true;
     showFinish();
     return;
   }

@@ -41,7 +41,7 @@
     <main id="main">
       <section class="hero" id="top" data-shot="hero" aria-labelledby="hero-title">
         <p class="label hero__kicker">
-          // Unofficial concept · <span class="accent">Track only</span> ·
+          <span aria-hidden="true">//</span> Unofficial concept · <span class="accent">Track only</span> ·
           3.0 turbo · 100+ built
         </p>
         <h1 class="hero__title" id="hero-title">Supra</h1>
@@ -162,6 +162,7 @@
                 <button class="button button--toggle" type="button" data-lap-camera="heli" aria-pressed="false">Heli</button>
                 <button class="button button--toggle" type="button" data-lap-camera="top" aria-pressed="false">Top</button>
               </div>
+              <button class="button button--toggle" type="button" data-lap-pause aria-pressed="false">Pause</button>
               <button class="button" type="button" data-lap-restart>Restart lap</button>
             </div>
             <p class="hud__note label">Telemetry simulated for illustration</p>

@@ -4,6 +4,17 @@
   display: none;
 }
 
+/* Over the lit 3D stage the muted grey fell to 1.1–4.8:1 (measured on the rendered frames, 2026-09-18):
+   labels read at the soft text tone there. Lite keeps the muted grey, on a flat background. */
+[data-mode='full'] :is(.hero, .chapter, .handoff) .label {
+  color: var(--color-text-soft);
+}
+
+/* The kicker sits on the brightest patch, the key light's reflection on the floor behind the title. */
+[data-mode='full'] .hero__kicker.label {
+  color: var(--color-text);
+}
+
 [data-mode='full'] .stage {
   display: block;
   position: fixed;

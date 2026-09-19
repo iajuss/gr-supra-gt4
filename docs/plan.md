@@ -5,10 +5,11 @@
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 186 testes verdes, build ok.
-  **TBT do desktop corrigido** (ainda sem commit): ambiente com shaders pré-compilados, `prepare` do
+- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 195 testes verdes, build ok.
+  **TBT do desktop corrigido** (commit `005df39`): ambiente com shaders pré-compilados, `prepare` do
   palco e do carro, 3D da volta montado só perto da seção. Detalhes em design.md ("Carregamento sem
-  tarefas longas").
+  tarefas longas"). **Checagem de acessibilidade feita:** contraste dos labels sobre o 3D, Pause na
+  volta, preloader `inert` (design.md, "Acessibilidade").
 - **Lighthouse** (2026-09-18, `vite preview` + Edge headless via `npx lighthouse@12`):
   - Mobile (lite): **100 / 100 / 100 / 100** (Perf / A11y / Boas práticas / SEO). TBT 20 ms.
   - Desktop (full): **99 / 100 / 100 / 100** em 3 rodadas, TBT 58–70 ms (era Perf 66–70 com
@@ -22,8 +23,8 @@
    - pré-compilar também o palco da volta e o bloom, para tirar os ~380 ms que ela bloqueia quando o
      usuário chega perto da seção;
    - o GLB tem 7,7 MB, acima da meta de ~5 MB do design.md.
-2. **Checagem manual de acessibilidade:** ordem do foco pelo teclado, foco visível, contraste do
-   texto sobre o palco 3D, alt das imagens do lite, `aria-live` do HUD e o preloader.
+2. ~~Checagem manual de acessibilidade~~ — feita em 2026-09-18 (ver design.md, "Acessibilidade").
+   Em aberto, por decisão: o preloader anuncia cada porcentagem (`role="status"`).
 3. Motion do hero/preloader.
 4. Créditos do footer e deploy na Vercel.
 - Não visto no navegador nesta sessão (painel oculto a maior parte do tempo): a animação do reveal
@@ -68,7 +69,8 @@
 | `lib/ribbon.js` | `buildRibbon` (vértices, índices, cores, segmentos pulados), `indexCountUntil`, `stripeAt` |
 | `lib/cameraRigs.js` | `cameraRig`, `cameraFov`, `followFactor`, `topCameraLook` |
 | `lib/lap.js` | `buildLap`: traçado em metros + modelo da volta (2D e 3D) |
-| `components/lapPlayer.js` | loop + relógio: início a 50% visível, pausa fora da tela, fim na linha, Restart |
+| `lib/lapPlayback.js` | regras puras de quando a volta anda: autoplay a 50% visível, fora da tela, pausa, fim, Restart |
+| `components/lapPlayer.js` | loop + relógio seguindo o `lapPlayback`; liga o botão Pause (`aria-pressed`) |
 | `components/lapSection.js` | modo lite (canvas 2D + HUD) |
 | `components/lapSection3d.js` | modo full (palco 3D, HUD, minimapa, câmeras, Restart); import dinâmico em `main.js` |
 | `scene/renderer.js` | fábrica do WebGLRenderer (1,5× máx.), compartilhada com o Bloco 4 |
@@ -282,7 +284,15 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
     a partir de 0,67. Console limpo. As transições vizinhas não foram capturadas (screenshots dando
     timeout); o `cameraShots.test.js` segue garantindo que não passam perto do carro.
 - [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
-- [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
+- [x] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura (2026-09-18)
+  - Roteiro manual no build (1152×720 full, 375 px lite). Passaram: ordem do foco, foco visível,
+    âncoras pelo teclado, `alt` do lite, anúncio do HUD, reduced motion → lite.
+  - Corrigidos: contraste dos labels sobre o 3D (muted → text-soft no full; kicker em text; medido no
+    frame renderizado, tudo ≥ 4,5:1); 🧪 Pause na volta (`lib/lapPlayback.js`, 9 testes) nos dois modos;
+    preloader deixa a página `inert`; `//` do kicker em `aria-hidden`.
+  - 👁 Pause congela o tempo, segue pausado fora da tela e de volta, Restart despausa (full e lite);
+    `inert` ativo durante o preloader e removido depois.
+  - Lighthouse depois: desktop 99 / 100 / 100 / 100, mobile 100 em tudo. 195 testes.
 - [x] Lighthouse no build (metas em design.md) — medido em 2026-09-18: mobile 100 em tudo; desktop
   Perf 66–70 pelo TBT, depois **99 / 100 / 100 / 100** com a correção abaixo. Corrigidos os achados menores: `public/favicon.svg` (a barra lime
   do header), `public/robots.txt` e o reveal, que punha `aria-label` num `<p>` (proibido pelo ARIA) e

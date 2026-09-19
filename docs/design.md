@@ -263,6 +263,30 @@ compilação), primeiro frame com o carro ~360 ms, 3D da volta ~365 ms, primeiro
 - Medir TBT no navegador do app engana: o cache de shaders do navegador já está quente depois da
   primeira carga (o GGX cai de ~310 para ~5 ms). O Lighthouse usa perfil novo, com o cache frio.
 
+## Acessibilidade (checagem manual, 2026-09-18)
+
+Roteiro no navegador (build, 1152×720 full e 375 px lite). Passaram sem mudança: ordem do foco pelo
+teclado, foco visível (inclusive no botão lime pressionado), âncoras da navegação pelo teclado, `alt`
+das imagens do lite, anúncio único do HUD no fim da volta, reduced motion → lite.
+
+- **Contraste sobre o 3D se mede no frame renderizado.** O Lighthouse não enxerga o WebGL. Método: copiar
+  o canvas no mesmo frame em que ele desenha (hook em `drawElements` + `drawImage` dentro do rAF),
+  compor os painéis semitransparentes por cima e comparar a cor do texto com o percentil 98 da
+  luminância na área das letras (retângulos do texto, não a caixa do bloco).
+- **Labels sobre o palco no tom `--color-text-soft`** (modo full: hero, capítulos, transição e HUD da
+  volta). O `--color-muted` ficava em 1,1–4,8:1 sobre as áreas iluminadas. O lite mantém o muted, sobre
+  fundo liso. O kicker do hero usa `--color-text`: ele fica sobre o reflexo da key light no piso.
+  Resultado: todo texto medido ≥ 4,5:1 (pior caso: o lime de "Track only", 4,74).
+- **A volta pode ser pausada** (WCAG 2.2.2: movimento automático com mais de 5 s). Botão Pause
+  (`aria-pressed`) ao lado de Restart, nos dois modos; o autoplay continua. A regra de quando a volta
+  anda é pura (`lib/lapPlayback.js`): pausar antes do início impede o autoplay, sair da tela e voltar
+  não despausa, Restart despausa. Com reduced motion (lite) a volta aparece terminada e os dois botões
+  somem.
+- **Preloader torna a página `inert`** enquanto a cobre (até 8 s), para o Tab não andar por links
+  escondidos. O anúncio da porcentagem a cada mudança (`role="status"`) ficou como está, por decisão.
+- O `//` do kicker fica em `aria-hidden`.
+- Não testado com leitor de tela real (NVDA); anúncios conferidos pelo DOM.
+
 ## Verificação
 
 - **Vitest (TDD)** para lógica pura:
