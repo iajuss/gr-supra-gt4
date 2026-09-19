@@ -85,6 +85,10 @@ pelo P0 (prévia do link), antes de o post do LinkedIn circular.
 - Em 1440×900 a captura do painel mostra só uma parte da viewport: para ver o quadro inteiro, emular
   1152×720 (mesmo aspecto 16:10).
 - Lighthouse no Windows termina com `EPERM` ao apagar a pasta temporária; os relatórios saem mesmo assim.
+  **E deixa o Edge headless vivo:** depois de ~30 rodadas eram 1.266 processos `msedge` e a memória
+  acabou (o Vitest caiu com "heap out of memory" e contou 135 testes). Depois de cada série, encerrar
+  os `msedge.exe` cuja linha de comando contém `lighthouse` (o perfil temporário); os outros são o Edge
+  do usuário.
 - Tempo de shader não se mede no navegador do app depois da primeira carga: o cache de shaders do
   navegador fica quente. Para TBT, confiar no Lighthouse (perfil novo, cache frio); os `performance.mark`
   e `measure` aparecem no audit `user-timings` do JSON.
@@ -449,9 +453,30 @@ a zona 3D e parado num capítulo.
   - Quantização do Draco não testada (a meta de peso ficou para trás na escolha do usuário)
 
 ### Dia 2 — imagem de cinema
-- [ ] Bloom no palco do hero: limiar alto (LEDs, lanternas, luz de chuva; a lataria não), composer com
-  MSAA (`samples: 4`), render sob demanda mantido, passadas pré-compiladas (como o PMREM) para o TBT
-  - 👁 laboratório: 2–3 intensidades · 📏 TBT, FPS
+- [x] Bloom no palco do carro (2026-09-19), **seletivo**: só as luzes do carro brilham
+  (`scene/bloom.js`, valores em `data/carStage.js`). Render sob demanda mantido
+  - O plano (limiar alto num composer com MSAA) não serviu: os reflexos dos spots no verniz passam do
+    brilho dos faróis, e mesmo com limiar 4 viravam manchas leitosas (`lookLab ?set=bloom`)
+  - Seletivo pela cena inteira num composer MSAA meio float: **34 FPS** rolando (sem bloom, 76). O MSAA
+    em meio float custava ~12 ms; a segunda passada com a lataria real em preto (~2M triângulos) ~6 ms
+  - Solução: a cena vai direto ao canvas, como antes; o brilho é feito à parte, a ¼ da resolução, só
+    das luzes, escondidas atrás da lataria por uma **silhueta** grosseira (`OCCLUDER`, 53 mil
+    triângulos, nunca desenhada no quadro; +187 KB no GLB, 5,75 MB), e só o desfoque é somado por cima.
+    Tentado antes: só as faces das luzes viradas para a câmera (as lanternas vazavam pela cabine)
+  - 📏 69 FPS rolando, mediana 12,2 ms e p95 18,3 ms, iguais a sem bloom. Console limpo
+  - 👁 hero, aero, chassis e engine lado a lado (sem / mínimo / suave / médio); **escolha do usuário:
+    suave** (força 0,4, raio 0,25)
+  - 📏 TBT: compilando os shaders do bloom na hora do primeiro quadro, desktop 70 / 87 / 90 (TBT até
+    1,3 s). Pré-compilados no `prepare`: 80–99, uma tarefa de ~350 ms quando um quadro chegava antes da
+    compilação; com o bloom esperando os shaders: 93–99 (~60 ms de montagem dos shaders na carga).
+    **Solução: o bloom liga no primeiro movimento / toque / tecla** (como o `AudioContext`), bem antes
+    de os faróis acenderem. Final, alternado com o publicado (`b90aeed`, worktree): **98 / 99 / 99 / 98**
+    (TBT 101–128 ms) × 99 / 98 / 91 (85–242 ms); mobile 100
+  - 👁 build em 1152×720: movimento real do mouse + clique em "Enter without sound" → ~14 passadas de
+    tela cheia por quadro (o bloom ligado). As ferramentas (`capture`, `shareCard`, `lookLab`) ligam o
+    bloom com `view.activateBloom()`
+  - Não visto quadro a quadro: o bloom piscando junto com os faróis na abertura (mesmo material, então
+    segue por construção)
 - [ ] 🧪 `lib/quality.js`: pelos primeiros quadros depois da abertura, p95 acima de ~20 ms desliga o bloom
   ou baixa a resolução dele (orçamento explícito)
 - [ ] Grão e vinheta em CSS, nos dois modos, numa camada entre o palco e o texto (ruído fixo, sem

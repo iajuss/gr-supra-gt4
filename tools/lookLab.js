@@ -139,6 +139,16 @@ const SETS = {
       config: { lights: { environmentIntensity, rim: { target: { x: -1.6, y: 0.9, z: 0 } } } },
     })),
   ],
+  // Bloom on the car stage (Bloco 6): off, and three strengths. Best with ?shots=hero,headlight,tail.
+  bloom: [
+    // Selective (only the lamps feed it): a brightness threshold alone bloomed the clear coat's
+    // highlights into milky blotches, even at 4.
+    // 1.4 / 0.5 fogged the close-ups (a close headlight fills the frame) and was dropped.
+    { label: 'Sem bloom', config: { bloom: false } },
+    { label: 'A. mínimo', config: { bloom: { strength: 0.2, radius: 0.15, threshold: 0 } } },
+    { label: 'B. suave', config: { bloom: { strength: 0.4, radius: 0.25, threshold: 0 } } },
+    { label: 'C. médio', config: { bloom: { strength: 0.8, radius: 0.35, threshold: 0 } } },
+  ],
   look: [
     { label: 'Atual' },
     { label: 'A. Luz', config: LIGHT, after: (car, view) => { clearcoat(BLACK)(car); edgeLight(view); } },
@@ -225,6 +235,7 @@ for (const variant of variants) {
   const car = await createCar(config, { url: variant.model ?? modelUrl });
   variant.after?.(car.object3D, view);
   view.add(car.object3D);
+  await view.activateBloom(); // as the page looks once open (a variant can turn it off: bloom false)
   await sized(canvas, SIZE.width);
 
   const row = document.createElement('div');

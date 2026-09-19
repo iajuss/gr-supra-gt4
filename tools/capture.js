@@ -29,6 +29,7 @@ function sized(element, cssWidth, tries = 60) {
 const view = await createStage(canvas, carStage);
 const car = await createCar(carStage);
 view.add(car.object3D);
+await view.activateBloom(); // the page turns the lamps' glow on at the first move: stills show it
 
 // createStage sizes the renderer from a ResizeObserver, which fires after this tick: capturing
 // before it lands would frame the shot against the canvas's default 300x150.

@@ -152,6 +152,63 @@ await step(doc, 'simplify', (document) => {
       simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: Number(ratio), error: Number(error) });
     }
 });
+// The occluder (2026-09-19): a coarse copy of the car's opaque shell, never seen, that the stage's bloom
+// draws in black so the body hides the lamps behind it (src/scene/bloom.js). Drawing the real body for
+// that cost ~6 ms a frame. Glass and the lamps themselves are left out: the lamps must not hide themselves.
+const OCCLUDER = { name: 'OCCLUDER', triangles: 30000, error: 0.01 };
+const NOT_OCCLUDING = [
+  'GLASS - windshield',
+  'Mirror',
+  'DETAIL tail glass',
+  'DETAIL plate',
+  'Luz blanca1',
+  'DETAIL tail light',
+  'DETAIL fog light',
+  'DETAIL rain light',
+  'Material.004',
+  'Material.002',
+];
+await step(doc, 'occluder', (document) => {
+  const root = document.getRoot();
+  const parts = [];
+  let template = null; // every node carries the same transform (the converter's), so the copy reuses it
+  for (const node of root.listNodes()) {
+    for (const prim of node.getMesh()?.listPrimitives() ?? []) {
+      if (NOT_OCCLUDING.includes(prim.getMaterial()?.getName())) continue;
+      parts.push(prim);
+      template ??= node;
+    }
+  }
+
+  const vertexCount = parts.reduce((sum, prim) => sum + prim.getAttribute('POSITION').getCount(), 0);
+  const indexCount = parts.reduce((sum, prim) => sum + prim.getIndices().getCount(), 0);
+  const positions = new Float32Array(vertexCount * 3);
+  const indices = new Uint32Array(indexCount);
+  let vertexOffset = 0;
+  let indexOffset = 0;
+  for (const prim of parts) {
+    const source = prim.getAttribute('POSITION').getArray();
+    positions.set(source, vertexOffset * 3);
+    for (const index of prim.getIndices().getArray()) indices[indexOffset++] = index + vertexOffset;
+    vertexOffset += source.length / 3;
+  }
+
+  const [kept] = MeshoptSimplifier.simplifySloppy(indices, positions, 3, null, OCCLUDER.triangles * 3, OCCLUDER.error);
+  const buffer = root.listBuffers()[0];
+  const prim = document
+    .createPrimitive()
+    .setAttribute('POSITION', document.createAccessor().setType('VEC3').setArray(positions).setBuffer(buffer))
+    .setIndices(document.createAccessor().setType('SCALAR').setArray(kept).setBuffer(buffer))
+    .setMaterial(document.createMaterial(OCCLUDER.name));
+  compactPrimitive(prim);
+  const node = document
+    .createNode(OCCLUDER.name)
+    .setMesh(document.createMesh(OCCLUDER.name).addPrimitive(prim))
+    .setTranslation(template.getTranslation())
+    .setRotation(template.getRotation())
+    .setScale(template.getScale());
+  root.listScenes()[0].addChild(node);
+});
 await step(doc, 'prune', prune());
 await step(doc, 'draco', draco());
 

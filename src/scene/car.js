@@ -97,6 +97,8 @@ function paintCar(model, { paint, materialRoles }) {
     // A part the page leaves out (the number plate) stays in the model but is never drawn.
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     if (materials.every((material) => material.userData.hidden)) child.visible = false;
+    // The coarse shell the bloom draws in black to hide the lamps behind the body (scene/bloom.js).
+    if (materials.some((material) => material.userData.role === 'occluder')) child.userData.occluder = true;
     child.renderOrder = Math.max(0, ...materials.map((material) => material.userData.renderOrder ?? 0));
   });
 }
@@ -200,7 +202,8 @@ export async function createCar(config, { onProgress, url = MODEL_URL } = {}) {
 
   draco.dispose();
 
-  // Each light as dressed (its glow and colour), to dim from.
+  // Each light as dressed (its glow and colour), to dim from. Their meshes are marked `glows`: the only
+  // things the stage's bloom lets shine (scene/bloom.js).
   const lamps = new Map();
   object3D.traverse((child) => {
     if (!child.isMesh) return;
@@ -208,6 +211,7 @@ export async function createCar(config, { onProgress, url = MODEL_URL } = {}) {
       const { role } = material.userData;
       const front = FRONT_LIGHTS.includes(role);
       if (!front && !REAR_LIGHTS.includes(role)) continue;
+      child.userData.glows = true;
       lamps.set(material, {
         front,
         glow: material.emissiveIntensity,

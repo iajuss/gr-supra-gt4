@@ -57,6 +57,12 @@ export default {
     environmentIntensity: 0.5,
   },
 
+  // Light that spills around the car's lamps, and only them (scene/bloom.js): discreet and physical,
+  // not a halo (glare sprites were dropped, 2026-09-19). The softer of three strengths compared in the
+  // look lab (?set=bloom), chosen by the user. The threshold is on the lamps' own brightness, linear.
+  // Set to null to draw without it.
+  bloom: { strength: 0.4, radius: 0.25, threshold: 0 },
+
   // The car comes out of the fog once it is on stage: `veiled` hides it, the reveal eases back to `density`.
   fog: { density: 0.022, veiled: 0.45, revealMs: 1400 },
 
@@ -116,6 +122,9 @@ export default {
     rainLight: { color: 0xc6ff00, emissive: 0xc6ff00, emissiveIntensity: 1.2 },
     // The page's line is "No number plate": the model's plate is not drawn.
     plate: { hidden: true },
+    // A coarse copy of the shell, never drawn in the frame: the bloom uses it to hide the lamps behind
+    // the body (scene/bloom.js; made by tools/model/optimize.mjs).
+    occluder: { hidden: true },
   },
 
   // Contact shadows, so the car stands on the floor instead of floating over it (2026-09-18). The body's
@@ -154,6 +163,7 @@ export default {
     lamp: ['DETAIL fog light'],
     rainLight: ['DETAIL rain light'],
     plate: ['DETAIL plate'],
+    occluder: ['OCCLUDER'],
     // Trim, wheel arches, and the parts only seen from below or inside the cabin.
     blackout: [
       'BLACKOUT',

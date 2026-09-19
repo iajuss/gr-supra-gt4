@@ -17,6 +17,7 @@ import {
 
 import { easeOutCubic } from '../lib/counter.js';
 import { lerp, offsetTarget } from '../lib/math.js';
+import { createBloom } from './bloom.js';
 import { createRenderer } from './renderer.js';
 import { createPitBox } from './pitBox.js';
 import { createStudioEnvironment } from './studioEnvironment.js';
@@ -36,12 +37,15 @@ export async function createStage(canvas, config) {
   const target = new Vector3();
   let currentShot = null; // re-applied on resize: the sideways offset depends on the aspect ratio
 
+  let bloom = null; // created right after the renderer; the resize callback only runs later
   const { renderer, dispose: disposeRenderer } = createRenderer(canvas, (width, height) => {
+    bloom?.setSize(width, height);
     camera.aspect = width / height;
     if (currentShot) setShot(currentShot);
     else camera.updateProjectionMatrix();
     requestRender();
   });
+  if (config.bloom) bloom = createBloom(renderer, scene, camera, config.bloom);
 
   const rig = new Group();
   for (const key of ['key', 'fill']) {
@@ -85,7 +89,8 @@ export async function createStage(canvas, config) {
   function render() {
     camera.getWorldDirection(lean).multiplyScalar(dolly);
     camera.position.add(lean);
-    renderer.render(scene, camera);
+    if (bloomActive) bloom.render();
+    else renderer.render(scene, camera);
     camera.position.sub(lean);
   }
 
@@ -138,7 +143,21 @@ export async function createStage(canvas, config) {
    * @param {import('three').Object3D} [object]
    */
   function prepare(object = scene) {
-    return renderer.compileAsync(object, camera, scene);
+    return Promise.all([renderer.compileAsync(object, camera, scene), bloomActive && bloom.prepare(object)]);
+  }
+
+  // The bloom starts on the visitor's first move, like the audio device: compiling its shaders while
+  // the page loads cost ~60 ms of main thread and pulled Lighthouse desktop to 93–96 (2026-09-19).
+  // It is ready long before the headlights first light, 0.7 s after the click.
+  let bloomActive = false;
+
+  /** @returns {Promise<unknown>} settles once the glow's shaders are compiled (tools wait on it) */
+  let bloomPrepared = Promise.resolve();
+  function activateBloom() {
+    if (!bloom || bloomActive) return bloomPrepared;
+    bloomActive = true;
+    bloomPrepared = bloom.prepare(scene).then(requestRender);
+    return bloomPrepared;
   }
 
   let revealFrame = 0;
@@ -178,6 +197,7 @@ export async function createStage(canvas, config) {
     scene,
     camera,
     prepare,
+    activateBloom,
     setShot,
     veil,
     reveal,
@@ -202,6 +222,7 @@ export async function createStage(canvas, config) {
       cancelFrame();
       cancelAnimationFrame(revealFrame);
       document.removeEventListener('visibilitychange', onVisibility);
+      bloom?.dispose();
       disposeRenderer();
       environment.dispose();
       groundGeometry.dispose();

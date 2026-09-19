@@ -141,6 +141,7 @@ await Promise.all([
 const view = await createStage(canvas, carStage);
 const car = await createCar(carStage);
 view.add(car.object3D);
+await view.activateBloom(); // as the page looks once open
 await sized(canvas, SIZE.width);
 
 const save = new URLSearchParams(location.search).get('save');

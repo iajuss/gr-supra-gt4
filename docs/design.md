@@ -307,7 +307,7 @@ vieram a existir).
 ```
 index.html
 public/
-  models/supra.glb         modelo com Draco (5,6 MB desde o Bloco 6)
+  models/supra.glb         modelo com Draco (5,75 MB desde o Bloco 6, com a silhueta do bloom)
   draco/                   decodificador Draco
   audio/engine-start.mp3   partida do motor (tela de som)
   shots/*.webp             imagens estáticas por capítulo (modo lite)
@@ -328,7 +328,7 @@ tools/                     laboratório, capturas do lite, pipeline do modelo (m
 
 - Metas atuais (desde 2026-09-18): Lighthouse **mobile 100** em tudo; **desktop ≥ 97**, idealmente 100
   (o desktop oscila com a carga da máquina: medir contra um build de referência, em rodadas alternadas).
-- Modelo: meta ≤ 5 MB (ideal 3–4 MB); hoje 5,6 MB, por escolha visual (Bloco 6).
+- Modelo: meta ≤ 5 MB (ideal 3–4 MB); hoje 5,75 MB, por escolha visual e pela silhueta do bloom (Bloco 6).
 - Resolução do 3D limitada a 1,5x. Sem sombras em tempo real: sombras de contato em textura fixa.
 - Render sob demanda; pausa fora da zona 3D e com a aba em segundo plano. O que desenhar sem parar
   (câmera na mão, fluxo de ar) tem limite explícito: ver "Rodada de upgrades".
@@ -573,11 +573,25 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
   o lite continua sem Three.js e o Lighthouse mobile não o vê. Com reduced motion fica a imagem.
 - **Grão e vinheta em CSS, nos dois modos**, numa camada entre o palco e o texto: custo zero de GPU,
   mantém o render sob demanda e chega ao celular. No WebGL fica só o bloom, e só no full.
-- **Bloom discreto e físico:** limiar alto, para brilharem as fontes de luz (LEDs, lanternas, luz de
-  chuva) e não a lataria; sem halo em sprite nem facho no chão (os dois já rejeitados). O composer perde
-  o antialias do canvas (render target com `samples: 4`) e as passadas são pré-compiladas, senão o TBT
-  volta. Orçamento: `lib/quality.js` desliga o bloom ou baixa a resolução dele se os primeiros quadros
-  depois da abertura passarem de ~20 ms no p95.
+- **Bloom discreto e físico, só nas luzes (feito):** brilham LEDs, lanternas, neblinas e luz de chuva, e
+  nunca a lataria; sem halo em sprite nem facho no chão (os dois já rejeitados).
+  - **Por que seletivo:** um limiar de brilho não separa as luzes do verniz. Os reflexos dos spots no
+    verniz são mais brilhantes que os faróis, e mesmo com limiar 4 viravam manchas leitosas.
+  - **Como, sem custo:** a cena vai direto ao canvas, com o antialias e o tone mapping de sempre. O
+    brilho é feito à parte, a ¼ da resolução: as malhas marcadas `glows` pelo `car.js` (as que a ignição
+    acende), escondidas atrás da lataria por uma silhueta grosseira que o pipeline gera (`OCCLUDER`,
+    53 mil triângulos, nunca desenhada no quadro). Só o desfoque é somado por cima, sem conversão de
+    cor, para os rastros fracos não acinzentarem a tela. Como vem das próprias luzes (mesmo material),
+    o bloom apaga e pisca junto com os faróis na abertura.
+  - Descartados por custo, medidos rolando no notebook: tudo num composer com MSAA em meio float
+    (76 → 34 FPS) e a lataria real em preto para esconder as luzes (~6 ms por quadro). Descartado por
+    vazar: só as faces das luzes viradas para a câmera (as lanternas apareciam pela cabine).
+  - **Intensidade:** a suave de três (força 0,4, raio 0,25), escolha do usuário.
+  - **Liga no primeiro movimento do visitante** (mouse, toque, tecla), como o `AudioContext`: montar
+    os ~15 shaders do bloom durante a carga custava ~60 ms de thread principal e derrubava o Lighthouse
+    desktop para 93–96. Ele fica pronto muito antes de os faróis acenderem (0,7 s depois do clique).
+  - Orçamento: o `lib/quality.js` segue no plano, mas o bloom não mudou o FPS (69 contra 76 sem ele,
+    mediana igual), então a urgência caiu.
 - **Câmera na mão só com o palco visível:** liga com a zona 3D na tela e a aba ativa, entra suave e
   desliga fora dela e com reduced motion. É a primeira coisa que desenha sem parar em repouso.
 - **Spline:** a câmera já anda em arco (`lerpOrbit`); a spline só tira a quebra de velocidade nas

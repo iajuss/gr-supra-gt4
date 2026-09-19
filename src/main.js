@@ -94,6 +94,11 @@ async function initStage(root) {
     const car = await createCar(carStage, { onProgress: preloader.setProgress });
     await view.prepare(car.object3D);
     view.add(car.object3D);
+    // The lamps' glow compiles on the visitor's first move, not while the page loads (scene/stage.js).
+    const glowUp = () => view.activateBloom();
+    for (const type of ['pointermove', 'pointerdown', 'keydown']) {
+      window.addEventListener(type, glowUp, { once: true, passive: true, capture: true });
+    }
     // Only if the page has not opened yet (a slow line lets the visitor in before the car arrives).
     if (!preloader.isOpen) {
       ignition = createIgnitionShow({

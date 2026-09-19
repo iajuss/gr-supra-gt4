@@ -47,7 +47,13 @@ só, com o nome do primeiro (`WHEELARCH RUBBER - black`): na página o carro só
 difusor, faróis de neblina, calotas, lanternas, vidro das lanternas e pinças de freio ganham material
 próprio antes da junção, para a página pintá-los à parte.
 
-Resultado: 24 malhas, **2.083.332 triângulos, 5,6 MB** (5.554.504 bytes, reproduzido byte a byte). Antes
+**A silhueta para o bloom** (2026-09-19, passo `occluder`): uma cópia grosseira de todas as peças opacas
+(menos vidros e as próprias luzes), simplificada com `simplifySloppy` até ~30 mil triângulos (saem ~53 mil
+com erro 0.01), numa malha própria com o material `OCCLUDER`. A página nunca a desenha no quadro: o bloom
+a usa em preto para a lataria esconder as luzes que ficam atrás dela (`src/scene/bloom.js`). +187 KB.
+
+Resultado: 25 malhas, 2.136.658 triângulos, **5,75 MB** (5.746.040 bytes). Sem a silhueta: 24 malhas,
+2.083.332 triângulos e 5,6 MB (5.554.504 bytes, reproduzido byte a byte). Antes
 da simplificação própria da carroceria: 3.544.763 triângulos e 7,7 MB. (Simplificando tudo só pelas
 posições eram 1.472.254 e 4,0 MB, com a lataria amassada.)
 
