@@ -428,7 +428,9 @@ a zona 3D e parado num capítulo.
   `.jpg`. Regravar quando o carro mudar (bloom, peso)
   - 👁 tags e imagem no `dist`; 240 testes. Falta: LinkedIn Post Inspector depois do deploy
 - [x] **P0** Comentário truncado no topo de `components/ignitionShow.js`
-- [ ] CI no GitHub Actions: `npm ci`, `npm test`, `npm run build` a cada push; selo no README
+- [x] CI no GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm test`, `npm run build` a cada
+  push no `main` e em pull requests, Node 24; selo no README. O lockfile já traz os binários nativos
+  de Linux (rolldown, lightningcss)
 - [ ] Carro mais leve (meta ≤ 5 MB, ideal 3–4 MB). O GLB já usa Draco e só tem `POSITION` + `NORMAL`: o
   peso é a lataria não simplificada (pintura 1,65 MB, blackout 1,73, `WHEELARCH` 1,89, carbono 0,71)
   - variantes no `optimize.mjs`: lataria com `simplifyWithAttributes` do meshoptimizer (pesando as

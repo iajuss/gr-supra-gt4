@@ -1,5 +1,7 @@
 # GR Supra GT4 — Unofficial Concept
 
+[![CI](https://github.com/iajuss/gr-supra-gt4/actions/workflows/ci.yml/badge.svg)](https://github.com/iajuss/gr-supra-gt4/actions/workflows/ci.yml)
+
 A fan-made landing page for the Toyota GR Supra GT4, the track-only Supra: a 3D car you scroll around,
 an opening that starts the engine, and a simulated lap of Silverstone.
 
