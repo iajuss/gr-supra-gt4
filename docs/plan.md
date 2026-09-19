@@ -5,33 +5,46 @@
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 198 testes verdes, build ok.
-  **TBT do desktop corrigido** (commit `005df39`): ambiente com shaders pré-compilados, `prepare` do
-  palco e do carro, 3D da volta montado só perto da seção. Detalhes em design.md ("Carregamento sem
-  tarefas longas"). **Checagem de acessibilidade feita:** contraste dos labels sobre o 3D, Pause na
-  volta, preloader `inert` (design.md, "Acessibilidade").
+- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 198 testes verdes, build ok, git
+  limpo em `e3269fb`. Nesta sessão: TBT do desktop corrigido, checagem de acessibilidade (contraste
+  sobre o 3D, Pause na volta, preloader `inert`), crédito do modelo no footer e o carro refeito a
+  pedido do usuário — pipeline do modelo corrigido (o `dedup` fundia os materiais), acabamento por
+  peça, detalhes (letreiro cromado, pinças e calotas lime, luzes acesas, lanternas vermelhas, sem
+  placa), sombras por roda e box de pit no piso. Tudo em design.md ("Carregamento sem tarefas longas",
+  "Acessibilidade", "Leitura do carro", "Profundidade", "Detalhes").
 - **Lighthouse** (2026-09-18, `vite preview` + Edge headless via `npx lighthouse@12`):
-  - Mobile (lite): **100 / 100 / 100 / 100** (Perf / A11y / Boas práticas / SEO). TBT 20 ms.
-  - Desktop (full): **99 / 100 / 100 / 100** em 3 rodadas, TBT 58–70 ms (era Perf 66–70 com
-    TBT de 0,8–1,7 s). LCP 0,37 s (título), CLS 0,001–0,002.
+  - Mobile (lite): **100 / 100 / 100 / 100**.
+  - Desktop (full): **100 / 100 / 100 / 100** (TBT 36–52 ms). Rodadas isoladas de 83–87 aparecem com
+    a máquina ocupada (captura de imagens, laboratório aberto); repetir sem carga antes de concluir.
 
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
-1. ~~TBT do desktop~~ — feito em 2026-09-18 (desktop 99). Ficaram como opcionais, sem efeito na nota:
-   - (a) baixar o GLB em paralelo com o `createStage`: o carro apareceria mais cedo (o download só
-     começa em ~1,1 s);
-   - pré-compilar também o palco da volta e o bloom, para tirar os ~380 ms que ela bloqueia quando o
-     usuário chega perto da seção;
-   - o GLB tem 7,7 MB, acima da meta de ~5 MB do design.md.
-2. ~~Checagem manual de acessibilidade~~ — feita em 2026-09-18 (ver design.md, "Acessibilidade").
-   Em aberto, por decisão: o preloader anuncia cada porcentagem (`role="status"`).
-3. Ideias do usuário antes de publicar (2026-09-18), nesta ordem: ~~leitura e profundidade do carro~~ (feito) →
-   ritmo entre "The circuit." e a volta → tela de som depois do carregamento.
-4. Motion do hero/preloader.
-5. Deploy na Vercel (~~créditos do footer~~ feitos).
-- Não visto no navegador nesta sessão (painel oculto a maior parte do tempo): a animação do reveal
-  depois da troca do `aria-label` pelo texto oculto (a estrutura do DOM foi conferida) e as
-  transições hero→aero e aero→chassis com o novo ponto do aero (garantidas pelo teste).
+1. **Ritmo entre "The circuit." e a volta** (ideia do usuário; caminho escolhido: juntar a transição com
+   a abertura da volta). Hoje, em 1152×720: a transição (`.handoff`, 720 px) termina e vem um cabeçalho
+   comum "04 — One lap of Silverstone / 5.891 km. 18 corners…" (`.section-head`, 151 px) antes do palco
+   3D em tela cheia (`.lap__layout`, 720 px). Proposta aprovada: "Built for one place / The circuit."
+   vira a abertura da volta; o palco entra em tela cheia logo depois, com título e dados sobrepostos no
+   estilo dos labels dos capítulos. Falta combinar o layout exato com o usuário.
+2. **Tela de som depois do carregamento** (ideia do usuário; nos dois modos): "turn your sound up",
+   tecla/clique/toque toca o motor (B58, seis em linha) e abre a página; saída sem som. Precisa achar
+   um áudio com licença que permita o uso.
+3. Motion do hero/preloader.
+4. Deploy na Vercel.
+- Opcionais, sem efeito na nota: baixar o GLB em paralelo com o `createStage` (carro ~1 s antes);
+  pré-compilar o palco da volta (bloqueia ~380 ms ao chegar perto); GLB de 7,7 MB acima da meta de ~5 MB.
+- Em aberto por decisão: o preloader anuncia cada porcentagem (`role="status"`); emblema da Toyota
+  discreto (regra "Sem logos oficiais").
+- Não visto no navegador: a animação do reveal depois da troca do `aria-label`.
+
+### Ferramentas desta sessão
+
+- `tools/lookLab.html` (com `npm run dev`): `?set=look|finish|page|parts|details|normals|frame`,
+  `?shots=` (capítulos e closes `nose`, `tail`, `wheel`, `headlight`), `?model=` (GLB candidato em
+  `public/models/`). Compara variantes lado a lado, destaca materiais e mede onde o carro cai no quadro.
+- `tools/capture.html` regrava as imagens do lite (`public/shots/*.webp`) depois de qualquer mudança no
+  carro.
+- Pipeline do modelo: FBX original em `Downloads/supra+personalizated(1).fbx`; passos em
+  `tools/model/README.md`. As ferramentas ficam fora do projeto (instalar numa pasta temporária).
 
 ### Decisões que destravam o deploy (2026-09-18)
 
