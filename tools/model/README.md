@@ -23,12 +23,18 @@ Resultado bruto: 247 MB, 9450 malhas, 5.310.866 triângulos.
 node --max-old-space-size=8192 optimize.mjs supra.glb supra-web.glb 0.05 0.001
 ```
 
-Um quinto argumento opcional lista (separados por vírgula) os materiais que **não** são simplificados; o
-padrão é a carroceria: pintura (`METALLIC CARPAINT - black.001`), `BLACKOUT`, carbono, caixas de roda e
-vidro, 2,93M triângulos no total. Simplificá-la, mesmo com erro 0.0002, deixa a pintura brilhante cheia de
-amassados: o meshopt ignora as normais, que deixam de bater com a superfície. Recalcular as normais depois deixa tudo facetado,
-porque a malha não compartilha vértices entre faces. Diagnóstico de 2026-09-17 em
-[docs/plan.md](../../docs/plan.md).
+Um quinto argumento opcional lista (separados por vírgula) os materiais que ficam **fora da simplificação
+geral**; o padrão é a carroceria: pintura (`METALLIC CARPAINT - black.001`), `BLACKOUT`, carbono, caixas
+de roda e vidro, 2,93M triângulos no total. Na simplificação geral, mesmo com erro 0.0002, a pintura
+brilhante fica cheia de amassados: o meshopt ignora as normais, que deixam de bater com a superfície.
+Recalcular as normais depois deixa tudo facetado, porque a malha não compartilha vértices entre faces.
+Diagnóstico de 2026-09-17 em [docs/plan.md](../../docs/plan.md).
+
+**A carroceria tem uma simplificação própria** (2026-09-19, `BODYWORK_SIMPLIFY` no script):
+`simplifyWithAttributes`, que pesa as normais junto com as posições, até metade dos triângulos (erro
+0.001, peso 1). O verniz continua liso. Comparado lado a lado com `tools/lookLab.html?models=`: 30% também
+ficava liso (4,3 MB); 20% amassava o capô e a tampa traseira (3,9 MB). Precisa do meshoptimizer ≥ 0.21
+(testado com 1.2.0).
 
 O script remove o cenário do autor (o fundo `Cylinder` com escala 7425, a luz `Area` e a `Camera`),
 junta as malhas por material, solda vértices, simplifica (menos a lataria) e comprime com Draco.
@@ -41,8 +47,9 @@ só, com o nome do primeiro (`WHEELARCH RUBBER - black`): na página o carro só
 difusor, faróis de neblina, calotas, lanternas, vidro das lanternas e pinças de freio ganham material
 próprio antes da junção, para a página pintá-los à parte.
 
-Resultado: 24 malhas, 3.544.763 triângulos, 7,7 MB (antes da correção, 13 malhas com a carroceria fundida). (Simplificando tudo eram 1.472.254 e 4,0 MB,
-com a lataria amassada.)
+Resultado: 24 malhas, **2.083.332 triângulos, 5,6 MB** (5.554.504 bytes, reproduzido byte a byte). Antes
+da simplificação própria da carroceria: 3.544.763 triângulos e 7,7 MB. (Simplificando tudo só pelas
+posições eram 1.472.254 e 4,0 MB, com a lataria amassada.)
 
 ## 3. Instalar
 

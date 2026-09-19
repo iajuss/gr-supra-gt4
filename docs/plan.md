@@ -50,7 +50,7 @@ pelo P0 (prévia do link), antes de o post do LinkedIn circular.
 
 - `tools/lookLab.html` (com `npm run dev`): `?set=look|finish|page|parts|details|normals|frame`,
   `?shots=` (capítulos e closes `nose`, `tail`, `wheel`, `headlight`), `?model=` (GLB candidato em
-  `public/models/`). Compara variantes lado a lado, destaca materiais e mede onde o carro cai no quadro.
+  `public/models/`), `?models=a.glb,b.glb` (compara GLBs, uma linha por modelo, com a pintura da página). Compara variantes lado a lado, destaca materiais e mede onde o carro cai no quadro.
 - `tools/capture.html` regrava as imagens do lite (`public/shots/*.webp`) depois de qualquer mudança no
   carro. `tools/shareCard.html` faz o mesmo com a imagem de compartilhamento (`?save=a` →
   `public/shots/og.jpg`).
@@ -431,12 +431,22 @@ a zona 3D e parado num capítulo.
 - [x] CI no GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm test`, `npm run build` a cada
   push no `main` e em pull requests, Node 24; selo no README. O lockfile já traz os binários nativos
   de Linux (rolldown, lightningcss)
-- [ ] Carro mais leve (meta ≤ 5 MB, ideal 3–4 MB). O GLB já usa Draco e só tem `POSITION` + `NORMAL`: o
-  peso é a lataria não simplificada (pintura 1,65 MB, blackout 1,73, `WHEELARCH` 1,89, carbono 0,71)
-  - variantes no `optimize.mjs`: lataria com `simplifyWithAttributes` do meshoptimizer (pesando as
-    normais, a causa dos amassados) em 2–3 níveis; quantização do Draco
-  - 👁 `lookLab.html?model=` lado a lado, closes da lataria com o verniz; usuário escolhe
-  - 📏 bytes, triângulos, FPS rolando; `tools/model/README.md` atualizado
+- [x] Carro mais leve (2026-09-19): **7,7 → 5,6 MB**, 3,54M → 2,08M triângulos. O GLB já usava Draco
+  e só tinha `POSITION` + `NORMAL`; o peso era a lataria não simplificada. Agora ela passa por
+  `simplifyWithAttributes` do meshoptimizer (1.2) pesando as normais (`BODYWORK_SIMPLIFY` no
+  `optimize.mjs`: metade dos triângulos, erro 0,001, peso 1). O script reproduz o GLB byte a byte
+  - Variantes (lataria a 50 / 30 / 20%): 5,6 / 4,3 / 3,9 MB. Comparadas no novo
+    `tools/lookLab.html?models=a.glb,b.glb` (uma linha por modelo, pintura da página) em perfil,
+    frente e traseira: 50% e 30% iguais ao atual; 20% com vinco no capô e ondulação na tampa.
+    **Escolha do usuário: 50%**, a mais segura, acima da meta de 5 MB por 0,6 MB
+  - 📏 FPS em 1152×720, página recém-carregada, rolagem programada de 4 s do hero à transição
+    (inclui a montagem da volta 3D), dois pares alternados: antigo 61 / 61 FPS, p95 18,4 / 24,1 ms;
+    novo **74 / 79 FPS, p95 18,3 / 18,2 ms**. Console limpo
+  - 📏 Lighthouse no build, rodadas alternadas contra o mesmo `dist` com o GLB antigo: desktop novo
+    99 / 99 / 99 (TBT 86–108 ms, peso 5,9 MB) × referência 99 / 98 / 97 (TBT 110–143 ms, 8,0 MB);
+    mobile 100 nos dois (o lite não baixa o carro). Acessibilidade, práticas e SEO 100 em tudo
+  - Imagens do lite e `og.jpg` não regravadas: o carro não muda à vista; ficam para depois do bloom
+  - Quantização do Draco não testada (a meta de peso ficou para trás na escolha do usuário)
 
 ### Dia 2 — imagem de cinema
 - [ ] Bloom no palco do hero: limiar alto (LEDs, lanternas, luz de chuva; a lataria não), composer com

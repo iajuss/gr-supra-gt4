@@ -1,15 +1,16 @@
 // FBX → GLB straight from the converter is 9450 meshes and 5.3M triangles.
 // Merge by material, weld, simplify and compress, so the browser gets something it can draw.
-// The main bodywork is left unsimplified: simplifying it, even gently, wrinkles the glossy paint.
+// The bodywork is simplified gently and with its normals weighted in: simplified on positions alone,
+// even gently, the glossy paint wrinkled.
 
 import { NodeIO, PropertyType } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { dedup, flatten, join, weld, simplifyPrimitive, prune, draco } from '@gltf-transform/functions';
+import { dedup, flatten, join, weld, simplifyPrimitive, compactPrimitive, prune, draco } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import draco3d from 'draco3dgltf';
 
-// The bodywork materials, never simplified: meshopt ignores the normals, so collapsing glossy panels leaves
-// shading dents all over the paint. They used to be one material (see the dedup step below).
+// The bodywork materials, kept out of the general simplify: it ignores the normals, so collapsing glossy
+// panels left shading dents all over the paint. They used to be one material (see the dedup step below).
 const BODYWORK = [
   'METALLIC CARPAINT - black.001',
   'BLACKOUT',
@@ -18,9 +19,27 @@ const BODYWORK = [
   'GLASS - windshield',
 ].join(',');
 
+// The bodywork's own pass: half the triangles, with the normals weighing as much as the positions, so
+// the reflections stay smooth. Chosen side by side in tools/lookLab.html?models= (2026-09-19): at 30%
+// it looked the same, at 20% the hood and the boot lid wrinkled; the user kept this, the safest.
+const BODYWORK_SIMPLIFY = { ratio: 0.5, error: 0.001, normalWeight: 1 };
+
 const [input, output, ratio = '0.05', error = '0.001', keep = BODYWORK] = process.argv.slice(2);
-// Materials whose meshes are never simplified, comma-separated.
+// Materials kept out of the general simplify (they get the bodywork's pass instead), comma-separated.
 const keepIntact = keep.split(',').map((name) => name.trim()).filter(Boolean);
+
+/** Simplifies one primitive weighing its normals as well as its positions, then drops unused vertices. */
+function simplifyKeepingNormals(prim, { ratio, error, normalWeight }) {
+  const positions = prim.getAttribute('POSITION').getArray();
+  const normals = prim.getAttribute('NORMAL').getArray();
+  const accessor = prim.getIndices();
+  const indices = new Uint32Array(accessor.getArray());
+  const target = Math.floor((indices.length * ratio) / 3) * 3;
+  const weights = [normalWeight, normalWeight, normalWeight];
+  const [kept] = MeshoptSimplifier.simplifyWithAttributes(indices, positions, 3, normals, 3, weights, null, target, error);
+  accessor.setArray(kept);
+  compactPrimitive(prim);
+}
 
 const io = new NodeIO()
   .registerExtensions(ALL_EXTENSIONS)
@@ -126,7 +145,10 @@ await MeshoptSimplifier.ready;
 await step(doc, 'simplify', (document) => {
   for (const mesh of document.getRoot().listMeshes())
     for (const prim of mesh.listPrimitives()) {
-      if (keepIntact.includes(prim.getMaterial()?.getName())) continue;
+      if (keepIntact.includes(prim.getMaterial()?.getName())) {
+        simplifyKeepingNormals(prim, BODYWORK_SIMPLIFY);
+        continue;
+      }
       simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: Number(ratio), error: Number(error) });
     }
 });

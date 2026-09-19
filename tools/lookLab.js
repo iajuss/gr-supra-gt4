@@ -191,7 +191,13 @@ async function measureFraming() {
 const params = new URLSearchParams(window.location.search);
 // ?model=<file in public/models> tries a candidate GLB without replacing the page's model.
 const modelUrl = params.get('model') ? `/models/${params.get('model')}` : undefined;
-const variants = params.get('set') === 'frame' ? [] : SETS[params.get('set') ?? 'parts'];
+// ?models=<a.glb,b.glb,…> compares candidate GLBs instead: one row each, dressed as on the page.
+const models = params.get('models')?.split(',');
+const variants = models
+  ? models.map((file) => ({ label: file, model: `/models/${file}` }))
+  : params.get('set') === 'frame'
+    ? []
+    : SETS[params.get('set') ?? 'parts'];
 const grid = document.querySelector('#grid');
 const log = document.querySelector('#log');
 const say = (line) => (log.textContent += `\n${line}`);
@@ -216,7 +222,7 @@ for (const variant of variants) {
   const config = merge(carStage, variant.config ?? {});
   const canvas = document.querySelector('#stage');
   const view = await createStage(canvas, config);
-  const car = await createCar(config, { url: modelUrl });
+  const car = await createCar(config, { url: variant.model ?? modelUrl });
   variant.after?.(car.object3D, view);
   view.add(car.object3D);
   await sized(canvas, SIZE.width);

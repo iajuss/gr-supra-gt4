@@ -307,7 +307,7 @@ vieram a existir).
 ```
 index.html
 public/
-  models/supra.glb         modelo com Draco (7,7 MB; meta ≤ 5 MB no Bloco 6)
+  models/supra.glb         modelo com Draco (5,6 MB desde o Bloco 6)
   draco/                   decodificador Draco
   audio/engine-start.mp3   partida do motor (tela de som)
   shots/*.webp             imagens estáticas por capítulo (modo lite)
@@ -328,7 +328,7 @@ tools/                     laboratório, capturas do lite, pipeline do modelo (m
 
 - Metas atuais (desde 2026-09-18): Lighthouse **mobile 100** em tudo; **desktop ≥ 97**, idealmente 100
   (o desktop oscila com a carga da máquina: medir contra um build de referência, em rodadas alternadas).
-- Modelo: meta ≤ 5 MB (ideal 3–4 MB); hoje 7,7 MB pela lataria não simplificada (Bloco 6).
+- Modelo: meta ≤ 5 MB (ideal 3–4 MB); hoje 5,6 MB, por escolha visual (Bloco 6).
 - Resolução do 3D limitada a 1,5x. Sem sombras em tempo real: sombras de contato em textura fixa.
 - Render sob demanda; pausa fora da zona 3D e com a aba em segundo plano. O que desenhar sem parar
   (câmera na mão, fluxo de ar) tem limite explícito: ver "Rodada de upgrades".
@@ -423,7 +423,8 @@ O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abai
 - **A lataria principal não é simplificada.** Simplificada, mesmo de leve, a pintura brilhante fica
   cheia de amassados (o meshopt ignora as normais). Pagamos o dobro de peso (4,0 → 7,9 MB) e perdemos
   uns 15% de FPS (137 → 118 rolando) por uma superfície lisa, que é o que a estética de reflexos
-  exige. As demais peças continuam simplificadas.
+  exige. As demais peças continuam simplificadas. **Revisto em 2026-09-19:** simplificada pesando as
+  normais, a lataria perde metade dos triângulos sem amassar (5,6 MB; ver "Rodada de upgrades").
 - O conversor FBX2glTF **já corrige Z-up → Y-up**; só faltava um quarto de volta em y para o nariz
   apontar para +x. Uma permutação de eixos por cima disso embaralhou tudo e custou algumas rodadas.
 - O GLB chega quase todo off-white: a pintura é aplicada por nome de material em `data/carStage.js`
@@ -581,8 +582,10 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
   desliga fora dela e com reduced motion. É a primeira coisa que desenha sem parar em repouso.
 - **Spline:** a câmera já anda em arco (`lerpOrbit`); a spline só tira a quebra de velocidade nas
   paradas. Se o laboratório não mostrar diferença, fica o arco.
-- **Carro mais leve:** o GLB já usa Draco e só tem posição e normal; o peso é a lataria, que não é
-  simplificada porque o meshopt ignorava as normais. Tentativa: `simplifyWithAttributes` pesando as
-  normais, escolhida pelo olho no `lookLab`.
+- **Carro mais leve (feito):** o peso era a lataria, deixada sem simplificação porque o meshopt
+  ignorava as normais. Com `simplifyWithAttributes` pesando as normais, metade dos triângulos sai sem
+  amassar o verniz: 7,7 → 5,6 MB e mais FPS rolando (61 → 74–79 no mesmo teste). Comparadas 50, 30 e
+  20%; a 20% o capô e a tampa traseira amassam. O usuário escolheu 50%, a mais segura, aceitando
+  ficar 0,6 MB acima da meta de 5 MB.
 - **Case:** seção "Making of" no README; sem página nova e sem versão em português nesta rodada.
 - **Fora da rodada:** o Supra na pista da volta e o som seguindo a telemetria.
