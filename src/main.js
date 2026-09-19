@@ -13,8 +13,11 @@ import { initLapSection } from './components/lapSection.js';
 import { createPreloader } from './components/preloader.js';
 import { openSoundGate } from './components/soundGate.js';
 import { initSpecCounters } from './components/specCounters.js';
+import { startAtTop } from './components/startAtTop.js';
 import { initTextReveal } from './components/textReveal.js';
 import { whenNear } from './lib/whenNear.js';
+
+startAtTop();
 
 const env = detectEnvironment();
 const { mode, reasons } = decideMode(env);
@@ -48,6 +51,7 @@ preloader.ready.then(() => {
       // With the car on stage the page opens as a car starts (data/opening.js): the lights blink on,
       // then the engine. Without it (lite, or a car still loading) the engine starts at once.
       const gesture = performance.now();
+      window.scrollTo(0, 0); // late layout (fonts, the lap's 3D layout) must not leave the page mid-way
       const engineAt = ignition ? opening.engineAt : 0;
       const heard = choice === 'sound' ? engine.play({ delay: engineAt }) : Promise.resolve(null);
       preloader.close();

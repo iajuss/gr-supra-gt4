@@ -172,6 +172,10 @@ O usuário achou o resultado "cru" e o som "seco"; vieram quatro refinamentos, t
 - **Lite** (sem carro 3D): sem luzes nem "respira"; o motor toca no clique e o título sobe na pega.
   Numa linha lenta (a tela de som abre aos 8 s, antes do carro) vale o mesmo.
 - **Reduced motion:** cai no lite, e o título e os textos aparecem parados.
+- **Sempre do topo** (pedido do usuário): a abertura acontece no hero, então a página não restaura a
+  rolagem num F5 (`history.scrollRestoration = 'manual'`), tira a âncora do endereço (`/#lap` abre no
+  topo) e volta ao topo de novo no clique da tela de som (`components/startAtTop.js`). O menu segue
+  levando às seções depois que a página abre.
 
 ## Fontes dos números
 
