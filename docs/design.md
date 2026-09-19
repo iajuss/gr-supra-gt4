@@ -346,6 +346,88 @@ O usuário decidiu seguir assim (2026-09-17); a pendência está registrada abai
   chassis +0.25, engine −0.15. É calculado pelo aspecto real da tela, e as imagens do lite saem
   centralizadas (lá a figura aparece sozinha).
 
+### Leitura do carro: verniz, recorte e soleira (2026-09-18)
+
+O preto fosco perdia o volume do carro no estúdio escuro (pedido do usuário). Comparadas no laboratório
+(`tools/lookLab.html?set=look`, variantes lado a lado em três ângulos): só luz, grafite, grafite com
+faixa central e grafite com soleira. Escolha do usuário: **preto com verniz + soleira lime**.
+
+- **Verniz:** a lataria vira `MeshPhysicalMaterial` com `clearcoat` 1 (rugosidade do verniz 0,06) sobre
+  preto `0x0e100f`, metalness 0,2 e roughness 0,5. O reflexo nítido do verniz desenha os volumes; o
+  preto continua preto. O modelo não tem texturas, então trocar o material não perde nada.
+- **Luz de recorte fria** (`lights.edge`, spot branco-azulado de trás e da direita) e ambiente 0,6 → 0,8.
+- ~~Soleira lime~~ (faixa desenhada no shader por posição): **retirada** na rodada de detalhes, a
+  pedido do usuário — lime chamativo demais; os acentos lime ficaram pequenos e sutis (ver abaixo).
+- **Reenquadramento:** com o carro visível, o aero e o chassis encostavam no texto (antes o preto sumia
+  no escuro). `offset` do aero −0,22 → −0,245 e do chassis 0,25 → 0,29. Medido projetando os vértices do
+  carro pela câmera (`lookLab.html?set=frame`), em 16:10: aero 0,035–0,614 com texto a partir de 0,66;
+  chassis 0,36–0,94 com texto até 0,32.
+- **Âncoras do menu no ponto da câmera:** a câmera fecha o enquadramento com o capítulo centralizado,
+  mas a âncora parava no topo (144 px antes, em 1152×720). `scroll-margin-top: -20svh` nos capítulos
+  do modo full (altura 140svh).
+- Imagens do lite regeradas com `tools/capture.html`.
+
+### Profundidade: peças separadas, chão e teto (2026-09-18, segunda rodada)
+
+O usuário achou o carro monocromático (farol e espelho da cor da lataria) e flutuando, e o teto parecia
+amassado.
+
+- **Causa do monocromático: o pipeline do modelo.** O FBX tem materiais distintos (pintura
+  `METALLIC CARPAINT`, `BLACKOUT`, carbono, vidro, caixas de roda), mas o `dedup()` do `optimize.mjs`
+  fundia materiais de valores iguais, e o conversor dá os mesmos valores a todos: tudo virava
+  "WHEELARCH RUBBER". Corrigido no script (dedup sem materiais) e o GLB regerado: 17 malhas, mesmos
+  3,55M triângulos e 7,7 MB. Detalhes em `tools/model/README.md`.
+- **Um acabamento por peça** (`paint` e `materialRoles` em `data/carStage.js`): pintura preta com
+  verniz; blackout acetinado (grades, raios das rodas, acabamentos inferiores); carbono com verniz,
+  um tom acima da pintura; vidro escuro espelhado. Os materiais que só aparecem por dentro ou por baixo
+  (`Material.002`, `.003`, `.005`, `a0000…`) ficam como blackout.
+- **Ambiente 0,8 → 0,5.** O `RoomEnvironment` é uma sala branca: com o verniz, a pintura preta lia como
+  prata. 0,8, 0,5 e 0,3 comparados no laboratório; o usuário escolheu 0,5. (`envMapIntensity` por
+  material não serve aqui: no three r186 ele só vale com `envMap` próprio, não com `scene.environment`.)
+- **O teto não está amassado:** a imagem de normais mostra a superfície lisa. É o teto *double bubble*
+  do GR Supra real; o spot lime mirado no meio do carro formava uma mancha no vale. Agora ele mira a
+  traseira (`rim.target` x −1,6).
+- **Chão:** sombra de contato mais fechada sob a carroceria e uma escura sob cada pneu (centros achados
+  na malha dos pneus por `lib/wheelContacts.js`), e um **box de pit** pintado no piso
+  (`scene/pitBox.js`): linhas laterais e de fundo e uma marca de parada lime à frente do bico. As linhas
+  laterais somem em degradê nas pontas (`fade` 0,38), porque passavam por baixo do texto do chassis e do
+  engine; a marca de parada fica a 0,55 m da ponta do box, fora da coluna do engine.
+- Lighthouse desktop depois: 100 / 99 / 100 (TBT 38–49 ms). Uma série anterior deu 83–90 com a máquina
+  ocupada pela captura das imagens; repetida sem carga, voltou ao normal.
+
+### Detalhes (2026-09-18, terceira rodada)
+
+Pedido do usuário: detalhes que deixem o carro rico, com lime mais sutil.
+
+- **Peças achadas nos nós do FBX, por posição** (a traseira fica em z negativo): o letreiro "Supra" é o
+  `Material.001` (tampa e lateral); as **pinças** são o `Material.002` (uma junto a cada roda, ~32 × 11 cm);
+  placa, luz central do difusor, faróis de neblina e calotas estavam juntos no `Material.003`. O pipeline
+  agora dá material próprio a esses quatro grupos antes da junção (`DETAILS` em
+  `tools/model/optimize.mjs`, pelos nomes dos nós): 21 malhas, 7,7 MB.
+- **Acabamentos:** letreiro em cromo polido; pinças e calotas lime com brilho próprio mínimo (0,1);
+  faróis de neblina acesos em branco; luz de chuva do difusor acesa em lime; **placa escondida**
+  (receita `hidden`), coerente com "No number plate".
+- **O emblema da Toyota fica discreto**, esculpido na peça e da cor dela: mantém a regra "Sem logos
+  oficiais" (decisão do usuário). Ele não é peça própria no modelo.
+- Lighthouse depois: desktop 99 / 100 / 100 (TBT 46–90 ms), mobile 100 em tudo.
+
+**Luzes (quarta rodada, mesmo dia).** Pedido do usuário: LED branco nos faróis e vermelho atrás.
+
+- **Lanternas vermelhas** — a única cor fora da paleta, porque lanterna só se lê em vermelho. Os
+  conjuntos das lanternas estavam espalhados em `a0000…` (lado esquerdo) e `Llanta` (direito); o vidro
+  delas, fundido com o para-brisa. O pipeline separa os dois (`DETAIL tail light`, `DETAIL tail glass`).
+  A barra entre as lanternas (`Material.004`, antes lime) também fica vermelha.
+- **Refletores traseiros vermelhos:** o `Material.002` era pinças + refletores do para-choque; as
+  pinças ganharam material próprio (`DETAIL caliper`) e o resto virou refletor.
+- **LED dos faróis por cima do vidro:** o LED (`Luz blanca1`) fica atrás da lente, que é a mesma peça
+  dos vidros das janelas, escura; lido através dela, sumia. O vidro não grava profundidade
+  (`depthWrite: false`) e o LED é desenhado depois dele (`overGlass`: passe transparente,
+  `renderOrder` 1).
+- **As duas neblinas acesas:** uma delas é uma superfície única virada para dentro e sumia vista de
+  fora; o material ficou de dois lados.
+- Mais lime: considerado e descartado pelo usuário (fica nas pinças, calotas e luz de chuva).
+- Lighthouse depois: desktop 100 / 100 / 100 (TBT 36–52 ms).
+
 ### Paleta: mantida
 
 O lime `#C6FF00` foi escolhido por ser o verde da Aston Martin Racing, vínculo que caiu com a troca de

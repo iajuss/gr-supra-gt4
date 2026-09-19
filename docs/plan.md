@@ -5,7 +5,7 @@
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 195 testes verdes, build ok.
+- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 198 testes verdes, build ok.
   **TBT do desktop corrigido** (commit `005df39`): ambiente com shaders pré-compilados, `prepare` do
   palco e do carro, 3D da volta montado só perto da seção. Detalhes em design.md ("Carregamento sem
   tarefas longas"). **Checagem de acessibilidade feita:** contraste dos labels sobre o 3D, Pause na
@@ -25,8 +25,10 @@
    - o GLB tem 7,7 MB, acima da meta de ~5 MB do design.md.
 2. ~~Checagem manual de acessibilidade~~ — feita em 2026-09-18 (ver design.md, "Acessibilidade").
    Em aberto, por decisão: o preloader anuncia cada porcentagem (`role="status"`).
-3. Motion do hero/preloader.
-4. Créditos do footer e deploy na Vercel.
+3. Ideias do usuário antes de publicar (2026-09-18), nesta ordem: ~~leitura e profundidade do carro~~ (feito) →
+   ritmo entre "The circuit." e a volta → tela de som depois do carregamento.
+4. Motion do hero/preloader.
+5. Deploy na Vercel (~~créditos do footer~~ feitos).
 - Não visto no navegador nesta sessão (painel oculto a maior parte do tempo): a animação do reveal
   depois da troca do `aria-label` pelo texto oculto (a estrutura do DOM foi conferida) e as
   transições hero→aero e aero→chassis com o novo ponto do aero (garantidas pelo teste).
@@ -283,7 +285,30 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
   - 👁 `?shot=aero` em 1152×720 (mesmo aspecto de 1440×900): carro de ~0,06 a ~0,63 da largura, texto
     a partir de 0,67. Console limpo. As transições vizinhas não foram capturadas (screenshots dando
     timeout); o `cameraShots.test.js` segue garantindo que não passam perto do carro.
-- [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
+- [x] Footer com créditos: modelo (`mariobelmonte141`, link do CGTrader, "Custom License, no AI"), traçado e fontes
+- [x] Leitura do carro (pedido do usuário, 2026-09-18): verniz, luz de recorte e soleira lime escolhidos
+  no laboratório `tools/lookLab.html`; aero e chassis reenquadrados; âncoras do menu no ponto da câmera;
+  imagens do lite regeradas. Detalhes em design.md ("Leitura do carro").
+  - 👁 1152×720: aero e chassis com folga do texto; âncoras param no centro do capítulo (866/864, 1874/1872).
+  - Lighthouse desktop: 99 em 4 de 5 rodadas (TBT 48–62 ms), uma de 87 fora da curva.
+  - `tools/capture.js` corrigido: não esperava o `createStage`, que virou assíncrono.
+- [x] Profundidade do carro (pedido do usuário, 2026-09-18): pipeline do modelo corrigido (o `dedup`
+  fundia os materiais), GLB regerado com pintura, blackout, carbono e vidro separados; acabamento por
+  peça; ambiente 0,5; spot lime fora do teto; sombras por roda (🧪 `lib/wheelContacts.js`) e box de pit
+  no piso. Detalhes em design.md ("Profundidade").
+  - 👁 1152×720: hero, aero, chassis e engine sem linhas do box sob o texto; console limpo.
+  - Imagens do lite regeradas. Lighthouse desktop 100 / 99 / 100.
+- [x] Detalhes do carro (pedido do usuário, 2026-09-18): letreiro "Supra" cromado, pinças e calotas lime
+  sutis, neblinas e luz de chuva acesas, placa escondida; soleira lime retirada; emblema da Toyota
+  discreto (regra "Sem logos oficiais"). Pipeline separa placa, luz de chuva, neblinas e calotas.
+  Detalhes em design.md ("Detalhes"). Lighthouse desktop 99–100, mobile 100.
+- [x] Luzes do carro (2026-09-18): LED branco dos faróis por cima do vidro, lanternas e refletores
+  vermelhos, as duas neblinas acesas. Pipeline separa lanternas, vidro delas e pinças. Lighthouse
+  desktop 100. Detalhes em design.md ("Detalhes" → "Luzes").
+- [ ] Ritmo entre "The circuit." e a volta (pedido do usuário): juntar a transição com a abertura da
+  volta, palco 3D em tela cheia com título e dados sobrepostos
+- [ ] Tela de som depois do carregamento (pedido do usuário): "turn your sound up", tecla/clique/toque
+  toca o motor, saída sem som; nos dois modos
 - [x] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura (2026-09-18)
   - Roteiro manual no build (1152×720 full, 375 px lite). Passaram: ordem do foco, foco visível,
     âncoras pelo teclado, `alt` do lite, anúncio do HUD, reduced motion → lite.
