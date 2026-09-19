@@ -5,7 +5,11 @@
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 240 testes verdes, build ok.
+- **No ar:** https://gr-supra-gt4.vercel.app — código em https://github.com/iajuss/gr-supra-gt4 (público,
+  branch `main`). A Vercel publica sozinha a cada push no `main`. Commits com o e-mail noreply do GitHub
+  (`269213431+iajuss@users.noreply.github.com`, configurado no repositório; o histórico foi reescrito
+  antes do primeiro envio para tirar o e-mail da Insper).
+- **Estado do código:** Blocos 1–5 concluídos. 240 testes verdes, build ok.
   Última sessão (2026-09-19, tarde): **abertura como partida do motor** — carregamento em linha, faróis
   piscando, motor, "SUPRA" na pega, som com ambiente (design.md "Abertura: partida do motor").
   Sessão de 2026-09-19: **abertura da volta em cortina** — a transição virou a abertura da seção da
@@ -29,7 +33,7 @@
 1. ~~Ritmo entre "The circuit." e a volta~~ — feito em 2026-09-19 (cortina, variante C).
 2. ~~Tela de som~~ — feita em 2026-09-19, com o áudio final (BMW Z3, `public/audio/engine-start.mp3`).
 3. ~~Motion do hero/preloader~~ — feito em 2026-09-19 (abertura como partida do motor).
-4. Deploy na Vercel.
+4. ~~Deploy na Vercel~~ — feito em 2026-09-19.
 - Opcional: os ~20 ms de TBT a mais no desktop depois da abertura (tarefa no chunk `stage`).
 - Opcionais, sem efeito na nota: baixar o GLB em paralelo com o `createStage` (carro ~1 s antes);
   pré-compilar o palco da volta (bloqueia ~380 ms ao chegar perto); GLB de 7,7 MB acima da meta de ~5 MB.
@@ -389,4 +393,8 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
     criado no primeiro movimento do ponteiro/toque/tecla (15 ms do clique ao som, TBT intacto).
   - Recorte do som refeito: 0–9 s, 145 KB. Imagens do lite não regravadas (o carro aceso não mudou).
   - Lighthouse: mobile 100 × 3; desktop 97–99 (ver "Retomada").
-- [ ] Deploy na Vercel (decidido em 2026-09-18)
+- [x] Deploy na Vercel (2026-09-19): repositório público `iajuss/gr-supra-gt4` com README em inglês;
+  importado pelo usuário no painel da Vercel (preset Vite, `npm run build`, saída `dist`, sem variáveis).
+  - Conferido no ar: página, GLB (`model/gltf-binary`), áudio, Draco `wasm`; modo full abre, console limpo.
+  - Lighthouse em produção, rodadas alternadas com o build local para separar a máquina do site: as
+    duas oscilam juntas (89–91 numa dupla, 99–100 na outra; produção 100 com TBT 39 ms). Mobile 92–100.
