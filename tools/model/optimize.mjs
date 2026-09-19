@@ -2,15 +2,24 @@
 // Merge by material, weld, simplify and compress, so the browser gets something it can draw.
 // The main bodywork is left unsimplified: simplifying it, even gently, wrinkles the glossy paint.
 
-import { NodeIO } from '@gltf-transform/core';
+import { NodeIO, PropertyType } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { dedup, flatten, join, weld, simplifyPrimitive, prune, draco } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import draco3d from 'draco3dgltf';
 
-const [input, output, ratio = '0.05', error = '0.001', keep = 'WHEELARCH RUBBER - black'] = process.argv.slice(2);
-// Materials whose meshes are never simplified, comma-separated. Despite its name, this one is most of the
-// bodywork: meshopt ignores the normals, so collapsing it leaves shading dents all over the paint.
+// The bodywork materials, never simplified: meshopt ignores the normals, so collapsing glossy panels leaves
+// shading dents all over the paint. They used to be one material (see the dedup step below).
+const BODYWORK = [
+  'METALLIC CARPAINT - black.001',
+  'BLACKOUT',
+  'CARBON FIBER 1x1 - default',
+  'WHEELARCH RUBBER - black',
+  'GLASS - windshield',
+].join(',');
+
+const [input, output, ratio = '0.05', error = '0.001', keep = BODYWORK] = process.argv.slice(2);
+// Materials whose meshes are never simplified, comma-separated.
 const keepIntact = keep.split(',').map((name) => name.trim()).filter(Boolean);
 
 const io = new NodeIO()
@@ -57,7 +66,59 @@ for (const node of doc.getRoot().listNodes()) {
 }
 console.log(`cenário    ${dropped} nós removidos`);
 
-await step(doc, 'dedup', dedup());
+// Small parts that share a catch-all material in the FBX ('Material.003') but get a finish of their own on
+// the page: each gets its own material here, before the meshes are joined by material. Node names from
+// the author's FBX (found with parts listed by position, 2026-09-18).
+const DETAILS = {
+  'DETAIL plate': ['Plane.1303'], // rear number plate: the page's car has none ("No number plate")
+  'DETAIL rain light': ['Plane.6072'], // the light at the centre of the diffuser
+  'DETAIL fog light': ['Plane.1747', 'Plane.1762'], // the lamps in the front bumper
+  'DETAIL hub': [
+    'Exported_from_Blender-3.5.284',
+    'Exported_from_Blender-3.5.610',
+    'Exported_from_Blender-3.5.788',
+    'Exported_from_Blender-3.5.1114',
+  ], // wheel centre caps
+  // The tail light clusters: the left one sits in 'a0000…', the right one in 'Llanta' (the rims' material).
+  'DETAIL tail light': [
+    'Plane.2056',
+    'Plane.2058',
+    'Plane.2060',
+    'Plane.2061',
+    'Plane.2057',
+    'Plane.2059',
+    'Plane.2062',
+    'Plane.2063',
+  ],
+  'DETAIL tail glass': ['Plane.1314'], // the tail lights' lens, fused with the windscreen's glass
+  // The brake calipers; the rest of their material ('Material.002') is the rear bumper's reflectors.
+  'DETAIL caliper': [
+    'Exported_from_Blender-3.5.308',
+    'Exported_from_Blender-3.5.634',
+    'Exported_from_Blender-3.5.764',
+    'Exported_from_Blender-3.5.1090',
+  ],
+};
+
+const detailOf = new Map(Object.entries(DETAILS).flatMap(([material, nodes]) => nodes.map((node) => [node, material])));
+const detailMaterials = new Map();
+let detailed = 0;
+for (const node of doc.getRoot().listNodes()) {
+  const name = detailOf.get(node.getName());
+  const mesh = node.getMesh();
+  if (!name || !mesh) continue;
+  for (const prim of mesh.listPrimitives()) {
+    if (!detailMaterials.has(name)) detailMaterials.set(name, prim.getMaterial().clone().setName(name));
+    prim.setMaterial(detailMaterials.get(name));
+  }
+  detailed++;
+}
+console.log(`detalhes  ${detailed} nós com material próprio`);
+
+// Materials are left out of dedup on purpose: the converter gives every material the same values, so
+// deduplicating them fused paint, blackout trim, carbon and glass into one ("WHEELARCH RUBBER"), and the
+// page could only paint the car in a single colour (found 2026-09-18).
+await step(doc, 'dedup', dedup({ propertyTypes: [PropertyType.ACCESSOR, PropertyType.MESH, PropertyType.TEXTURE] }));
 await step(doc, 'flatten', flatten());
 await step(doc, 'join', join({ keepNamed: false }));
 await step(doc, 'weld', weld({ tolerance: 0.0001 }));

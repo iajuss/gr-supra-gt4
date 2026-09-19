@@ -20,20 +20,28 @@ Resultado bruto: 247 MB, 9450 malhas, 5.310.866 triângulos.
 ## 2. Limpar e otimizar
 
 ```bash
-node --max-old-space-size=8192 optimize.mjs supra.glb supra-web.glb 0.05 0.001 "WHEELARCH RUBBER - black"
+node --max-old-space-size=8192 optimize.mjs supra.glb supra-web.glb 0.05 0.001
 ```
 
-O último argumento lista (separados por vírgula) os materiais que **não** são simplificados; o padrão já é
-esse. Apesar do nome, `WHEELARCH RUBBER - black` é a maior parte da carroceria (2,93M triângulos), e
-simplificá-la, mesmo com erro 0.0002, deixa a pintura brilhante cheia de amassados: o meshopt ignora
-as normais, que deixam de bater com a superfície. Recalcular as normais depois deixa tudo facetado,
+Um quinto argumento opcional lista (separados por vírgula) os materiais que **não** são simplificados; o
+padrão é a carroceria: pintura (`METALLIC CARPAINT - black.001`), `BLACKOUT`, carbono, caixas de roda e
+vidro, 2,93M triângulos no total. Simplificá-la, mesmo com erro 0.0002, deixa a pintura brilhante cheia de
+amassados: o meshopt ignora as normais, que deixam de bater com a superfície. Recalcular as normais depois deixa tudo facetado,
 porque a malha não compartilha vértices entre faces. Diagnóstico de 2026-09-17 em
 [docs/plan.md](../../docs/plan.md).
 
 O script remove o cenário do autor (o fundo `Cylinder` com escala 7425, a luz `Area` e a `Camera`),
 junta as malhas por material, solda vértices, simplifica (menos a lataria) e comprime com Draco.
 
-Resultado: 13 malhas, 3.551.233 triângulos, 7,9 MB. (Simplificando tudo eram 1.472.254 e 4,0 MB,
+**O `dedup` não pode fundir materiais** (corrigido em 2026-09-18). O conversor dá os mesmos valores a
+todos os materiais, e o `dedup()` padrão juntava pintura, blackout, carbono, caixas de roda e vidro num
+só, com o nome do primeiro (`WHEELARCH RUBBER - black`): na página o carro só podia ter uma cor.
+
+**Detalhes com material próprio** (`DETAILS` no script, pelos nomes dos nós do FBX): placa, luz central do
+difusor, faróis de neblina, calotas, lanternas, vidro das lanternas e pinças de freio ganham material
+próprio antes da junção, para a página pintá-los à parte.
+
+Resultado: 24 malhas, 3.544.763 triângulos, 7,7 MB (antes da correção, 13 malhas com a carroceria fundida). (Simplificando tudo eram 1.472.254 e 4,0 MB,
 com a lataria amassada.)
 
 ## 3. Instalar
