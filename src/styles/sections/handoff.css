@@ -1,10 +1,11 @@
+/* Opens THE LAP: "Built for one place / The circuit." (the section's title). The lap section gives the gutters. */
 .handoff {
   display: grid;
   place-content: center;
   justify-items: center;
   gap: var(--space-4);
   min-height: 70svh;
-  padding: var(--section-pad-y) var(--gutter);
+  padding-block: var(--section-pad-y);
   text-align: center;
 }
 
@@ -17,6 +18,14 @@
   color: var(--color-accent);
 }
 
+/* Over the stage as it rises: the title travels to the stage's corner (components/lapCurtain.js). */
 [data-mode='full'] .handoff {
+  position: relative;
+  z-index: 2;
   min-height: 100svh;
+  pointer-events: none;
+}
+
+[data-mode='full'] .handoff__line {
+  transform-origin: 0 0;
 }

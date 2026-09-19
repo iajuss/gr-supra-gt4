@@ -1,13 +1,38 @@
-/* Opaque background: from here down the 3D stage is covered. */
+/* The handoff opens the section over the car stage; from the lap layout down the 3D car stage is covered. */
 .lap {
-  padding: var(--section-pad-y) var(--gutter);
+  padding: 0 var(--gutter) var(--section-pad-y);
+}
+
+/* #lap (the nav's anchor): lite lands below the fixed header; the 3D stage lands flush, as designed. */
+.lap__layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--space-6);
   background: var(--color-bg);
+  scroll-margin-top: calc(var(--header-h) + var(--space-5));
+}
+
+.lap__head {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.lap__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--color-line);
 }
 
-.lap__layout {
-  display: grid;
-  gap: var(--space-6);
+.lap__facts dd {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-weight: var(--weight-stat);
+  font-size: 1.5rem;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .lap__track {
@@ -93,6 +118,15 @@
     grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     align-items: start;
   }
+
+  .lap__head {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Full mode: the stage closes the section, so the title in its corner leaves with it. */
+[data-mode='full'] .lap {
+  padding-bottom: 0;
 }
 
 /* ---------- Full mode: 3D stage (set by components/lapSection3d.js) ----------
@@ -105,6 +139,7 @@
   height: 100vh;
   height: 100svh;
   min-height: 36rem;
+  scroll-margin-top: 0;
   margin-inline: calc(-1 * var(--gutter));
   overflow: hidden;
   border-block: 1px solid var(--color-line);
@@ -123,6 +158,7 @@
   gap: var(--space-2);
 }
 
+[data-lap-view='3d'] .lap__head,
 [data-lap-view='3d'] .lap__controls,
 [data-lap-view='3d'] .hud__grid,
 [data-lap-view='3d'] .lap__track,
@@ -131,15 +167,35 @@
   z-index: var(--z-hud);
 }
 
+/* A soft shade under the top corner, where the title and the data sit over the lit track. */
+.lap__layout[data-lap-view='3d']::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 auto;
+  height: 45%;
+  background: linear-gradient(rgb(10 11 10 / 0.75), transparent);
+  pointer-events: none;
+}
+
+/* Top-left, under the handoff's title once it has landed in the corner (it rests on the head's top edge,
+   see components/lapCurtain.js): the header, a gap, the title at half size, another gap. */
+[data-lap-view='3d'] .lap__head {
+  top: calc(var(--header-h) + var(--space-6) + var(--fs-heading) * 0.5 * var(--leading-display) + var(--space-3));
+  left: var(--gutter);
+  max-width: min(34rem, 50%);
+}
+
 /* Below the fixed header: on the full-screen stage both were fighting for the top strip. */
 [data-lap-view='3d'] .lap__controls {
   top: calc(var(--header-h) + var(--space-3));
   right: var(--gutter);
 }
 
+/* Under the controls, right-aligned: the top-left corner belongs to the title. */
 [data-lap-view='3d'] .hud__note {
-  top: calc(var(--header-h) + var(--space-3));
-  left: var(--gutter);
+  top: calc(var(--header-h) + var(--space-3) + 2.75rem + var(--space-3));
+  right: var(--gutter);
 }
 
 /* Over the moving stage, even on the HUD panels, the muted grey fell under 4.5:1 (see stage.css). */

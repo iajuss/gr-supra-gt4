@@ -62,11 +62,13 @@ async function initStage(root) {
       return;
     }
 
-    const [{ createSmoothScroll }, { createCameraRig }] = await Promise.all([
+    const [{ createSmoothScroll }, { createCameraRig }, { createLapCurtain }] = await Promise.all([
       import('./lib/scroll.js'),
       import('./scene/cameraRig.js'),
+      import('./components/lapCurtain.js'),
     ]);
     createSmoothScroll();
+    createLapCurtain(document.querySelector('.lap'));
     createCameraRig({
       shots: cameraShots,
       root: document,

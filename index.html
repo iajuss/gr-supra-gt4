@@ -115,19 +115,24 @@
         </div>
       </section>
 
-      <section class="handoff" data-shot="transition" aria-label="Transition">
-        <p class="label" data-reveal="fade">Built for one place</p>
-        <p class="handoff__line" data-reveal="lines">The circuit.</p>
-      </section>
+      <section class="lap" aria-labelledby="lap-title">
+        <!-- Full mode: the lap stage rises under this and its title travels to the stage's corner
+             (components/lapCurtain.js). -->
+        <div class="handoff" data-shot="transition" data-curtain>
+          <p class="label" data-reveal="fade">Built for one place</p>
+          <h2 class="handoff__line" data-reveal="lines" id="lap-title" data-curtain-title>The circuit.</h2>
+        </div>
 
-      <section class="lap" id="lap" aria-labelledby="lap-title">
-        <header class="section-head">
-          <p class="label" data-reveal="fade"><span class="accent">04</span> — The lap</p>
-          <h2 class="section-head__title" data-reveal="lines" id="lap-title">One lap of Silverstone.</h2>
-          <p class="section-head__lead">5.891 km. 18 corners. One twin-scroll turbo.</p>
-        </header>
+        <div class="lap__layout" id="lap" data-lap>
+          <header class="lap__head">
+            <p class="label" data-reveal="fade"><span class="accent">04</span> — One lap of Silverstone</p>
+            <dl class="lap__facts">
+              <div><dt class="label">Circuit</dt><dd>Silverstone GP</dd></div>
+              <div><dt class="label">Length</dt><dd>5.891 <span class="unit">km</span></dd></div>
+              <div><dt class="label">Corners</dt><dd>18</dd></div>
+            </dl>
+          </header>
 
-        <div class="lap__layout" data-lap>
           <!-- Full mode only: 3D stage (components/lapSection3d.js). In lite it stays hidden. -->
           <canvas class="lap__stage" role="img" aria-label="3D view of the simulated lap around Silverstone" data-lap-stage></canvas>
 
