@@ -34,7 +34,9 @@ Status: aprovado em 2026-09-17.
 2. **01 — AERO** — close da asa traseira e difusor.
 3. **02 — CHASSIS** — dianteira e splitter, rente ao chão.
 4. **03 — ENGINE** — 3.0 L, 6 em linha, um turbo (era `V12` na versão Vulcan).
-5. **Transição** — câmera se afasta, carro escurece, render 3D pausa.
+5. **Transição** — câmera se afasta, carro escurece, render 3D pausa. Desde 2026-09-19 é a abertura da
+   volta: "Built for one place / The circuit." fica dentro da seção e "The circuit." é o título dela
+   (ver "Abertura da volta: cortina").
 6. **THE LAP** — traçado real de Silverstone (GeoJSON `bacinger/f1-circuits`, MIT) em Canvas 2D, ponto lime
    percorrendo a volta + HUD (velocidade, marcha, setor, tempo). Inicia ao entrar na tela; botão `REPLAY`.
    Telemetria **simulada**, identificada como tal.
@@ -73,6 +75,33 @@ Status: aprovado em 2026-09-17.
      Pista girada 90° em telas largas (4:3) e em pé no mobile (3:4).
 7. **SPECS** — contadores, barras comparativas, reveal tipográfico. Números verificados em fontes públicas.
 8. **Footer** — aviso fan-made, crédito do modelo 3D (autor, link e licença como publicada), crédito do traçado e das fontes.
+
+### Abertura da volta: cortina (2026-09-19)
+
+Pedido do usuário: entre a transição e o palco da volta havia um cabeçalho comum ("04 — One lap of
+Silverstone", 151 px em 1152×720), que quebrava o ritmo. Três variantes comparadas lado a lado na página
+real (laboratório temporário, já apagado): **A** título e dados sobre o palco, com a transição igual;
+**B** "The circuit." como título e só label e dados no palco; **C** cortina. Escolha do usuário: **C**.
+
+- **Uma seção só:** a transição (`.handoff`, ainda com `data-shot="transition"`) abre a `section.lap`;
+  "The circuit." é o `h2#lap-title`. O cabeçalho comum saiu. Sobre o palco ficam o label
+  `04 — One lap of Silverstone` e os dados (Circuit / Length / Corners) no canto superior esquerdo,
+  com uma sombra suave no topo do palco; a nota "Telemetry simulated" foi para baixo dos botões.
+- **A cortina:** o palco sobe uma tela por baixo da transição e "The circuit." encolhe do centro até o
+  canto (metade do tamanho), pousando logo acima do label. O label "Built for one place" só sobe com a
+  página.
+- **Sem `sticky`:** no laboratório a transição ficava presa, e o `offsetTop` dela passava a mentir
+  enquanto presa (3744 → 4104), o que desloca as paradas da câmera no `cameraRig`. Em vez de prender, o
+  título recebe no `y` a distância rolada, então na tela ele só faz o próprio caminho. As seções não
+  mudam de lugar e a câmera não mudou.
+- O caminho é puro e testado (`lib/curtain.js`, `curtainAt`: ease in-out cúbico, compensação da
+  rolagem); `components/lapCurtain.js` só liga um ScrollTrigger ao progresso, no modo full, e mede de novo
+  quando o título muda de largura (o reveal divide e junta as linhas depois da primeira medição).
+- **Âncora "Lap":** o `id="lap"` está no palco (`.lap__layout`); no full a âncora para com o palco
+  assentado e o título no canto; no lite, logo abaixo do header.
+- **Lite:** empilhado — transição, label e dados, volta 2D.
+- O fundo opaco passou da seção para o `.lap__layout`, e no full a seção não tem padding embaixo: senão
+  o carro fixo apareceria no respiro sob o palco e o título sairia antes do palco.
 
 ## Fontes dos números
 

@@ -1,30 +1,27 @@
 # Plano de implementação
 
-## ▶ Retomada (atualizado em 2026-09-18, fim da sessão)
+## ▶ Retomada (atualizado em 2026-09-19)
 
 - **O carro mudou: Vulcan → Toyota Supra MK5**, apresentado como **GR Supra GT4**. Não foi decisão de
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
-- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 198 testes verdes, build ok, git
-  limpo em `e3269fb`. Nesta sessão: TBT do desktop corrigido, checagem de acessibilidade (contraste
+- **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 203 testes verdes, build ok.
+  Sessão de 2026-09-19: **abertura da volta em cortina** — a transição virou a abertura da seção da
+  volta e "The circuit." vai para o canto do palco enquanto ele sobe (design.md, "Abertura da volta:
+  cortina"). Sessão anterior (2026-09-18): TBT do desktop corrigido, checagem de acessibilidade (contraste
   sobre o 3D, Pause na volta, preloader `inert`), crédito do modelo no footer e o carro refeito a
   pedido do usuário — pipeline do modelo corrigido (o `dedup` fundia os materiais), acabamento por
   peça, detalhes (letreiro cromado, pinças e calotas lime, luzes acesas, lanternas vermelhas, sem
   placa), sombras por roda e box de pit no piso. Tudo em design.md ("Carregamento sem tarefas longas",
   "Acessibilidade", "Leitura do carro", "Profundidade", "Detalhes").
-- **Lighthouse** (2026-09-18, `vite preview` + Edge headless via `npx lighthouse@12`):
+- **Lighthouse** (2026-09-19, depois da cortina; `vite preview` + Edge headless via `npx lighthouse@12`):
   - Mobile (lite): **100 / 100 / 100 / 100**.
-  - Desktop (full): **100 / 100 / 100 / 100** (TBT 36–52 ms). Rodadas isoladas de 83–87 aparecem com
+  - Desktop (full): **100 / 100 / 100 / 100** nas 3 rodadas (TBT 44–49 ms, CLS ≤ 0,002). Rodadas isoladas de 83–87 aparecem com
     a máquina ocupada (captura de imagens, laboratório aberto); repetir sem carga antes de concluir.
 
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
-1. **Ritmo entre "The circuit." e a volta** (ideia do usuário; caminho escolhido: juntar a transição com
-   a abertura da volta). Hoje, em 1152×720: a transição (`.handoff`, 720 px) termina e vem um cabeçalho
-   comum "04 — One lap of Silverstone / 5.891 km. 18 corners…" (`.section-head`, 151 px) antes do palco
-   3D em tela cheia (`.lap__layout`, 720 px). Proposta aprovada: "Built for one place / The circuit."
-   vira a abertura da volta; o palco entra em tela cheia logo depois, com título e dados sobrepostos no
-   estilo dos labels dos capítulos. Falta combinar o layout exato com o usuário.
+1. ~~Ritmo entre "The circuit." e a volta~~ — feito em 2026-09-19 (cortina, variante C).
 2. **Tela de som depois do carregamento** (ideia do usuário; nos dois modos): "turn your sound up",
    tecla/clique/toque toca o motor (B58, seis em linha) e abre a página; saída sem som. Precisa achar
    um áudio com licença que permita o uso.
@@ -60,7 +57,12 @@
 - Para forçar o modo full: emular 1440×900 e recarregar. O app limpa a emulação quando a largura do
   painel muda, então vale reemular antes de cada recarga.
 - A porta 5173 costuma estar ocupada por um dev server de outra sessão, que serve módulos em cache.
-  Use a entrada `vite-dev-auto` do `.claude/launch.json`, que sobe em 5174.
+  Use a entrada `vite-dev-auto` do `.claude/launch.json`, que sobe em 5174 (conferir nos logs:
+  `preview_logs`, busca "Local"; o painel pode anunciar outra porta, mas o Vite fica na 5174).
+- A 4173 também pode estar com o `vite-preview` de outra sessão (servindo um `dist` antigo): para o
+  Lighthouse, use `vite-preview-auto` (4174) e feche as abas do painel antes de medir.
+- A emulação "mobile" do painel pode continuar valendo na carga seguinte: depois dela, conferir
+  `data-mode` antes de medir o modo full.
 - Capturar a cena antes do `ResizeObserver` enquadra contra o canvas padrão de 300×150.
 - Uma volta dura 12 s; para pegá-la correndo, agrupar clique + espera + leitura num único lote.
 - O painel pode ficar oculto no meio de uma medição (quadro de ~1 s no FPS, capturas com timeout ou
@@ -318,8 +320,16 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
 - [x] Luzes do carro (2026-09-18): LED branco dos faróis por cima do vidro, lanternas e refletores
   vermelhos, as duas neblinas acesas. Pipeline separa lanternas, vidro delas e pinças. Lighthouse
   desktop 100. Detalhes em design.md ("Detalhes" → "Luzes").
-- [ ] Ritmo entre "The circuit." e a volta (pedido do usuário): juntar a transição com a abertura da
-  volta, palco 3D em tela cheia com título e dados sobrepostos
+- [x] Ritmo entre "The circuit." e a volta (pedido do usuário, 2026-09-19): variantes A/B/C comparadas
+  lado a lado na página real (lab temporário, apagado); escolhida a **C, cortina**. Detalhes em design.md
+  ("Abertura da volta: cortina").
+  - 🧪 `lib/curtain.js` (`curtainAt`, 5 testes): caminho do título com a rolagem compensada, sem `sticky`
+    (que deslocava as paradas do `cameraRig`). `components/lapCurtain.js` liga ao ScrollTrigger (full).
+  - 👁 1152×720: título pousa alinhado ao label (58 px, 12 px acima); paradas da câmera iguais (3744 /
+    4464); âncora "Lap" para no palco assentado; 1280×1000 sem recarregar continua alinhado; lite em
+    375 px empilhado, sem overflow; console limpo. Movimento contínuo não visto (painel oculto): medido
+    em pontos da rolagem.
+  - Lighthouse: desktop 100 × 4 (TBT 44–49 ms), mobile 100 × 4.
 - [ ] Tela de som depois do carregamento (pedido do usuário): "turn your sound up", tecla/clique/toque
   toca o motor, saída sem som; nos dois modos
 - [x] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura (2026-09-18)
