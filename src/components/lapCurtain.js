@@ -53,6 +53,7 @@ export function createLapCurtain(root) {
   }
 
   function render(progress) {
+    if (!move) measure(); // a scroll can arrive before ScrollTrigger's first refresh
     const { x, y, scale } = curtainAt(progress, move);
     title.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
   }
