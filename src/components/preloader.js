@@ -1,10 +1,13 @@
-// Full-mode loading screen: "Loading_telemetry — NN%" with the real download progress of the car.
-// It blocks the page while the model loads, but never for longer than OPEN_AFTER_MS: on a slow line
-// the page opens anyway and the car emerges when it arrives.
+// The screen over the page before it opens, in two phases:
+// 1. loading (full mode): "Loading_telemetry — NN%" with the real download progress of the car. It is
+//    ready when the car is on stage, when loading fails, or after READY_AFTER_MS on a slow line (the car
+//    then emerges when it arrives);
+// 2. once ready, the sound screen takes over (components/soundGate.js) and the page opens on the
+//    visitor's choice. Lite has no loading phase: it is ready at once.
 
 import { percentShown } from '../lib/progress.js';
 
-const OPEN_AFTER_MS = 8000;
+const READY_AFTER_MS = 8000;
 const LEAVE_MS = 600; // matches the opacity transition in stage.css
 
 /**
@@ -12,10 +15,17 @@ const LEAVE_MS = 600; // matches the opacity transition in stage.css
  * @param {{ reducedMotion: boolean }} options
  */
 export function createPreloader(root, { reducedMotion }) {
+  const loading = root.querySelector('.preloader__loading');
   const value = root.querySelector('.preloader__value');
   const html = document.documentElement;
   let shown = 0;
+  let isReady = false;
   let open = false;
+
+  let markReady;
+  const ready = new Promise((resolve) => (markReady = resolve));
+  let markClosed;
+  const closed = new Promise((resolve) => (markClosed = resolve));
 
   // While the screen covers the page, what is behind it can be neither focused nor read.
   const page = [...document.body.children].filter((element) => element !== root && element.tagName !== 'SCRIPT');
@@ -24,20 +34,29 @@ export function createPreloader(root, { reducedMotion }) {
   root.hidden = false;
   html.classList.add('is-loading');
   setPageInert(true);
-  const timeout = setTimeout(close, OPEN_AFTER_MS);
+  const timeout = setTimeout(becomeReady, READY_AFTER_MS);
 
   function write(percent) {
     shown = percent;
     if (value) value.textContent = String(percent);
   }
 
+  function becomeReady() {
+    if (isReady) return;
+    isReady = true;
+    clearTimeout(timeout);
+    if (loading) loading.hidden = true;
+    markReady();
+  }
+
   /** Lifts the screen off the page; safe to call more than once. */
   function close() {
     if (open) return;
     open = true;
-    clearTimeout(timeout);
+    becomeReady();
     html.classList.remove('is-loading');
     setPageInert(false);
+    markClosed();
 
     if (reducedMotion) {
       root.hidden = true;
@@ -53,13 +72,18 @@ export function createPreloader(root, { reducedMotion }) {
       const next = percentShown(shown, ratio);
       if (next !== shown) write(next);
     },
-    /** The car is decoded and on stage. */
+    /** The car is decoded and on stage (or, in lite, there is nothing to load). */
     finish() {
       write(100);
-      close();
+      becomeReady();
     },
-    /** Loading failed: step aside so the lite fallback shows. */
-    fail: close,
+    /** Loading failed: the lite fallback takes over behind the screen, which moves on. */
+    fail: becomeReady,
+    close,
+    /** Resolves when loading is over and the sound screen can take over. */
+    ready,
+    /** Resolves when the page opens. */
+    closed,
     get isOpen() {
       return open;
     },

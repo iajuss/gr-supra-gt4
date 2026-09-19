@@ -92,3 +92,9 @@ main,
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
+
+/* The main call to action: filled from the start. */
+.button--solid {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}

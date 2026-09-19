@@ -3,9 +3,12 @@ import '@fontsource-variable/jetbrains-mono';
 import './styles/main.css';
 
 import { decideMode, detectEnvironment } from './lib/capabilities.js';
+import engineSound from './data/engineSound.js';
 import { initChapterShots } from './components/chapterShots.js';
+import { createEngineSound } from './components/engineSound.js';
 import { initLapSection } from './components/lapSection.js';
 import { createPreloader } from './components/preloader.js';
+import { openSoundGate } from './components/soundGate.js';
 import { initSpecCounters } from './components/specCounters.js';
 import { initTextReveal } from './components/textReveal.js';
 import { whenNear } from './lib/whenNear.js';
@@ -18,9 +21,27 @@ const motion = { reducedMotion: env.reducedMotion };
 
 initTextReveal(document, motion);
 
+// Both modes open through the sound screen, once there is nothing left to wait for.
+const preloaderRoot = document.querySelector('.preloader');
+const preloader = createPreloader(preloaderRoot, motion);
+const engine = createEngineSound(engineSound);
+preloader.ready.then(() => {
+  engine.preload();
+  openSoundGate(preloaderRoot.querySelector('.gate'), {
+    surface: preloaderRoot,
+    onChoice(choice) {
+      if (choice === 'sound') engine.play();
+      preloader.close();
+    },
+  });
+});
+
 const stage = document.querySelector('.stage');
 if (mode === 'full' && stage) initStage(stage);
-else initChapterShots(document);
+else {
+  initChapterShots(document);
+  preloader.finish(); // lite loads nothing up front
+}
 
 const lap = document.querySelector('[data-lap]');
 if (lap) initLap(lap);
@@ -32,7 +53,6 @@ console.info(`[supra] mode=${mode}`, reasons);
 
 /** The fixed car stage, full mode only: Three.js is never fetched in lite. */
 async function initStage(root) {
-  const preloader = createPreloader(document.querySelector('.preloader'), motion);
   try {
     const [{ createStage }, { createCar }, { default: carStage }, { default: cameraShots }] = await Promise.all([
       import('./scene/stage.js'),
@@ -47,10 +67,11 @@ async function initStage(root) {
     await view.prepare(car.object3D);
     view.add(car.object3D);
 
-    // The car is on stage: the preloader lifts (if the timeout has not already) and the car emerges.
+    // The car is on stage: the sound screen can take over, and the car emerges once the page opens
+    // (at once if the visitor is already in, after the slow-line timeout).
     const showCar = () => {
       preloader.finish();
-      view.reveal({ instant: motion.reducedMotion });
+      preloader.closed.then(() => view.reveal({ instant: motion.reducedMotion }));
     };
 
     // ?shot=<id> holds one chapter's framing, to check it on its own, instead of following the scroll.
