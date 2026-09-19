@@ -123,12 +123,17 @@ Pedido do usuário: depois do carregamento, uma tela pedindo som; tecla, clique 
   contexto e toca: medido 0 ms entre criar o contexto e tocar. Decodificar depois do gesto atrasava o
   som em ~2 s com o arquivo provisório. Recorte e fades em `lib/envelope.js`; se o áudio não chegar em
   1,5 s depois do gesto, a página abre em silêncio.
-- **Áudio provisório** (`data/engineSound.js`): prévia do Pixabay de um BMW M4 (S55, seis em linha
-  biturbo, parente do B58), trecho 0–5 s, tocada direto do CDN (CORS aberto). Nenhum B58 com licença
-  aberta encontrado: Freesound fora do ar (502) na busca, Wikimedia Commons sem Supra, Sample Focus com
-  licença voltada a música. Candidatas em `tools/soundLab.html`. Pendente: escolher a gravação final,
-  salvar o recorte em `public/audio/` (o MP3 provisório tem 4 MB e aparece no peso da página) e o
-  crédito no footer, se a licença pedir.
+- **Áudio final (2026-09-19):** BMW Z3, "car-start" de Erdie no Freesound (**CC BY 4.0**), trecho 0–5,5 s:
+  pega logo no início e acelera. O usuário pediu partida e acelerada rápidas dentro do tempo da tela.
+  - Busca: nenhum B58/A90/M340i com licença aberta no Freesound. Comparadas no laboratório (temporário)
+    gravações curtas com partida e acelerada (Z3, Mercedes 190E-16V, Lotus Elise, BMW M6, todas CC0
+    menos a Z3) e uma montagem de dois trechos com crossfade (partida e acelerada do M4, cujo original
+    no Freesound é CC0). Escolha do usuário: a Z3, sem edição.
+  - Arquivo: `public/audio/engine-start.mp3`, recortado com ffmpeg da prévia HQ pública (o original, MP3
+    de 160 kbps, exige login), estéreo 128 kbps, 89 KB (o provisório tinha 4 MB e vinha do CDN do Pixabay).
+    Os fades continuam no código (`lib/envelope.js`), não no arquivo.
+  - Crédito no footer, **só porque a licença pede** (decisão do usuário: CC0 ficaria sem crédito): título,
+    autor com link, licença com link e "trimmed" (a CC BY exige indicar a alteração).
 
 ## Fontes dos números
 
