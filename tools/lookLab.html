@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Look lab</title>
+    <style>
+      body { margin: 0; padding: 12px; background: #0a0b0a; color: #f2f2ee; font: 13px/1.4 monospace; }
+      canvas#stage { position: fixed; left: 0; top: 0; width: 960px; height: 600px; visibility: hidden; }
+      .row { display: grid; grid-template-columns: 110px repeat(3, 1fr); gap: 6px; margin-bottom: 6px; align-items: center; }
+      .row img { width: 100%; display: block; }
+      .row b { color: #c6ff00; }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <div id="grid"></div>
+    <pre id="log">starting…</pre>
+    <script type="module" src="./lookLab.js"></script>
+  </body>
+</html>

@@ -26,7 +26,7 @@ function sized(element, cssWidth, tries = 60) {
   });
 }
 
-const view = createStage(canvas, carStage);
+const view = await createStage(canvas, carStage);
 const car = await createCar(carStage);
 view.add(car.object3D);
 
