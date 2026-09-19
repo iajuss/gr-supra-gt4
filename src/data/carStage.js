@@ -27,13 +27,29 @@ export default {
       color: 0xc6ff00,
       intensity: 110,
       position: { x: -3.2, y: 5.6, z: -3.4 },
-      target: { x: 0, y: 0.6, z: 0 },
+      // Aimed at the tail: on the middle of the car the sheen pooled in the roof's double bubble and read
+      // as a dent (2026-09-18).
+      target: { x: -1.6, y: 0.9, z: 0 },
       angle: 0.38,
       penumbra: 0.9,
       distance: 11,
       decay: 2,
     },
-    environmentIntensity: 0.6, // procedural room environment (no HDR download)
+    // Cool white from behind and to the right: it outlines the car against the dark studio, which the
+    // black paint alone lost (look lab, 2026-09-18).
+    edge: {
+      color: 0xdfe8ff,
+      intensity: 90,
+      position: { x: 4.5, y: 3.2, z: -4.5 },
+      target: { x: 0, y: 0.6, z: 0 },
+      angle: 0.5,
+      penumbra: 0.8,
+      distance: 14,
+      decay: 2,
+    },
+    // Procedural room environment (no HDR download). It is a white room: much more and the black paint
+    // reads as silver (0.8 and 0.3 compared in the look lab, 2026-09-18).
+    environmentIntensity: 0.5,
   },
 
   // The car comes out of the fog once it is on stage: `veiled` hides it, the reveal eases back to `density`.
@@ -49,26 +65,104 @@ export default {
   // How the loaded model is repainted, by material name. The GLB arrives almost entirely off-white,
   // so every part is dressed in the page's own palette instead.
   paint: {
-    // Carbon, with a controlled sheen. Double-sided: some panels are single surfaces facing inwards
-    // (the rear wing's endplates vanished when seen from outside, 2026-09-17).
-    body: { color: 0x101210, metalness: 0.85, roughness: 0.28, doubleSided: true },
-    glass: { color: 0x050705, metalness: 1, roughness: 0.06, opacity: 0.62 },
+    // Each part gets its own finish, so the car reads in depth instead of as one black mass
+    // (look lab, 2026-09-18). Double-sided where panels are single surfaces facing inwards (the rear
+    // wing's endplates vanished when seen from outside, 2026-09-17).
+    // The paint: black under a clear coat, whose sharp second reflection draws the volumes.
+    body: {
+      color: 0x0e100f,
+      metalness: 0.2,
+      roughness: 0.5,
+      clearcoat: 1,
+      clearcoatRoughness: 0.06,
+      doubleSided: true,
+    },
+    // Satin black: grilles, wheel spokes, lower trim. Duller than the paint, so the two separate.
+    blackout: { color: 0x0b0c0b, metalness: 0.3, roughness: 0.62, doubleSided: true },
+    // Carbon aero (splitter, skirts, diffuser, wing): glossy, a shade lighter than the paint.
+    carbon: {
+      color: 0x171a18,
+      metalness: 0.5,
+      roughness: 0.32,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+      doubleSided: true,
+    },
+    // Dark tinted glass: see-through enough to hint at the cabin, mirror-like enough to catch the room.
+    glass: { color: 0x0a0d0e, metalness: 0.9, roughness: 0.04, opacity: 0.4, depthWrite: false },
     rim: { color: 0x141614, metalness: 0.9, roughness: 0.35 },
     tyre: { color: 0x090a09, metalness: 0, roughness: 0.95 },
     chrome: { color: 0x9aa39a, metalness: 1, roughness: 0.15 },
-    accent: { color: 0xc6ff00, emissive: 0xc6ff00, emissiveIntensity: 2.4 }, // tail light bar, calipers
-    headlight: { color: 0xe8f0e0, emissive: 0xdfeacd, emissiveIntensity: 1.8 },
+    // The headlights' LED strips, cool white; the tail lights red, the one colour off the palette,
+    // because a car's tail lights read as red or not at all (2026-09-18).
+    headlight: { color: 0xf4f8ff, emissive: 0xeaf2ff, emissiveIntensity: 4, overGlass: true },
+    tailLight: { color: 0xff1a1a, emissive: 0xff1a1a, emissiveIntensity: 3 },
+    tailBar: { color: 0xd01010, emissive: 0xff1a1a, emissiveIntensity: 1.2 },
+    tailGlass: { color: 0x7a0c0c, metalness: 0.3, roughness: 0.05, opacity: 0.3 },
+    reflector: { color: 0xa01010, emissive: 0xff1a1a, emissiveIntensity: 0.3, metalness: 0.2, roughness: 0.3 },
+    // Details, so the car reads rich up close (2026-09-18): the "Supra" script in polished chrome, lime
+    // calipers and wheel centres, the bumper lamps lit white and the diffuser's rain light lit lime.
+    // The lime stays small and barely glowing: a lime sill line was tried and taken out as too loud.
+    badge: { color: 0xd8dcd6, metalness: 1, roughness: 0.12 },
+    caliper: { color: 0xc6ff00, emissive: 0xc6ff00, emissiveIntensity: 0.1, metalness: 0.2, roughness: 0.4 },
+    hub: { color: 0xc6ff00, emissive: 0xc6ff00, emissiveIntensity: 0.1, metalness: 0.4, roughness: 0.35 },
+    // Double-sided: one of the two lamps is a single surface facing inwards, and vanished from outside.
+    lamp: { color: 0xf2f2ee, emissive: 0xf2f2ee, emissiveIntensity: 1.6, doubleSided: true },
+    rainLight: { color: 0xc6ff00, emissive: 0xc6ff00, emissiveIntensity: 1.2 },
+    // The page's line is "No number plate": the model's plate is not drawn.
+    plate: { hidden: true },
   },
 
-  // Which material names of the GLB map to which paint above.
+  // Contact shadows, so the car stands on the floor instead of floating over it (2026-09-18). The body's
+  // pool is a share of the car's footprint; each tyre gets a tight, dark one where it touches down.
+  shadows: {
+    body: { length: 1.12, width: 1.24, strength: 0.95 },
+    wheel: { material: 'neumático', length: 0.95, width: 0.6, strength: 1 },
+  },
+
+  // A pit box painted on the studio floor around the car: it gives the car a place to stand, and its
+  // lines draw the floor's perspective (look lab, 2026-09-18). Metres, centred on the car.
+  pitBox: {
+    length: 5.8,
+    width: 3.2,
+    stroke: 0.08,
+    lineColor: 0x8c918b,
+    // Share of each side line that fades out at either end, so the lines never run under the text.
+    fade: 0.38,
+    // The stop mark ahead of the nose, in the page's lime.
+    stop: { width: 0.14, share: 0.55, inset: 0.55, color: 0xc6ff00, glow: 0.35 },
+  },
+
+  // Which material names of the GLB map to which paint above; anything unlisted is paint
+  // ('METALLIC CARPAINT - black.001'). Until 2026-09-18 the pipeline fused paint, blackout, carbon and
+  // glass into 'WHEELARCH RUBBER - black' (tools/model/README.md), so the car could only be one colour.
   materialRoles: {
     glass: ['GLASS - windshield', 'Mirror'],
-    rim: ['Llanta', 'Cromado1'],
-    // 'WHEELARCH RUBBER - black' is not listed on purpose: despite the name it is most of the
-    // bodywork (852k of the 1.47M triangles), and painting it as tyre made the car flat and matte.
+    rim: ['Llanta'],
     tyre: ['neumático'],
-    accent: ['Material.004', 'azul'],
+    carbon: ['CARBON FIBER 1x1 - default'],
+    badge: ['Material.001'],
+    caliper: ['DETAIL caliper'],
+    reflector: ['Material.002'], // what is left of it once the calipers are split out: the rear reflectors
+    // Split out of 'Material.003' by the model pipeline (tools/model/optimize.mjs, DETAILS).
+    hub: ['DETAIL hub'],
+    lamp: ['DETAIL fog light'],
+    rainLight: ['DETAIL rain light'],
+    plate: ['DETAIL plate'],
+    // Trim, wheel arches, and the parts only seen from below or inside the cabin.
+    blackout: [
+      'BLACKOUT',
+      'WHEELARCH RUBBER - black',
+      'Material.003',
+      'Material.005',
+      'a0000000-0000-0000-0000-000000000000',
+      'DefaultMaterial',
+    ],
     headlight: ['Luz blanca1'],
+    tailBar: ['Material.004'],
+    tailLight: ['DETAIL tail light'],
+    tailGlass: ['DETAIL tail glass'],
+    chrome: ['Cromado1'],
   },
 
   // Scene colours (hex), following the CSS tokens.

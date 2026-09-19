@@ -18,6 +18,7 @@ import {
 import { easeOutCubic } from '../lib/counter.js';
 import { lerp, offsetTarget } from '../lib/math.js';
 import { createRenderer } from './renderer.js';
+import { createPitBox } from './pitBox.js';
 import { createStudioEnvironment } from './studioEnvironment.js';
 
 /**
@@ -50,18 +51,14 @@ export async function createStage(canvas, config) {
     rig.add(light);
   }
 
-  const rimConfig = lights.rim;
-  const rim = new SpotLight(
-    rimConfig.color,
-    rimConfig.intensity,
-    rimConfig.distance,
-    rimConfig.angle,
-    rimConfig.penumbra,
-    rimConfig.decay,
-  );
-  rim.position.set(rimConfig.position.x, rimConfig.position.y, rimConfig.position.z);
-  rim.target.position.set(rimConfig.target.x, rimConfig.target.y, rimConfig.target.z);
-  rig.add(rim, rim.target);
+  // Spots: the lime rim over the roof and the cool edge light that cuts the outline out of the dark.
+  for (const key of ['rim', 'edge']) {
+    const { color, intensity, distance, angle, penumbra, decay, position, target } = lights[key];
+    const spot = new SpotLight(color, intensity, distance, angle, penumbra, decay);
+    spot.position.set(position.x, position.y, position.z);
+    spot.target.position.set(target.x, target.y, target.z);
+    rig.add(spot, spot.target);
+  }
 
   const groundGeometry = new PlaneGeometry(groundConfig.size, groundConfig.size);
   const groundMaterial = new MeshStandardMaterial({
@@ -72,6 +69,9 @@ export async function createStage(canvas, config) {
   const ground = new Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI / 2;
   rig.add(ground);
+
+  const pitBox = createPitBox(config.pitBox);
+  rig.add(pitBox.object3D);
 
   scene.add(rig);
 
@@ -186,6 +186,7 @@ export async function createStage(canvas, config) {
       environment.dispose();
       groundGeometry.dispose();
       groundMaterial.dispose();
+      pitBox.dispose();
     },
   };
 }
