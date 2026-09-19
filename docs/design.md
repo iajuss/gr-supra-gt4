@@ -237,6 +237,32 @@ src/
 - Render pausa fora da zona 3D e com a aba em segundo plano.
 - Lighthouse desktop: Performance ≥ 85, Acessibilidade ≥ 95. Mobile (lite): Performance ≥ 90.
 
+### Carregamento sem tarefas longas (2026-09-18)
+
+O TBT do desktop (1,0–1,7 s) era quase todo **compilação de shader na thread principal**, não trabalho
+de GPU nem download. Medido com `performance.mark` no build, pelo Lighthouse (cache de shaders frio):
+PMREM do `RoomEnvironment` ~600 ms (o filtro GGX sozinho ~420; não muda com a resolução, então é
+compilação), primeiro frame com o carro ~360 ms, 3D da volta ~365 ms, primeiro frame do palco ~125 ms.
+
+- **Ambiente com shaders pré-compilados** (`scene/studioEnvironment.js`): antes do `fromScene`, os
+  shaders do quarto, do blur e do GGX são compilados com `compileAsync` (compilação paralela via
+  `KHR_parallel_shader_compile`), contra o mesmo render target e sem tone mapping, como o `fromScene`
+  os usa. O `createStage` virou assíncrono.
+  - **Os filtros precisam ser compilados na malha de LOD real.** Com uma geometria vazia, o ANGLE
+    (D3D11) montava o shader final para outro layout de vértice e recompilava bloqueando no primeiro
+    draw (~330 ms restantes). Com a malha real, o `fromScene` caiu para ~18 ms.
+  - Usa campos internos do `PMREMGenerator` (three r186: `_setSize`, `_allocateTargets`,
+    `_blurMaterial`, `_ggxMaterial`, `_lodMeshes`). Se sumirem numa atualização, a pré-compilação é
+    pulada e o `fromScene` volta a compilar bloqueando: correto, só mais lento. **Conferir o TBT ao
+    atualizar o three.**
+- **`view.prepare(objeto)`** compila com `compileAsync` antes do primeiro frame do palco e do carro.
+- **3D da volta montado só perto da seção** (`lib/whenNear.js`, uma tela de antecedência). O layout 3D
+  é aplicado desde o início para não haver salto. O custo (~380 ms) não sumiu: passou para o momento
+  em que o usuário se aproxima da volta.
+- Resultado: desktop 99 / 100 / 100 / 100, TBT 58–70 ms (era 764–909).
+- Medir TBT no navegador do app engana: o cache de shaders do navegador já está quente depois da
+  primeira carga (o GGX cai de ~310 para ~5 ms). O Lighthouse usa perfil novo, com o cache frio.
+
 ## Verificação
 
 - **Vitest (TDD)** para lógica pura:

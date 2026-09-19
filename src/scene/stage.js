@@ -10,22 +10,21 @@ import {
   MeshStandardMaterial,
   PerspectiveCamera,
   PlaneGeometry,
-  PMREMGenerator,
   Scene,
   SpotLight,
   Vector3,
 } from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 import { easeOutCubic } from '../lib/counter.js';
 import { lerp, offsetTarget } from '../lib/math.js';
 import { createRenderer } from './renderer.js';
+import { createStudioEnvironment } from './studioEnvironment.js';
 
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {typeof import('../data/carStage.js').default} config
  */
-export function createStage(canvas, config) {
+export async function createStage(canvas, config) {
   const { colors, lights, ground: groundConfig, camera: cameraConfig, fog } = config;
 
   const scene = new Scene();
@@ -42,13 +41,6 @@ export function createStage(canvas, config) {
     else camera.updateProjectionMatrix();
     requestRender();
   });
-
-  // A procedural room stands in for an HDRI: soft reflections with nothing to download.
-  const pmrem = new PMREMGenerator(renderer);
-  const environment = pmrem.fromScene(new RoomEnvironment(), 0.04);
-  scene.environment = environment.texture;
-  scene.environmentIntensity = lights.environmentIntensity;
-  pmrem.dispose();
 
   const rig = new Group();
   for (const key of ['key', 'fill']) {
@@ -90,10 +82,11 @@ export function createStage(canvas, config) {
   // Nothing here animates on its own: a frame is drawn only after something changes, and only
   // while the stage is active (the 3D zone on screen) and the tab in the foreground.
   let active = true;
+  let ready = false; // no frame before the environment exists: it would compile shaders only to discard them
   let frame = 0;
 
   function requestRender() {
-    if (frame || !active || document.hidden) return;
+    if (frame || !ready || !active || document.hidden) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
       render();
@@ -129,6 +122,15 @@ export function createStage(canvas, config) {
     camera.updateProjectionMatrix();
   }
 
+  /**
+   * Compiles the shaders an object needs (the whole scene by default) before its first frame, off the
+   * main thread where the browser supports parallel compilation, so that frame does not block on them.
+   * @param {import('three').Object3D} [object]
+   */
+  function prepare(object = scene) {
+    return renderer.compileAsync(object, camera, scene);
+  }
+
   let revealFrame = 0;
 
   /** Thickens the fog until the car disappears into it (before it is ready to be seen). */
@@ -155,9 +157,17 @@ export function createStage(canvas, config) {
     revealFrame = requestAnimationFrame(step);
   }
 
+  // A procedural room stands in for an HDRI: soft reflections with nothing to download. Built last, as it
+  // is the one step that waits: everything the resize callback touches is in place by then.
+  const environment = await createStudioEnvironment(renderer);
+  scene.environment = environment.texture;
+  scene.environmentIntensity = lights.environmentIntensity;
+  ready = true;
+
   return {
     scene,
     camera,
+    prepare,
     setShot,
     veil,
     reveal,

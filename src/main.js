@@ -8,6 +8,7 @@ import { initLapSection } from './components/lapSection.js';
 import { createPreloader } from './components/preloader.js';
 import { initSpecCounters } from './components/specCounters.js';
 import { initTextReveal } from './components/textReveal.js';
+import { whenNear } from './lib/whenNear.js';
 
 const env = detectEnvironment();
 const { mode, reasons } = decideMode(env);
@@ -39,9 +40,11 @@ async function initStage(root) {
       import('./data/carStage.js'),
       import('./data/cameraShots.js'),
     ]);
-    const view = createStage(root.querySelector('.stage__canvas'), carStage);
+    const view = await createStage(root.querySelector('.stage__canvas'), carStage);
+    await view.prepare();
     view.veil();
     const car = await createCar(carStage, { onProgress: preloader.setProgress });
+    await view.prepare(car.object3D);
     view.add(car.object3D);
 
     // The car is on stage: the preloader lifts (if the timeout has not already) and the car emerges.
@@ -84,10 +87,17 @@ async function initStage(root) {
   }
 }
 
-/** Full mode loads the 3D lap on demand; lite, or any failure loading it, keeps the 2D lap. */
+/**
+ * Full mode loads the 3D lap on demand, once the section is a screen away: building it costs a few
+ * hundred milliseconds of main thread that the first screen should not pay. Lite, or any failure
+ * loading it, keeps the 2D lap.
+ */
 async function initLap(root) {
   if (mode === 'full') {
+    // The 3D layout from the start, so the section does not jump when the stage arrives.
+    root.dataset.lapView = '3d';
     try {
+      await whenNear(root);
       const { initLapSection3d } = await import('./components/lapSection3d.js');
       initLapSection3d(root);
       return;

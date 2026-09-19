@@ -22,7 +22,6 @@ export function initLapSection3d(root) {
   const line = createCentreline(measurePath(metres), lapScene.track);
 
   const stage = createLapStage(root.querySelector('[data-lap-stage]'), line, lapScene);
-  root.dataset.lapView = '3d';
 
   const minimap = createLapTrack(root.querySelector('[data-lap-canvas]'), metres, {
     sectorSplits: circuit.sectorSplits,

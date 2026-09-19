@@ -6,25 +6,22 @@
   design: o Sketchfab quebrou o cadastro na migração para a KitBash e não existe Vulcan gratuito com
   malha utilizável em nenhum acervo. Motivos e alternativas verificadas em [design.md](design.md).
 - **Estado do código:** Blocos 1–4 concluídos; Bloco 5 em andamento. 186 testes verdes, build ok.
-  Commits da sessão: limpeza do Vulcan, câmera em arco, enquadramento do aero e achados menores do
-  Lighthouse (favicon, robots.txt, reveal sem `aria-label`).
+  **TBT do desktop corrigido** (ainda sem commit): ambiente com shaders pré-compilados, `prepare` do
+  palco e do carro, 3D da volta montado só perto da seção. Detalhes em design.md ("Carregamento sem
+  tarefas longas").
 - **Lighthouse** (2026-09-18, `vite preview` + Edge headless via `npx lighthouse@12`):
   - Mobile (lite): **100 / 100 / 100 / 100** (Perf / A11y / Boas práticas / SEO). TBT 20 ms.
-  - Desktop (full): **Perf 66–70** (meta 85), A11y / BP / SEO 100. Só o TBT reprova: 1,0–1,7 s, com
-    tarefas longas de ~800–970 ms no carregamento. LCP 0,4 s (título), CLS 0,002.
-  - Mesma faixa com WebGL por software (`--use-angle=swiftshader --enable-unsafe-swiftshader`) e com a
-    GPU forçada (`--use-angle=d3d11 --ignore-gpu-blocklist --enable-gpu`): o trabalho é real.
+  - Desktop (full): **99 / 100 / 100 / 100** em 3 rodadas, TBT 58–70 ms (era Perf 66–70 com
+    TBT de 0,8–1,7 s). LCP 0,37 s (título), CLS 0,001–0,002.
 
 ### Próximos passos, em ordem (combinado em 2026-09-18)
 
-1. **TBT do desktop — medir e depois corrigir** (método escolhido pelo usuário):
-   - Instrumentar temporariamente com `performance.mark` (`createStage`, `createCar`, parse/upload do
-     GLB, `initLapSection3d`) para saber quanto pesa cada parte.
-   - Hipóteses, a atacar na ordem do ganho: (a) o GLB só começa a baixar ~1,4 s depois do início,
-     porque `createCar` espera o `createStage` síncrono (PMREM + compilação de shaders) — buscar em
-     paralelo; (b) o 3D da volta é montado no carregamento, longe da tela — adiar até perto da seção;
-     (c) compilar shaders sem bloquear (`compileAsync`).
-   - Revalidar com Lighthouse desktop (3 rodadas, a nota oscila).
+1. ~~TBT do desktop~~ — feito em 2026-09-18 (desktop 99). Ficaram como opcionais, sem efeito na nota:
+   - (a) baixar o GLB em paralelo com o `createStage`: o carro apareceria mais cedo (o download só
+     começa em ~1,1 s);
+   - pré-compilar também o palco da volta e o bloom, para tirar os ~380 ms que ela bloqueia quando o
+     usuário chega perto da seção;
+   - o GLB tem 7,7 MB, acima da meta de ~5 MB do design.md.
 2. **Checagem manual de acessibilidade:** ordem do foco pelo teclado, foco visível, contraste do
    texto sobre o palco 3D, alt das imagens do lite, `aria-live` do HUD e o preloader.
 3. Motion do hero/preloader.
@@ -56,6 +53,9 @@
 - Em 1440×900 a captura do painel mostra só uma parte da viewport: para ver o quadro inteiro, emular
   1152×720 (mesmo aspecto 16:10).
 - Lighthouse no Windows termina com `EPERM` ao apagar a pasta temporária; os relatórios saem mesmo assim.
+- Tempo de shader não se mede no navegador do app depois da primeira carga: o cache de shaders do
+  navegador fica quente. Para TBT, confiar no Lighthouse (perfil novo, cache frio); os `performance.mark`
+  e `measure` aparecem no audit `user-timings` do JSON.
 
 ### Mapa do Bloco 2B
 
@@ -283,9 +283,21 @@ A marcação já existe no `index.html`: `.stage` fixo com canvas, `.preloader` 
     timeout); o `cameraShots.test.js` segue garantindo que não passam perto do carro.
 - [ ] Footer com créditos (modelo: autor `mariobelmonte141`, link e licença como publicada; traçado; fontes)
 - [ ] Acessibilidade: foco, contraste, textos alternativos, ordem de leitura
-- [ ] Lighthouse no build (metas em design.md) — medido em 2026-09-18: mobile 100 em tudo; desktop
-  Perf 66–70 pelo TBT (ver Retomada). Corrigidos os achados menores: `public/favicon.svg` (a barra lime
+- [x] Lighthouse no build (metas em design.md) — medido em 2026-09-18: mobile 100 em tudo; desktop
+  Perf 66–70 pelo TBT, depois **99 / 100 / 100 / 100** com a correção abaixo. Corrigidos os achados menores: `public/favicon.svg` (a barra lime
   do header), `public/robots.txt` e o reveal, que punha `aria-label` num `<p>` (proibido pelo ARIA) e
   agora usa uma cópia do texto em `.visually-hidden`, com as linhas em `aria-hidden`
   - Entrada `vite-preview` (porta 4173) no `.claude/launch.json` para medir o build
+  - TBT do desktop (2026-09-18): medido com `performance.mark` temporários (já removidos), atacado por
+    ordem do ganho. Cada passo revalidado com 3 rodadas (Perf / TBT):
+    - início: 69–70 / 764–909 ms;
+    - volta 3D adiada com `whenNear` (layout 3D desde o início): 69–70 / 826–913 ms. A tarefa dela
+      começava antes do FCP e quase não contava, e a criação do contexto WebGL (~130 ms) passou para
+      o `createStage`;
+    - `compileAsync` no palco e no carro (`view.prepare`): 70–72 / 725–861 ms;
+    - ambiente com shaders pré-compilados (`scene/studioEnvironment.js`): 81–82 / 382–390 ms;
+    - filtros do PMREM compilados na malha de LOD real: **99 / 38–70 ms**.
+  - 👁 1152×720: hero com os reflexos e o lime como antes; a volta monta só ao rolar até perto dela
+    (0 → 1 montagem) e roda. Com o cache frio, o console mostra um aviso de precisão do compilador
+    HLSL (`X4122`) num programa não identificado; inofensivo, não verificado se já aparecia antes.
 - [ ] Deploy na Vercel (decidido em 2026-09-18)
