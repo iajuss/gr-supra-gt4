@@ -84,6 +84,11 @@ pelo P0 (prévia do link), antes de o post do LinkedIn circular.
 - A primeira captura depois de recarregar costuma sair preta; a segunda sai certa.
 - Em 1440×900 a captura do painel mostra só uma parte da viewport: para ver o quadro inteiro, emular
   1152×720 (mesmo aspecto 16:10).
+- **A própria página aberta envenena o Lighthouse, e agora o tempo todo.** Com a câmera na mão o palco
+  desenha sem parar enquanto a zona 3D está na tela, então uma aba esquecida no painel consome GPU
+  indefinidamente — não só durante uma captura. Uma série medida assim deu desktop 72 / 93 / 96 contra
+  87 / 93 / 99 da referência; fechada a aba e parado o dev server, deu 99 contra 99 nos quatro pares.
+  Antes de medir: fechar as abas do painel e parar o dev server.
 - Lighthouse no Windows termina com `EPERM` ao apagar a pasta temporária; os relatórios saem mesmo assim.
   **E deixa o Edge headless vivo:** depois de ~30 rodadas eram 1.266 processos `msedge` e a memória
   acabou (o Vitest caiu com "heap out of memory" e contou 135 testes). Depois de cada série, encerrar
@@ -505,9 +510,33 @@ a zona 3D e parado num capítulo.
   - 👁 arco × spline rolando a mesma página (flag temporária `?camera=arc` no `cameraRig`, removida
     depois). **Escolha do usuário: spline.** `mode=full`, console limpo, 250 testes. O `lookLab` ganhou
     `?set=path` com `?shots=p:<0–1>`, que amostra o próprio caminho no meio dos movimentos
-- [ ] 🧪 Câmera na mão nas paradas: `lib/handheld.js` (soma de senos determinística, amplitude limitada,
-  entrada suave). Só com a zona 3D visível e a aba ativa; nunca com reduced motion
-  - 👁 amplitude no laboratório · 📏 FPS parado
+- [x] 🧪 Câmera na mão (2026-09-20): `lib/handheld.js` puro — `handheldAt` devolve a deriva em -1–1 por
+  eixo (três senos de períodos que não se encaixam, pesos somando 1, então o limite é garantido por
+  construção e não por corte) e `applyHandheld` re-mira o shot **girando só o olhar**: a câmera não sai
+  do lugar, a distância até o carro é a do capítulo e o `offsetTarget` segue valendo. O laço vive em
+  `scene/handheldCamera.js`, entre o rig e o palco; enquanto roda é o **único** que escreve na câmera,
+  senão um quadro cairia meio tremido. Valores em `data/carStage.js`
+  - 👁 amplitudes comparadas na página real (chave temporária `?hand=off|a|b|c`, removida depois):
+    sem, 0,20°/0,12°, 0,35°/0,20° e 0,60°/0,35°. **Escolha do usuário: B** (0,35°/0,20°, ~7 px de
+    deriva no quadro), entrada de 1,2 s
+  - 📏 FPS **parado** em 1152×720, o número que decidia o item: hero **156** e chassis **138**, mediana
+    6,1 ms e p95 12,2 ms nos dois — a tela do notebook é de ~164 Hz e a mão não perde o vsync
+  - 📏 O laço para mesmo fora da zona 3D: 825 quadros gravados depois dela (logo o rAF estava vivo) e
+    **zero** desenhos do canvas do carro, contados por canvas — a volta tem palco próprio e contaminava
+    a conta total
+  - 📏 Rolando o hero → transição em 4 s: 108 / 106 FPS, mediana 6,2 / 12,0 ms, p95 12,3 ms. Sem
+    regressão; não dá para cravar melhora porque a referência anotada (78, 12,1, 18,2) incluía a
+    montagem da volta 3D na mesma passada
+  - **O custo real não é taxa de quadros, é GPU contínua:** 27 chamadas de desenho por quadro enquanto
+    a zona 3D está na tela, onde antes eram 0 em repouso
+  - 📏 Lighthouse no build, 4 pares alternados contra `e9c1695` numa worktree: **desktop 99 nos quatro
+    pares dos dois lados**, TBT novo 91–119 ms contra referência 95–110 ms — faixas sobrepostas, sem
+    regressão. Mobile 100 / 100 / 100 / 100 (TBT 12–15 ms, CLS 0): o lite não carrega Three.js, então
+    a mão nem existe lá
+  - 🧪 14 testes (264 no total): começa exatamente parada, determinística, nunca sai de -1–1, usa a
+    faixa que tem, nenhum atraso traz o movimento de volta, os dois eixos não balançam juntos, a entrada
+    é uma fração do movimento e termina sem degrau; e, do lado do shot, amplitude zero devolve o shot
+    intacto, a posição nunca muda, a distância se mantém e o giro bate com a amplitude pedida
 - Profundidade de campo: fora, a menos que sobre tempo (caro, borra perto do texto)
 
 ### Dia 3 — aero, celular e entrega

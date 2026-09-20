@@ -599,8 +599,28 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
     desktop para 93–96. Ele fica pronto muito antes de os faróis acenderem (0,7 s depois do clique).
   - Orçamento: o `lib/quality.js` segue no plano, mas o bloom não mudou o FPS (69 contra 76 sem ele,
     mediana igual), então a urgência caiu.
-- **Câmera na mão só com o palco visível:** liga com a zona 3D na tela e a aba ativa, entra suave e
-  desliga fora dela e com reduced motion. É a primeira coisa que desenha sem parar em repouso.
+- **Câmera na mão (feita):** o quadro deriva devagar nas paradas, como um operador segurando uma lente
+  longa, em vez de ficar congelado. Liga com a zona 3D na tela e a aba ativa, entra de um standstill e
+  desliga fora dela. É a primeira coisa da página que desenha sem parar em repouso.
+  - **Só o enquadramento gira; a câmera não sai do lugar** (escolha do usuário, contra também deslocar a
+    posição): a paralaxe quase não aparece a essa distância, e mexer na posição arriscaria a composição
+    já aprovada de cada capítulo. Assim a distância até o carro continua sendo a do capítulo.
+  - **Amplitude constante enquanto o palco está visível**, em vez de sumir ao rolar: durante o scroll o
+    próprio movimento da câmera domina o tremor, então medir a velocidade do scroll seria uma peça a
+    mais sem efeito na tela.
+  - **O limite é por construção, não por corte:** três senos por eixo, de períodos que não se encaixam
+    (nenhum atraso traz o movimento de volta), com pesos somando um. Todo seno começa em zero, então
+    ligar a mão parte exatamente de onde o tripé estava, e a entrada de 1,2 s tira também o solavanco
+    de velocidade. Eixos com frequências diferentes, senão o quadro balançaria na diagonal.
+  - **Intensidade:** B de três (0,35° e 0,20°, ~7 px de deriva no quadro), escolha do usuário, comparada
+    na página real com uma chave temporária — é movimento, não aparece em quadro parado.
+  - **Custo:** parado, 138–156 FPS com mediana de 6,1 ms (a tela é de ~164 Hz e nenhum quadro a perde),
+    e rolando fica igual. O preço não é taxa de quadros: são 27 chamadas de desenho por quadro enquanto
+    a zona 3D está na tela, onde antes eram 0 em repouso — GPU e bateria, medidos por canvas porque a
+    volta tem palco próprio.
+  - **Reduced motion não chega aqui:** ele manda a página inteira para o modo leve
+    (`lib/capabilities.js`), então o palco 3D nunca roda com ele. A guarda no laço fica como seguro: se
+    essa regra mudar, esta é a única coisa da página que ficaria se mexendo para sempre.
 - **Spline (feita):** a câmera já andava em arco (`lerpOrbit`), mas em movimentos retos entre pares de
   paradas; agora a lista inteira é uma curva só (`smoothShotAt`), que passa exatamente por cada parada
   sem a quebra de velocidade ao chegar nela.
