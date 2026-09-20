@@ -610,8 +610,11 @@ a zona 3D e parado num capítulo.
     clipe atrás de uma tarja de 90%
   - 👁 375 px: nada baixado antes do clique (zero pedidos), depois vídeo tocando, mudo, em laço, sem
     rolagem horizontal; full intacto (slot `display:none`, zero pedidos). Console limpo
-  - ⏳ **Falta medir:** Lighthouse mobile 100. O clipe só carrega após o clique, que o Lighthouse nunca
-    dá, mas isso ainda não foi verificado
+  - 📏 Lighthouse mobile no build, máquina limpa: **100 / 100 / 100** (a primeira rodada fria deu 82),
+    TBT 34–44 ms, LCP 1,51 s, peso 349 KB contra os 346 KB de antes. O relatório confirma que **o
+    vídeo não é pedido em nenhuma rodada**: o Lighthouse nunca clica na tela de som. Ressalva para a
+    rodada final: o TBT do celular era 12–15 ms antes deste item e agora é 34–44 — a nota segue 100
+    (o limite é 200 ms), mas o aumento é real
 - [x] Imagens do lite regravadas (2026-09-20, com autorização): as três de `public/shots/*.webp` por
   `tools/capture.html` e a `og.jpg` por `tools/shareCard.html?save=a` — agora com o bloom nas luzes,
   pendentes desde o Dia 1
