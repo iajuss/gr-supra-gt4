@@ -482,8 +482,31 @@ a zona 3D e parado num capítulo.
     bloom com `view.activateBloom()`
   - Não visto quadro a quadro: o bloom piscando junto com os faróis na abertura (mesmo material, então
     segue por construção)
-- [ ] 🧪 `lib/quality.js`: pelos primeiros quadros depois da abertura, p95 acima de ~20 ms desliga o bloom
-  ou baixa a resolução dele (orçamento explícito)
+- [x] 🧪 `lib/quality.js` (2026-09-20): orçamento explícito de quadros. Decide **uma vez**, depois da
+  abertura, e não volta atrás; o que cai é, nesta ordem, a **câmera na mão** e depois o **bloom** — a
+  mão é o que desenha para sempre e é a perda menos visível, o bloom é assinatura. Regra pura em
+  `lib/quality.js`, laço em `scene/qualityBudget.js`, alavancas novas `view.dropBloom()` e
+  `handheld.park()`
+  - **O limiar do plano não servia como escrito.** "p95 acima de ~20 ms" confunde esforço com vsync: o
+    intervalo entre quadros é travado pela tela, então 16,7 ms é um 60 Hz perfeitamente saudável e o
+    orçamento castigaria justo os monitores comuns que deveria proteger. Virou **quadros perdidos
+    relativos ao ritmo da própria tela**
+  - O ritmo sai do **quartil inferior** dos intervalos, não da mediana: metade dos quadros pode
+    atrasar sem mover um quantil baixo, enquanto a mediana subiria junto e esconderia o engasgo
+  - Dois tetos, cada um tapando um buraco da métrica relativa: o ritmo é limitado a 21 ms (máquina que
+    não alcança nenhuma tela plausível está lenta o tempo todo, e nada se destacaria como perdido) e um
+    piso absoluto de 20 ms (👁 **achado no navegador:** a 164 Hz perder um quadro é 12 ms, ou seja
+    80 FPS; sem o piso a máquina boa levava veredito `still` com `missed: 0.111`)
+  - **Julga depois da abertura, não durante.** 👁 medido: o veredito caía em 1,76 s, em plena ignição,
+    que é o momento mais pesado da página — quem engasgasse só na partida perderia a mão para sempre.
+    `ignitionShow.play()` passou a devolver uma promessa e o orçamento espera por ela
+  - 📏 Os três vereditos forçados por chave temporária (removida), contando desenhos por canvas:
+    `full` desenha ~4.300/s parado; `still` zera parado e faz 1836 desenhos numa rolagem padrão;
+    `plain` zera parado e faz **1089** na mesma rolagem, 41% menos — a passada do bloom sumiu mesmo
+  - 🧪 16 testes: lê o ritmo da tela em vez de um milissegundo fixo, deixa 60 Hz e 164 Hz saudáveis
+    em paz, aguenta engasgo isolado, tira a mão a um quinto de quadros perdidos e o bloom a um terço,
+    ignora pausa de aba, não fala antes de ter amostra, não se deixa enganar por quadros selvagens ao
+    estimar o ritmo, pega a máquina lenta o tempo todo e não altera o que recebe
 - [x] Grão e vinheta em CSS (2026-09-19, `styles/sections/film.css`): pseudo-elementos do palco fixo
   (full, abaixo de todo o texto) e das figuras dos capítulos (lite). Ruído SVG embutido, sem download;
   o grão se mexe 8×/s só por `transform` (compositor) e para com reduced motion

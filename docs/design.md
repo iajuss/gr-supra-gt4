@@ -597,8 +597,9 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
   - **Liga no primeiro movimento do visitante** (mouse, toque, tecla), como o `AudioContext`: montar
     os ~15 shaders do bloom durante a carga custava ~60 ms de thread principal e derrubava o Lighthouse
     desktop para 93–96. Ele fica pronto muito antes de os faróis acenderem (0,7 s depois do clique).
-  - Orçamento: o `lib/quality.js` segue no plano, mas o bloom não mudou o FPS (69 contra 76 sem ele,
-    mediana igual), então a urgência caiu.
+  - Orçamento: o bloom não mudou o FPS (69 contra 76 sem ele, mediana igual), então a urgência do
+    `lib/quality.js` caiu — até a câmera na mão devolvê-la, por ser a primeira coisa que desenha sem
+    parar. Feito; ver "Orçamento de quadros".
 - **Câmera na mão (feita):** o quadro deriva devagar nas paradas, como um operador segurando uma lente
   longa, em vez de ficar congelado. Liga com a zona 3D na tela e a aba ativa, entra de um standstill e
   desliga fora dela. É a primeira coisa da página que desenha sem parar em repouso.
@@ -636,5 +637,25 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
   amassar o verniz: 7,7 → 5,6 MB e mais FPS rolando (61 → 74–79 no mesmo teste). Comparadas 50, 30 e
   20%; a 20% o capô e a tampa traseira amassam. O usuário escolheu 50%, a mais segura, aceitando
   ficar 0,6 MB acima da meta de 5 MB.
+- **Orçamento de quadros (feito):** pelos primeiros quadros **depois da abertura**, a página decide
+  **uma vez** o quanto de palco esta máquina aguenta, e não volta atrás — assim nada muda debaixo do
+  olho do visitante no meio da leitura (escolha do usuário, contra vigiar sempre).
+  - **Cai primeiro a câmera na mão, depois o bloom** (escolha do usuário, contra a ordem prevista no
+    plano): a mão é o que faz a página desenhar para sempre, então tirá-la devolve o render sob
+    demanda e zero quadros em repouso, que é o maior ganho numa máquina fraca — e custa 7 px de
+    deriva. O bloom, que é assinatura do carro, só sai se ainda faltar.
+  - **A medida é quadro perdido, não milissegundo.** O intervalo entre quadros é travado pelo vsync:
+    16,7 ms é um 60 Hz saudável e 6,1 ms um 164 Hz. Um limiar fixo de 20 ms, como o plano previa,
+    dispararia sozinho nos monitores comuns que ele deveria proteger. O ritmo da tela sai do quartil
+    inferior dos intervalos — a mediana subiria junto com o engasgo e o esconderia.
+  - **Duas bordas, achadas medindo:** um teto de 21 ms para o ritmo estimado, senão uma máquina lenta
+    o tempo todo não teria nenhum quadro "fora do ritmo" e passaria por sadia; e um piso de 20 ms para
+    o que conta como perdido, senão uma tela de 164 Hz perde o veredito por quadros de 12 ms — que
+    ainda são 80 por segundo. Sem esse piso, este notebook recebia `still` com 11% de quadros ditos
+    perdidos.
+  - **Depois da abertura, de propósito:** medido no navegador, o veredito caía em 1,76 s, em plena
+    ignição — o momento mais pesado da página. Quem engasgasse só na partida perderia a mão para
+    sempre, então a abertura passou a avisar quando termina.
+
 - **Case:** seção "Making of" no README; sem página nova e sem versão em português nesta rodada.
 - **Fora da rodada:** o Supra na pista da volta e o som seguindo a telemetria.
