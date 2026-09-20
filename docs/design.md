@@ -594,6 +594,8 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
     (76 → 34 FPS) e a lataria real em preto para esconder as luzes (~6 ms por quadro). Descartado por
     vazar: só as faces das luzes viradas para a câmera (as lanternas apareciam pela cabine).
   - **Intensidade:** a suave de três (força 0,4, raio 0,25), escolha do usuário.
+  - **Só malhas eram escondidas na passada de brilho**, e linhas e pontos não são malhas: o fluxo de ar
+    do capítulo aero entrou brilhando sem ninguém pedir (2026-09-20). A passada agora cobre os três.
   - **Liga no primeiro movimento do visitante** (mouse, toque, tecla), como o `AudioContext`: montar
     os ~15 shaders do bloom durante a carga custava ~60 ms de thread principal e derrubava o Lighthouse
     desktop para 93–96. Ele fica pronto muito antes de os faróis acenderem (0,7 s depois do clique).
@@ -637,6 +639,25 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
   amassar o verniz: 7,7 → 5,6 MB e mais FPS rolando (61 → 74–79 no mesmo teste). Comparadas 50, 30 e
   20%; a 20% o capô e a tampa traseira amassam. O usuário escolheu 50%, a mais segura, aceitando
   ficar 0,6 MB acima da meta de 5 MB.
+- **Fluxo de ar no capítulo aero (feito):** um leque de linhas de corrente que sobe no nariz, passa o
+  teto e assenta atrás da traseira, em lime da paleta e luz somada. Linhas com uma marca correndo,
+  não partículas (escolha do usuário, comparadas na página real): a linha contínua desenha a forma do
+  carro mesmo parada, e o capítulo aero é sobre forma.
+  - **A regra que a matemática garante:** nenhum ponto entra na caixa do carro. As faixas de cima
+    limpam o teto pela folga pedida; as de fora são empurradas para longe, nunca para dentro.
+  - **Pertence ao capítulo, e a mais nenhum:** quem manda é a posição da câmera ao longo da rolagem,
+    não a seção estar visível — a seção tem 1008 px contra 720 de tela e por isso está "na tela"
+    quase o tempo todo, o que espalhou o ar pela zona 3D inteira na primeira versão. Acende e apaga
+    em desvanecimento, então nada aparece de uma vez no meio de um movimento.
+  - **O ar não brilha:** as linhas vazavam para a passada do bloom, porque ela só escondia malhas e
+    `LineSegments` não é uma. Corrigido — o bloom continua sendo só das luzes do carro, que é a
+    decisão registrada acima. O halo custava o mesmo; ficar sem ele foi escolha do usuário.
+  - **É o item mais caro da rodada:** 137 → 108 FPS no capítulo, sem engasgo. Por isso cai junto com a
+    câmera na mão quando o orçamento de quadros aperta, e não depois dela.
+  - **Amarrar o ar ao som do motor foi levantado e descartado:** o motor toca uma vez só, na abertura,
+    com a câmera no hero, e o som seguindo a telemetria está fora desta rodada. O ar ficaria longe do
+    capítulo que fala dele.
+
 - **Orçamento de quadros (feito):** pelos primeiros quadros **depois da abertura**, a página decide
   **uma vez** o quanto de palco esta máquina aguenta, e não volta atrás — assim nada muda debaixo do
   olho do visitante no meio da leitura (escolha do usuário, contra vigiar sempre).

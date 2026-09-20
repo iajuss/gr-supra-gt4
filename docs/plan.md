@@ -563,10 +563,30 @@ a zona 3D e parado num capítulo.
 - Profundidade de campo: fora, a menos que sobre tempo (caro, borra perto do texto)
 
 ### Dia 3 — aero, celular e entrega
-- [ ] 🧪 Fluxo de ar no capítulo aero: `lib/airflow.js` (linhas de corrente a partir do perfil do carro,
-  nunca dentro da bounding box, laço contínuo, posição por tempo); cena com linhas instanciadas,
-  desenhando só com o capítulo na tela; parado com reduced motion
-  - 👁 laboratório: linhas × partículas · 📏 FPS
+- [x] 🧪 Fluxo de ar no capítulo aero (2026-09-20): `lib/airflow.js` puro — `streamlines` monta o leque
+  a partir das medidas do carro, `pointAt` diz onde uma marca está em cada instante (laço sem emenda) e
+  `nearStop` diz quanto do efeito pertence àquele ponto da rolagem. Cena em `scene/airflow.js`: o leque
+  inteiro num único `LineSegments`, com a marca correndo feita no shader
+  - 🧪 18 testes. O invariante do plano é o principal: **nenhum ponto de nenhuma linha entra na caixa
+    do carro** — o ar sobe no nariz, passa o teto com a folga pedida e assenta atrás; as faixas laterais
+    são empurradas para fora, nunca para dentro
+  - 👁 linhas × pontos comparados na página real (chave temporária `?flow`, removida).
+    **Escolha do usuário: linhas**, que desenham a forma do carro mesmo paradas
+  - 🐛 **O gatilho estava grosseiro e o usuário pegou:** prendi o fluxo a um `IntersectionObserver` na
+    seção aero, que tem 1008 px contra 720 de tela e por isso "está visível" por quase toda a zona 3D —
+    o ar aparecia fora do capítulo. Agora segue a **posição da câmera** (`nearStop`, alcance 0,11 do
+    caminho, com as paradas a ~0,25 uma da outra), acendendo e apagando em desvanecimento
+  - 🐛 **Vazamento no bloom, achado medindo:** `lampsOnly` só escondia `isMesh`, e `LineSegments` não é
+    mesh — as linhas entravam na passada de brilho e **brilhavam**, contra a regra do bloom seletivo.
+    Corrigido para cobrir linhas e pontos. **Escolha do usuário: sem halo**
+  - 📏 O porteiro, contado por canvas: **27 desenhos por quadro fora do capítulo, 37 dentro** (hero
+    27,0 · aero 37,4 · chassis 27,1)
+  - 📏 Custo do efeito, três passadas estáveis na parada do aero: **137 → 108 FPS**, mediana 6,2 ms,
+    p95 18,1 ms. É o item mais caro da rodada, e por isso **cai junto com a câmera na mão** quando o
+    orçamento aperta (escolha do usuário)
+  - Reduced motion não chega aqui, como na câmera na mão: ele manda a página para o modo leve
+  - Amarrar o fluxo ao som do motor foi levantado pelo usuário e **descartado por ele** depois de ver o
+    efeito só no capítulo: o motor toca uma vez só, na abertura, com a câmera no hero
 - [ ] Vídeo curto no hero do lite: loop mudo de 4–6 s, `playsinline`, ~0,6–1 MB (H.264, e WebM se
   compensar), a imagem atual como pôster; carregado só depois do clique na tela de som; com reduced
   motion fica a imagem
