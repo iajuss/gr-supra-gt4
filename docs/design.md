@@ -567,10 +567,21 @@ Os 429k triângulos são o preço, pago só no desktop — o mobile é lite, com
 Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano em
 [plan.md](plan.md) (Bloco 6). Decisões do usuário, todas pelas recomendações:
 
-- **Celular: vídeo curto no hero do lite**, não 3D. O GLB tem 3,55M triângulos e 7,7 MB; 3D no celular
+- **Celular: vídeo curto no hero do lite (feito)**, não 3D. O GLB tem 3,55M triângulos e 7,7 MB; 3D no celular
   exigiria outra versão do carro e poria o Three.js (e a compilação de shaders) na emulação mobile do
   Lighthouse. O vídeo (loop mudo de 4–6 s, ~1 MB) só carrega depois do clique na tela de som, então
   o lite continua sem Three.js e o Lighthouse mobile não o vê. Com reduced motion fica a imagem.
+- **O hero do celular ganhou imagem (2026-09-20):** até aqui ele era só tipografia sobre preto — o
+  plano falava em "a imagem atual como pôster", mas imagem atual não havia. Agora um prato giratório
+  mudo de 6 s corre atrás do título, espelhando o desktop, onde o mesmo texto já fica sobre o carro.
+  - **Volta inteira, de propósito:** 360° fecha o laço por construção, sem corte nem fade.
+  - **Nada baixa antes do clique** na tela de som, então o peso da primeira tela do celular não muda.
+  - **O texto vem primeiro:** um escurecimento próprio ocupa o lugar da vinheta, e o grão continua
+    vindo do filme. Medido no quadro composto ao longo da volta, um dos quatro textos reprovava — o
+    kicker, que cai sobre a poça de luz do piso e cuja cor tem teto de 6,18:1 mesmo sobre preto puro.
+    Sobre a imagem ele sobe para um cinza intermediário e vai a 5,5:1, o mesmo que já mede no desktop;
+    a alternativa era esconder o clipe atrás de uma tarja quase opaca.
+
 - **Grão e vinheta em CSS, nos dois modos (feito):** sobre a imagem do carro e abaixo de todo o texto
   (full: o palco fixo; lite: as figuras dos capítulos). Custo zero de GPU do palco, que continua
   desenhando só sob demanda. Vinheta radial de 50% nas bordas; grão em ruído SVG embutido que se mexe

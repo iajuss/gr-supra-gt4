@@ -587,15 +587,34 @@ a zona 3D e parado num capítulo.
   - Reduced motion não chega aqui, como na câmera na mão: ele manda a página para o modo leve
   - Amarrar o fluxo ao som do motor foi levantado pelo usuário e **descartado por ele** depois de ver o
     efeito só no capítulo: o motor toca uma vez só, na abertura, com a câmera no hero
-- [ ] Vídeo curto no hero do lite: loop mudo de 4–6 s, `playsinline`, ~0,6–1 MB (H.264, e WebM se
-  compensar), a imagem atual como pôster; carregado só depois do clique na tela de som; com reduced
-  motion fica a imagem
-  - gerado pela ferramenta de captura quadro a quadro + ffmpeg (sem Playwright); grava em `public/` →
-    pedir autorização
-  - 🧪 regra de quem recebe vídeo ou imagem (`lib/heroMedia.js` ou em `capabilities`)
-  - 👁 375 px, console · 📏 Lighthouse mobile 100
-- [ ] Imagens do lite regravadas com `tools/capture.html`, uma vez, depois das mudanças visuais do
-  carro (pedir autorização)
+- [x] Vídeo curto no hero do lite (2026-09-20): `public/video/hero.mp4`, **769 KB**, 720×1280, 6 s,
+  180 quadros, H.264 **sem trilha de áudio**; pôster de 12 KB. Mudo, em laço, `playsinline`, e só
+  carregado depois do clique na tela de som. Regra pura em `lib/heroMedia.js` (🧪 9 testes),
+  componente em `components/heroMedia.js`
+  - **O plano partia de uma premissa falsa:** "a imagem atual como pôster" — o hero do lite não tinha
+    imagem nenhuma, era só tipografia sobre preto (verificado no DOM). O item virou, com decisão do
+    usuário, **acrescentar** uma imagem em movimento atrás do título, espelhando o desktop, onde o
+    mesmo texto já fica sobre o carro. O pôster também teve de ser gerado
+  - **Prato giratório de 360°**, de propósito: o laço fecha por construção, sem corte nem fade. A
+    câmera na mão não serviria de base, porque por construção ela nunca repete
+  - Pipeline sem Playwright: `tools/heroClip.html` grava 180 quadros pelo `shotServer`, que ganhou um
+    destino em `.frames/` (fora de `public/`, no `.gitignore`); o ffmpeg junta. **WebM foi tentado e
+    descartado por não compensar**: VP9 deu 740 KB contra 471 KB do H.264 no mesmo CRF de partida.
+    Com folga no orçamento, o CRF final foi 24 (769 KB) em vez de 28 (471 KB), porque o risco aqui é
+    banding em degradê escuro
+  - 📏 **Contraste no quadro composto, ao longo de toda a volta** (critério do bloco, ≥ 4,5:1):
+    título 14,27 · lead 11,87 · cue 5,92 · **kicker 5,47**. O kicker reprovava com 3,69: ele cai em
+    65–69% da altura, em cima da poça de luz do piso, e a cor dele tem teto de 6,18:1 **mesmo sobre
+    preto puro**. Escolha do usuário entre três opções medidas: um cinza intermediário só sobre a
+    imagem, que dá 5,47 — praticamente o 5,46 que ele já mede no desktop — em vez de esconder o
+    clipe atrás de uma tarja de 90%
+  - 👁 375 px: nada baixado antes do clique (zero pedidos), depois vídeo tocando, mudo, em laço, sem
+    rolagem horizontal; full intacto (slot `display:none`, zero pedidos). Console limpo
+  - ⏳ **Falta medir:** Lighthouse mobile 100. O clipe só carrega após o clique, que o Lighthouse nunca
+    dá, mas isso ainda não foi verificado
+- [x] Imagens do lite regravadas (2026-09-20, com autorização): as três de `public/shots/*.webp` por
+  `tools/capture.html` e a `og.jpg` por `tools/shareCard.html?save=a` — agora com o bloom nas luzes,
+  pendentes desde o Dia 1
 - [ ] Lighthouse CI no workflow, **informativo** (não bloqueia: o runner oscila)
 - [ ] 📏 Rodada final: Lighthouse alternado contra a referência, FPS, peso da página; números na Retomada
 - [ ] README: seção "Making of" (bastidores, métricas, antes e depois, link para o vídeo)
