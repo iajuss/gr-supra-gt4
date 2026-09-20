@@ -601,8 +601,16 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
     mediana igual), então a urgência caiu.
 - **Câmera na mão só com o palco visível:** liga com a zona 3D na tela e a aba ativa, entra suave e
   desliga fora dela e com reduced motion. É a primeira coisa que desenha sem parar em repouso.
-- **Spline:** a câmera já anda em arco (`lerpOrbit`); a spline só tira a quebra de velocidade nas
-  paradas. Se o laboratório não mostrar diferença, fica o arco.
+- **Spline (feita):** a câmera já andava em arco (`lerpOrbit`), mas em movimentos retos entre pares de
+  paradas; agora a lista inteira é uma curva só (`smoothShotAt`), que passa exatamente por cada parada
+  sem a quebra de velocidade ao chegar nela.
+  - **Monótona (Fritsch–Carlson), não Catmull-Rom:** a versião monótona proíbe qualquer trecho de
+    ultrapassar os vizinhos, e é isso que impede a câmera de chegar mais perto do carro no meio do
+    movimento. Uma Catmull-Rom faria esse desvio justamente na meia-volta do hero para o aero.
+  - O previsto era descartar a spline se o laboratório não mostrasse diferença. Mostrou, mas não em
+    quadro parado: a diferença é de ritmo e só aparece rolando. A comparação foi feita na página real,
+    com uma flag temporária (`?camera=arc`) que roda a câmera antiga no mesmo scroll, removida depois.
+    **Escolha do usuário: spline.**
 - **Carro mais leve (feito):** o peso era a lataria, deixada sem simplificação porque o meshopt
   ignorava as normais. Com `simplifyWithAttributes` pesando as normais, metade dos triângulos sai sem
   amassar o verniz: 7,7 → 5,6 MB e mais FPS rolando (61 → 74–79 no mesmo teste). Comparadas 50, 30 e

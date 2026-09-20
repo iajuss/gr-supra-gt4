@@ -492,10 +492,19 @@ a zona 3D e parado num capítulo.
   - 📏 FPS rolando em 1152×720: 78, mediana 12,1 ms, p95 18,2 ms (igual). Lighthouse no build: desktop
     93 / 99 / 99 (a primeira rodada fria), mobile 100 / 100, CLS 0
   - 👁 375 px: vinheta nas figuras, grão animado, sem rolagem horizontal; console limpo
-- [ ] 🧪 Câmera em spline (Catmull-Rom sobre as paradas, preservando o arco do `lerpOrbit`): passa
-  exatamente pelas paradas; `cameraShots.test.js` cobre a spline (nenhum trecho mais perto do carro
-  que as paradas)
-  - 👁 laboratório: arco atual × spline; sem diferença visível, fica o arco
+- [x] 🧪 Câmera em spline (2026-09-20, `smoothShotAt` em `lib/math.js`): a lista inteira de paradas
+  vira uma curva só, em vez de um movimento reto por par. Passa exatamente por cada parada, mas sem a
+  quebra de velocidade ao chegar nela. Interpola em volta do carro, como o `lerpOrbit` faz para um par
+  (ângulo desenrolado, raio, altura), mais alvo, fov e offset
+  - **Fritsch–Carlson, não Catmull-Rom:** a spline monótona não deixa nenhum trecho ultrapassar os
+    vizinhos. É isso que impede a câmera de chegar mais perto do carro no meio do movimento — a
+    Catmull-Rom faria justamente esse desvio na meia-volta do hero para o aero
+  - 🧪 10 testes novos: passa pelas paradas, sem quebra de velocidade nos dois lados de cada uma,
+    nunca abre nem fecha mais que as paradas vizinhas, paradas desiguais, corte fora da faixa; e o
+    `cameraShots.test.js` repete a folga do carro sobre a curva, com os pontos reais
+  - 👁 arco × spline rolando a mesma página (flag temporária `?camera=arc` no `cameraRig`, removida
+    depois). **Escolha do usuário: spline.** `mode=full`, console limpo, 250 testes. O `lookLab` ganhou
+    `?set=path` com `?shots=p:<0–1>`, que amostra o próprio caminho no meio dos movimentos
 - [ ] 🧪 Câmera na mão nas paradas: `lib/handheld.js` (soma de senos determinística, amplitude limitada,
   entrada suave). Só com a zona 3D visível e a aba ativa; nunca com reduced motion
   - 👁 amplitude no laboratório · 📏 FPS parado
