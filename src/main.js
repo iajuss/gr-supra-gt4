@@ -139,12 +139,16 @@ async function initStage(root) {
       { createSmoothScroll },
       { createCameraRig },
       { createHandheldCamera },
+      { createAirflow },
+      { nearStop },
       { createQualityBudget },
       { createLapCurtain },
     ] = await Promise.all([
       import('./lib/scroll.js'),
       import('./scene/cameraRig.js'),
       import('./scene/handheldCamera.js'),
+      import('./scene/airflow.js'),
+      import('./lib/airflow.js'),
       import('./scene/qualityBudget.js'),
       import('./components/lapCurtain.js'),
     ]);
@@ -156,25 +160,45 @@ async function initStage(root) {
       ...carStage.handheld,
       reducedMotion: motion.reducedMotion,
     });
-    // If this machine cannot keep up, the hand goes first and the bloom after it.
+    // The air over the car, shown only while the aero chapter is on screen.
+    const airflow = createAirflow(carStage.car, { view }, carStage.airflow);
+
+    // If this machine cannot keep up, what goes is decided here: first the two things that draw
+    // forever (the hand on the camera and the air), then the bloom, which is the car's signature.
     const budget = createQualityBudget({
-      view,
-      handheld,
       after: openingOver,
       settings: carStage.quality,
-      onDecision: ({ level, missed, vsync }) =>
-        console.info(`[supra] quality=${level}`, { missed: +missed.toFixed(3), vsync: +vsync.toFixed(1) }),
+      onVerdict({ level, missed, vsync }) {
+        if (level !== 'full') {
+          handheld.park();
+          airflow.park();
+        }
+        if (level === 'plain') view.dropBloom();
+        console.info(`[supra] quality=${level}`, { missed: +missed.toFixed(3), vsync: +vsync.toFixed(1) });
+      },
     });
 
-    createCameraRig({
+    // The air belongs to the aero chapter and to no other: it comes up as the camera arrives there
+    // and is gone before the next one (lib/airflow.js). The stop is read every time, because a
+    // resize moves it; `rig` is still empty on the rig's own first call, which the guard covers.
+    let rig = null;
+    const blowAt = (progress) => {
+      if (rig) airflow.setHere(nearStop(progress, rig.stopOf('aero'), carStage.airflow.reach));
+    };
+
+    rig = createCameraRig({
       shots: cameraShots,
       root: document,
-      onShot: handheld.setShot,
+      onShot(shot, progress) {
+        handheld.setShot(shot);
+        blowAt(progress);
+      },
       onActive(active) {
         handheld.setActive(active);
         budget.setActive(active);
       },
     });
+    blowAt(0);
     showCar();
   } catch (error) {
     // The stage steps aside and the chapters show their stills, so the page is never left without the car.

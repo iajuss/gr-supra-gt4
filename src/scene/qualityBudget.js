@@ -1,22 +1,20 @@
-// An explicit budget for the stage: it watches the first frames the visitor actually gets and, if the
-// machine cannot keep up, gives something back — once, and for good (lib/quality.js holds the rule).
+// An explicit budget for the stage: it watches the first frames the visitor actually gets and says,
+// once, how much of the stage this machine can afford (lib/quality.js holds the rule).
 //
-// What it gives up, in order: the handheld camera first, because it is what makes the page draw
-// forever and it is the least visible loss, then the bloom, which is the car's signature.
+// It only reports. What a verdict costs — the handheld camera first, the bloom after it — is decided
+// where the pieces are wired together, so adding another thing to give up is one line there.
 //
 // This sampler is itself a loop that runs every frame, so it stops the moment it has decided.
 
-import { QUALITY, judgeFrames } from '../lib/quality.js';
+import { judgeFrames } from '../lib/quality.js';
 
 /**
  * @param {object} options
- * @param {{ dropBloom: Function }} options.view
- * @param {{ park: Function }} options.handheld
  * @param {{ warmUp?: number, sample?: number }} [options.settings] plus any lib/quality.js threshold
  * @param {Promise<unknown>} [options.after] the opening; nothing is watched until it is over
- * @param {(verdict: ReturnType<typeof judgeFrames>) => void} [options.onDecision]
+ * @param {(verdict: ReturnType<typeof judgeFrames>) => void} options.onVerdict said once
  */
-export function createQualityBudget({ view, handheld, settings = {}, after, onDecision }) {
+export function createQualityBudget({ settings = {}, after, onVerdict }) {
   const { warmUp = 30, sample = 90, ...rules } = settings;
   const gaps = [];
   let active = false;
@@ -34,9 +32,7 @@ export function createQualityBudget({ view, handheld, settings = {}, after, onDe
     const verdict = judgeFrames(gaps, rules);
     if (!verdict.decided) return;
     stop();
-    if (verdict.level !== QUALITY.full) handheld.park();
-    if (verdict.level === QUALITY.plain) view.dropBloom();
-    onDecision?.(verdict);
+    onVerdict(verdict);
   }
 
   function tick(now) {

@@ -75,7 +75,10 @@ export function createBloom(renderer, scene, camera, { strength, radius, thresho
 
   function lampsOnly(root = scene) {
     root.traverse((object) => {
-      if (!object.isMesh || object.userData.glows) return;
+      // Lines and points are drawn too, and are not meshes: left in, the airflow's lime lines came
+      // through the glow pass and bloomed, which the selective bloom exists to prevent.
+      const drawn = object.isMesh || object.isLine || object.isPoints;
+      if (!drawn || object.userData.glows) return;
       changed.set(object, { visible: object.visible, material: object.material });
       if (object.userData.occluder) {
         object.visible = true;

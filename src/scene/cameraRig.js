@@ -17,7 +17,7 @@ function centreScroll(section) {
  * @param {object} options
  * @param {Array<{ id: string }>} options.shots in page order; a shot without its [data-shot] section is skipped
  * @param {ParentNode} options.root
- * @param {(shot: ReturnType<typeof smoothShotAt>) => void} options.onShot
+ * @param {(shot: ReturnType<typeof smoothShotAt>, progress: number) => void} options.onShot
  * @param {(active: boolean) => void} [options.onActive] the 3D zone entering or leaving the viewport
  */
 export function createCameraRig({ shots, root, onShot, onActive }) {
@@ -35,7 +35,7 @@ export function createCameraRig({ shots, root, onShot, onActive }) {
   const timeline = gsap.to(progress, {
     value: 1,
     ease: 'none',
-    onUpdate: () => onShot(smoothShotAt(framed, progress.value, stops)),
+    onUpdate: () => onShot(smoothShotAt(framed, progress.value, stops), progress.value),
     scrollTrigger: {
       trigger: sections[0],
       start: 'center center',
@@ -58,12 +58,17 @@ export function createCameraRig({ shots, root, onShot, onActive }) {
     onToggle: ({ isActive }) => onActive?.(isActive),
   });
 
-  onShot(smoothShotAt(framed, 0, stops));
+  onShot(smoothShotAt(framed, 0, stops), 0);
   onActive?.(zone.isActive);
 
   return {
     get stops() {
       return stops;
+    },
+    /** Where a shot sits along the scroll, 0-1; -1 if the page has no section for it. */
+    stopOf(id) {
+      const index = framed.findIndex((shot) => shot.id === id);
+      return index < 0 ? -1 : stops[index];
     },
     destroy() {
       timeline.scrollTrigger?.kill();

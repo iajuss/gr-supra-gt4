@@ -73,6 +73,23 @@ export default {
     far: 500,
   },
 
+  // Air over the car in the aero chapter (lib/airflow.js, scene/airflow.js). `mode` picks how the
+  // same streamlines are drawn: 'lines' (a mark running along each) or 'dots' (points travelling
+  // the same routes). Lime and added light, so the air reads against the dark studio without
+  // competing with the car's own lamps; `speed` is routes per second.
+  airflow: {
+    mode: 'lines',
+    color: 0xc6ff00,
+    opacity: 0.55,
+    marks: 3,
+    speed: 0.22,
+    dots: 26,
+    size: 0.045,
+    // How far either side of the aero stop the air is still drawn, along the 0-1 scroll path. The
+    // chapters sit about 0.25 apart, so this fades it in and out well inside its own chapter.
+    reach: 0.11,
+  },
+
   // The frame budget (lib/quality.js, scene/qualityBudget.js): how many frames it watches before it
   // decides, and how many of the first ones it throws away — the opening is an animation of its own,
   // and judging the machine by it would punish every machine. Thresholds live with the rule.
