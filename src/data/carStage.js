@@ -73,6 +73,12 @@ export default {
     far: 500,
   },
 
+  // A hand on the camera instead of a tripod (lib/handheld.js, scene/handheldCamera.js): the framing
+  // drifts, the camera never moves, so the distance to the car is the chapter's own. Degrees at the
+  // very edge of the drift, which it rarely reaches; `easeIn` is how long it takes to get there from
+  // a standstill. Set both amplitudes to 0 to bolt the camera back down.
+  handheld: { amplitude: { yaw: 0.35, pitch: 0.2 }, easeIn: 1.2 },
+
   // How the loaded model is repainted, by material name. The GLB arrives almost entirely off-white,
   // so every part is dressed in the page's own palette instead.
   paint: {

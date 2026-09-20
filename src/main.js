@@ -127,21 +127,26 @@ async function initStage(root) {
       return;
     }
 
-    const [{ createSmoothScroll }, { createCameraRig }, { createLapCurtain }] = await Promise.all([
-      import('./lib/scroll.js'),
-      import('./scene/cameraRig.js'),
-      import('./components/lapCurtain.js'),
-    ]);
+    const [{ createSmoothScroll }, { createCameraRig }, { createHandheldCamera }, { createLapCurtain }] =
+      await Promise.all([
+        import('./lib/scroll.js'),
+        import('./scene/cameraRig.js'),
+        import('./scene/handheldCamera.js'),
+        import('./components/lapCurtain.js'),
+      ]);
     createSmoothScroll();
     createLapCurtain(document.querySelector('.lap'));
+    // The hand sits between the two: the rig says where the chapter looks, and it keeps that framing alive.
+    const handheld = createHandheldCamera({
+      view,
+      ...carStage.handheld,
+      reducedMotion: motion.reducedMotion,
+    });
     createCameraRig({
       shots: cameraShots,
       root: document,
-      onShot(shot) {
-        view.setShot(shot);
-        view.requestRender();
-      },
-      onActive: view.setActive,
+      onShot: handheld.setShot,
+      onActive: handheld.setActive,
     });
     showCar();
   } catch (error) {
