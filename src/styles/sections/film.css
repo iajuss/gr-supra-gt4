@@ -26,7 +26,8 @@
 [data-mode='full'] .stage::before,
 .chapter__shot::before,
 [data-mode='full'] .stage::after,
-.chapter__shot::after {
+.chapter__shot::after,
+[data-mode='lite'] .hero__media::after {
   content: '';
   position: absolute;
   pointer-events: none;
@@ -38,9 +39,11 @@
   background: var(--film-vignette);
 }
 
-/* Twice the size of the frame, so shifting it never shows an edge. */
+/* Twice the size of the frame, so shifting it never shows an edge. The hero's moving picture in
+   lite gets the grain too; its darkening comes from sections/hero.css, in place of the vignette. */
 [data-mode='full'] .stage::after,
-.chapter__shot::after {
+.chapter__shot::after,
+[data-mode='lite'] .hero__media::after {
   inset: -50%;
   background: var(--film-grain);
   opacity: var(--film-grain-opacity);
@@ -63,7 +66,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   [data-mode='full'] .stage::after,
-  .chapter__shot::after {
+  .chapter__shot::after,
+  [data-mode='lite'] .hero__media::after {
     animation: none;
   }
 }

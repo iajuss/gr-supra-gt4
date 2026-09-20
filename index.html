@@ -72,6 +72,10 @@
 
     <main id="main">
       <section class="hero" id="top" data-shot="hero" aria-labelledby="hero-title">
+        <!-- Lite only: the hero's moving picture, the phone's stand-in for the 3D stage. It stays
+             empty until the visitor comes through the sound screen (components/heroMedia.js), so
+             nothing here is downloaded before that. -->
+        <div class="hero__media" aria-hidden="true"></div>
         <p class="label hero__kicker">
           <span aria-hidden="true">//</span> Unofficial concept · <span class="accent">Track only</span> ·
           3.0 turbo · 100+ built

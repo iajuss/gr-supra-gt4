@@ -8,6 +8,7 @@ import opening from './data/opening.js';
 import { initChapterShots } from './components/chapterShots.js';
 import { createEngineSound } from './components/engineSound.js';
 import { createHeroEntrance } from './components/heroEntrance.js';
+import { createHeroMedia } from './components/heroMedia.js';
 import { createIgnitionShow } from './components/ignitionShow.js';
 import { initLapSection } from './components/lapSection.js';
 import { createPreloader } from './components/preloader.js';
@@ -35,6 +36,9 @@ const catchAt = engineSound.catchAt - engineSound.start;
 
 // The hero comes in as the page opens, its title landing when the engine catches.
 const entrance = createHeroEntrance(document.querySelector('.hero'), { reducedMotion: motion.reducedMotion, catchAt });
+
+// Lite only: the hero's moving picture. It is a download, so it waits for the sound screen.
+const heroMedia = createHeroMedia(document, { mode, reducedMotion: env.reducedMotion, saveData: env.saveData });
 let ignition = null; // full mode, once the car is on stage: its lights, the rim and the camera
 
 // Settles when the page has finished opening and the stage is still again: the frame budget waits
@@ -59,6 +63,7 @@ preloader.ready.then(() => {
       // then the engine. Without it (lite, or a car still loading) the engine starts at once.
       const gesture = performance.now();
       window.scrollTo(0, 0); // late layout (fonts, the lap's 3D layout) must not leave the page mid-way
+      heroMedia.enter(); // the visitor is in: now the hero may weigh something
       const engineAt = ignition ? opening.engineAt : 0;
       const heard = choice === 'sound' ? engine.play({ delay: engineAt }) : Promise.resolve(null);
       preloader.close();
