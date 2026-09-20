@@ -5,6 +5,7 @@ import carStage from '../src/data/carStage.js';
 import cameraShots from '../src/data/cameraShots.js';
 import { createStage } from '../src/scene/stage.js';
 import { createCar } from '../src/scene/car.js';
+import { shotAt, smoothShotAt } from '../src/lib/math.js';
 import { Color, MeshNormalMaterial, MeshPhysicalMaterial, SpotLight, Vector3 } from 'three';
 
 // Close-ups for small parts (badges, lights, calipers), next to the page's chapter shots.
@@ -149,6 +150,12 @@ const SETS = {
     { label: 'B. suave', config: { bloom: { strength: 0.4, radius: 0.25, threshold: 0 } } },
     { label: 'C. médio', config: { bloom: { strength: 0.8, radius: 0.35, threshold: 0 } } },
   ],
+  // The camera's path between the chapters, sampled where the two differ most: mid-move.
+  // Use with ?shots=p:0.125,p:0.375,p:0.625,p:0.875 (progress along the whole list).
+  path: [
+    { label: 'Arco', path: shotAt },
+    { label: 'Spline', path: smoothShotAt },
+  ],
   look: [
     { label: 'Atual' },
     { label: 'A. Luz', config: LIGHT, after: (car, view) => { clearcoat(BLACK)(car); edgeLight(view); } },
@@ -243,7 +250,10 @@ for (const variant of variants) {
   row.style.gridTemplateColumns = `110px repeat(${SHOTS.length}, 1fr)`;
   row.innerHTML = `<b>${variant.label}</b>`;
   for (const id of SHOTS) {
-    const shot = [...cameraShots, ...CLOSE_UPS].find((entry) => entry.id === id);
+    // `p:<0–1>` samples the camera's path itself, through the variant's own way of reading it.
+    const shot = id.startsWith('p:')
+      ? (variant.path ?? shotAt)(cameraShots, Number(id.slice(2)))
+      : [...cameraShots, ...CLOSE_UPS].find((entry) => entry.id === id);
     view.setShot({ ...shot, offset: 0 });
     view.render();
     context.drawImage(canvas, 0, 0, SIZE.width, SIZE.height); // same tick as the render

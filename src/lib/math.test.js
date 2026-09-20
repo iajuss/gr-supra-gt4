@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { clamp, lastIndexAtOrBefore, lerp, lerpOrbit, lerpShot, normalizeStops, offsetTarget, shotAt } from './math.js';
+import { clamp, lastIndexAtOrBefore, lerp, lerpOrbit, lerpShot, normalizeStops, offsetTarget, shotAt, smoothShotAt } from './math.js';
 
 describe('lastIndexAtOrBefore', () => {
   const cumulative = [0, 10, 20, 20, 35];
@@ -233,5 +233,66 @@ describe('shotAt with uneven stops', () => {
 
   it('matches the even spacing when the stops are even', () => {
     expect(shotAt(shots, 0.25, [0, 0.5, 1])).toEqual(shotAt(shots, 0.25));
+  });
+});
+
+describe('smoothShotAt', () => {
+  // Four shots half a turn apart, so the path both swings around and doubles back.
+  const at = (deg, radius, y, fov) => ({
+    position: { x: Math.cos((deg * Math.PI) / 180) * radius, y, z: Math.sin((deg * Math.PI) / 180) * radius },
+    target: { x: 0, y: 0.5, z: 0 },
+    fov,
+  });
+  const shots = [at(0, 6, 1.5, 36), at(150, 5, 2.4, 34), at(20, 5.5, 0.6, 34), at(80, 7, 1, 38)];
+  const sample = (progress, stops) => smoothShotAt(shots, progress, stops);
+  const radiusAt = (progress, stops) => {
+    const { position } = sample(progress, stops);
+    return Math.hypot(position.x, position.z);
+  };
+
+  it('passes exactly through every shot', () => {
+    for (const [i, shot] of shots.entries()) {
+      const { position, fov } = sample(i / (shots.length - 1));
+      expect(position.x).toBeCloseTo(shot.position.x, 6);
+      expect(position.z).toBeCloseTo(shot.position.z, 6);
+      expect(position.y).toBeCloseTo(shot.position.y, 6);
+      expect(fov).toBeCloseTo(shot.fov, 6);
+    }
+  });
+
+  it('has no kink at a stop: the speed is the same on both sides', () => {
+    const stop = 1 / 3;
+    const step = 1e-4;
+    const speed = (from, to) => {
+      const a = sample(from).position;
+      const b = sample(to).position;
+      return Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) / step;
+    };
+    const before = speed(stop - step, stop);
+    const after = speed(stop, stop + step);
+    expect(after).toBeCloseTo(before, 1);
+  });
+
+  it('never swings wider or closer than the stops around it', () => {
+    for (let i = 0; i < shots.length - 1; i += 1) {
+      const ends = [radiusAt(i / 3), radiusAt((i + 1) / 3)];
+      for (let step = 1; step < 20; step += 1) {
+        const radius = radiusAt((i + step / 20) / 3);
+        expect(radius).toBeGreaterThanOrEqual(Math.min(...ends) - 1e-6);
+        expect(radius).toBeLessThanOrEqual(Math.max(...ends) + 1e-6);
+      }
+    }
+  });
+
+  it('follows uneven stops', () => {
+    const stops = [0, 0.1, 0.9, 1];
+    expect(sample(0.1, stops).fov).toBeCloseTo(34, 6);
+    expect(sample(0.9, stops).fov).toBeCloseTo(34, 6);
+    expect(sample(1, stops).fov).toBeCloseTo(38, 6);
+  });
+
+  it('clamps outside the range', () => {
+    expect(sample(-2)).toEqual(sample(0));
+    expect(sample(5)).toEqual(sample(1));
   });
 });

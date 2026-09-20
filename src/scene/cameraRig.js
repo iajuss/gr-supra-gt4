@@ -1,10 +1,10 @@
-// Scroll → camera: one scrubbed timeline over the 3D zone, read through shotAt.
+// Scroll → camera: one scrubbed timeline over the 3D zone, read through smoothShotAt.
 // GSAP only moves a 0–1 progress; where the camera goes is the tested maths in lib/math.js.
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import { normalizeStops, shotAt } from '../lib/math.js';
+import { normalizeStops, smoothShotAt } from '../lib/math.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,7 +17,7 @@ function centreScroll(section) {
  * @param {object} options
  * @param {Array<{ id: string }>} options.shots in page order; a shot without its [data-shot] section is skipped
  * @param {ParentNode} options.root
- * @param {(shot: ReturnType<typeof shotAt>) => void} options.onShot
+ * @param {(shot: ReturnType<typeof smoothShotAt>) => void} options.onShot
  * @param {(active: boolean) => void} [options.onActive] the 3D zone entering or leaving the viewport
  */
 export function createCameraRig({ shots, root, onShot, onActive }) {
@@ -35,7 +35,7 @@ export function createCameraRig({ shots, root, onShot, onActive }) {
   const timeline = gsap.to(progress, {
     value: 1,
     ease: 'none',
-    onUpdate: () => onShot(shotAt(framed, progress.value, stops)),
+    onUpdate: () => onShot(smoothShotAt(framed, progress.value, stops)),
     scrollTrigger: {
       trigger: sections[0],
       start: 'center center',
@@ -58,7 +58,7 @@ export function createCameraRig({ shots, root, onShot, onActive }) {
     onToggle: ({ isActive }) => onActive?.(isActive),
   });
 
-  onShot(shotAt(framed, 0, stops));
+  onShot(smoothShotAt(framed, 0, stops));
   onActive?.(zone.isActive);
 
   return {
