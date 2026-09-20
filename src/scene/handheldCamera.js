@@ -19,13 +19,19 @@ import { applyHandheld, handheldAt } from '../lib/handheld.js';
  * @param {boolean} [options.reducedMotion] keeps the camera on its tripod
  */
 export function createHandheldCamera({ view, amplitude, easeIn, reducedMotion = false }) {
-  const tripod = reducedMotion || (!amplitude.yaw && !amplitude.pitch);
+  let tripod = reducedMotion || (!amplitude.yaw && !amplitude.pitch);
   let shot = null;
   let active = false;
   let frame = 0;
   let start = 0;
 
   function draw(now) {
+    // A parked camera never draws, whatever the order of the frame's callbacks: the guard lives
+    // here so the loop cannot outlive `park`, which is the only thing that stops it for good.
+    if (tripod) {
+      frame = 0;
+      return;
+    }
     frame = requestAnimationFrame(draw);
     view.setShot(applyHandheld(shot, handheldAt((now - start) / 1000, easeIn), amplitude));
     view.requestRender();
@@ -61,6 +67,19 @@ export function createHandheldCamera({ view, amplitude, easeIn, reducedMotion = 
       view.setActive(next);
       if (active) run();
       else stop();
+    },
+    /**
+     * Back on the tripod for good, when the frame budget cannot afford a camera that draws forever
+     * (lib/quality.js). The framing returns to the chapter's own aim, so nothing is left leaning.
+     */
+    park() {
+      if (tripod) return;
+      tripod = true;
+      stop();
+      if (shot) {
+        view.setShot(shot);
+        view.requestRender();
+      }
     },
     destroy() {
       stop();

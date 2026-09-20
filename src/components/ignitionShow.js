@@ -34,24 +34,28 @@ export function createIgnitionShow({ view, car, duration, loudness }) {
     /**
      * @param {{ clipStart: number, lightsOn: number }} times on the performance.now() clock: when the
      *   engine clip starts, and when the headlights first light
+     * @returns {Promise<void>} settles when the show is over and the stage is still again
      */
     play({ clipStart, lightsOn }) {
       const end = duration + SETTLE_S;
-      const step = () => {
-        const now = performance.now();
-        const t = (now - clipStart) / 1000;
-        car.setLights(lightsAt((now - lightsOn) / 1000, 0));
-        const loud = curve ? loudnessAt(curve, LOUDNESS_WINDOW, t) : 0;
-        view.setRim(1 + RIM_SWELL * loud);
-        const back = t > duration ? easeInOut(Math.min(1, (t - duration) / SETTLE_S)) : 0;
-        view.setDolly(dollyAt(t, duration, DOLLY) * (1 - back)); // also requests the frame
-        if (t < end || now < lightsOn + LIGHTS_MS) requestAnimationFrame(step);
-        else {
-          view.setRim(1);
-          view.setDolly(0);
-        }
-      };
-      requestAnimationFrame(step);
+      return new Promise((done) => {
+        const step = () => {
+          const now = performance.now();
+          const t = (now - clipStart) / 1000;
+          car.setLights(lightsAt((now - lightsOn) / 1000, 0));
+          const loud = curve ? loudnessAt(curve, LOUDNESS_WINDOW, t) : 0;
+          view.setRim(1 + RIM_SWELL * loud);
+          const back = t > duration ? easeInOut(Math.min(1, (t - duration) / SETTLE_S)) : 0;
+          view.setDolly(dollyAt(t, duration, DOLLY) * (1 - back)); // also requests the frame
+          if (t < end || now < lightsOn + LIGHTS_MS) requestAnimationFrame(step);
+          else {
+            view.setRim(1);
+            view.setDolly(0);
+            done();
+          }
+        };
+        requestAnimationFrame(step);
+      });
     },
   };
 }

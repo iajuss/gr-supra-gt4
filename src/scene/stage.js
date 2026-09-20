@@ -160,6 +160,13 @@ export async function createStage(canvas, config) {
     return bloomPrepared;
   }
 
+  /** Gives the glow up for good, when the frame budget says this machine cannot afford it. */
+  function dropBloom() {
+    if (!bloomActive) return;
+    bloomActive = false;
+    requestRender();
+  }
+
   let revealFrame = 0;
 
   /** Thickens the fog until the car disappears into it (before it is ready to be seen). */
@@ -198,6 +205,7 @@ export async function createStage(canvas, config) {
     camera,
     prepare,
     activateBloom,
+    dropBloom,
     setShot,
     veil,
     reveal,

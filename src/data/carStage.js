@@ -73,6 +73,11 @@ export default {
     far: 500,
   },
 
+  // The frame budget (lib/quality.js, scene/qualityBudget.js): how many frames it watches before it
+  // decides, and how many of the first ones it throws away — the opening is an animation of its own,
+  // and judging the machine by it would punish every machine. Thresholds live with the rule.
+  quality: { warmUp: 30, sample: 90 },
+
   // A hand on the camera instead of a tripod (lib/handheld.js, scene/handheldCamera.js): the framing
   // drifts, the camera never moves, so the distance to the car is the chapter's own. Degrees at the
   // very edge of the drift, which it rarely reaches; `easeIn` is how long it takes to get there from

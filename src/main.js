@@ -37,6 +37,13 @@ const catchAt = engineSound.catchAt - engineSound.start;
 const entrance = createHeroEntrance(document.querySelector('.hero'), { reducedMotion: motion.reducedMotion, catchAt });
 let ignition = null; // full mode, once the car is on stage: its lights, the rim and the camera
 
+// Settles when the page has finished opening and the stage is still again: the frame budget waits
+// for it, so it measures the machine and not the engine start (scene/qualityBudget.js).
+let openingDone;
+const openingOver = new Promise((resolve) => {
+  openingDone = resolve;
+});
+
 preloader.ready.then(() => {
   engine.preload();
   // Opening the audio device blocks for a moment: do it on the visitor's first move towards the
@@ -58,7 +65,8 @@ preloader.ready.then(() => {
       heard.then((startAt) => {
         const clipStart = startAt ?? gesture + engineAt * 1000; // silent: the clip's would-be clock
         entrance.play(clipStart);
-        ignition?.play({ clipStart, lightsOn: gesture + opening.keyAt * 1000 });
+        const show = ignition?.play({ clipStart, lightsOn: gesture + opening.keyAt * 1000 });
+        (show ?? Promise.resolve()).then(openingDone);
       });
     },
   });
@@ -127,13 +135,19 @@ async function initStage(root) {
       return;
     }
 
-    const [{ createSmoothScroll }, { createCameraRig }, { createHandheldCamera }, { createLapCurtain }] =
-      await Promise.all([
-        import('./lib/scroll.js'),
-        import('./scene/cameraRig.js'),
-        import('./scene/handheldCamera.js'),
-        import('./components/lapCurtain.js'),
-      ]);
+    const [
+      { createSmoothScroll },
+      { createCameraRig },
+      { createHandheldCamera },
+      { createQualityBudget },
+      { createLapCurtain },
+    ] = await Promise.all([
+      import('./lib/scroll.js'),
+      import('./scene/cameraRig.js'),
+      import('./scene/handheldCamera.js'),
+      import('./scene/qualityBudget.js'),
+      import('./components/lapCurtain.js'),
+    ]);
     createSmoothScroll();
     createLapCurtain(document.querySelector('.lap'));
     // The hand sits between the two: the rig says where the chapter looks, and it keeps that framing alive.
@@ -142,11 +156,24 @@ async function initStage(root) {
       ...carStage.handheld,
       reducedMotion: motion.reducedMotion,
     });
+    // If this machine cannot keep up, the hand goes first and the bloom after it.
+    const budget = createQualityBudget({
+      view,
+      handheld,
+      after: openingOver,
+      settings: carStage.quality,
+      onDecision: ({ level, missed, vsync }) =>
+        console.info(`[supra] quality=${level}`, { missed: +missed.toFixed(3), vsync: +vsync.toFixed(1) }),
+    });
+
     createCameraRig({
       shots: cameraShots,
       root: document,
       onShot: handheld.setShot,
-      onActive: handheld.setActive,
+      onActive(active) {
+        handheld.setActive(active);
+        budget.setActive(active);
+      },
     });
     showCar();
   } catch (error) {
