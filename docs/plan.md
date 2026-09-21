@@ -694,7 +694,13 @@ a zona 3D e parado num capítulo.
 - [x] Imagens do lite regravadas (2026-09-20, com autorização): as três de `public/shots/*.webp` por
   `tools/capture.html` e a `og.jpg` por `tools/shareCard.html?save=a` — agora com o bloom nas luzes,
   pendentes desde o Dia 1
-- [ ] Lighthouse CI no workflow, **informativo** (não bloqueia: o runner oscila)
+- [x] Lighthouse CI no workflow (2026-09-20), **informativo**: job `lighthouse` separado no
+  `.github/workflows/ci.yml`, com `continue-on-error`, servindo o `dist` e medindo desktop e mobile.
+  Os números vão para o resumo do job (`.github/lighthouse-summary.mjs`) e os JSON ficam como
+  artefato. **Não decide nada**: quem decide é a comparação alternada local contra um commit de
+  referência — o runner oscila mais que a página, como a própria rodada final mostrou
+  - Workflow não se verifica localmente: foi para uma branch com pull request, para o CI rodar
+    sem publicar na Vercel
 - [x] 📏 Rodada final (2026-09-20): Lighthouse alternado contra `6768e5c`, FPS e peso; números na Retomada
 - [x] README: seção "Making of" (2026-09-20): seis casos com antes e depois medido, mais uma nota
   sobre o que a medição ensinou (a aba aberta envenenando o Lighthouse, o `visibilityState` que

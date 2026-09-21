@@ -1,5 +1,5 @@
 # Tests and production build on every push to main and on pull requests.
-# Lighthouse CI joins later (Bloco 6, day 3), as information only: the runners vary too much to gate on.
+# Lighthouse runs alongside, as information only: the runners vary too much to gate on.
 name: CI
 
 on:
@@ -19,3 +19,49 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+  # Information only. The hosted runners swing far more than the page does - what actually decides
+  # anything here is a local alternating comparison against a reference commit (README, "Making of").
+  # continue-on-error keeps a slow runner from ever failing a pull request.
+  lighthouse:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Serve the build
+        run: |
+          npx vite preview --port 4173 --strictPort &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:4173/ > /dev/null && exit 0
+            sleep 1
+          done
+          echo "the preview server never answered" >&2
+          exit 1
+
+      - name: Measure
+        run: |
+          {
+            echo "| run | perf | a11y | best practices | seo | TBT | LCP | CLS | weight |"
+            echo "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for preset in desktop mobile; do
+            flags=""
+            if [ "$preset" = desktop ]; then flags="--preset=desktop"; fi
+            npx --yes lighthouse@12 "http://localhost:4173/" $flags --quiet \
+              --output=json --output-path="lh-$preset.json" \
+              --chrome-flags="--headless=new --no-sandbox"
+            node .github/lighthouse-summary.mjs "lh-$preset.json" "$preset"
+          done
+
+      - name: Keep the reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: lh-*.json
