@@ -435,7 +435,11 @@ a zona 3D e parado num capítulo.
   Track only"), "SUPRA" e o endereço com as fontes da página. Variantes A (hero), B (frente baixa) e
   C (perfil) comparadas; escolhida a **A**. `?save=<id>` grava pelo `shotServer`, que passou a aceitar
   `.jpg`. Regravar quando o carro mudar (bloom, peso)
-  - 👁 tags e imagem no `dist`; 240 testes. Falta: LinkedIn Post Inspector depois do deploy
+  - 👁 tags e imagem no `dist`; 240 testes
+  - ✅ LinkedIn Post Inspector passado pelo usuário em 2026-09-20, depois de a `og.jpg` ser
+    regravada com o bloom: a prévia já mostra a imagem nova. Antes disso conferido que o que está
+    no ar é byte a byte a imagem local (md5 `868a916f…`, 56.964 B) e que as meta tags publicadas
+    trazem a URL absoluta, o `twitter:card` e o `canonical`
 - [x] **P0** Comentário truncado no topo de `components/ignitionShow.js`
 - [x] CI no GitHub Actions (`.github/workflows/ci.yml`): `npm ci`, `npm test`, `npm run build` a cada
   push no `main` e em pull requests, Node 24; selo no README. O lockfile já traz os binários nativos
@@ -507,7 +511,8 @@ a zona 3D e parado num capítulo.
     em paz, aguenta engasgo isolado, tira a mão a um quinto de quadros perdidos e o bloom a um terço,
     ignora pausa de aba, não fala antes de ter amostra, não se deixa enganar por quadros selvagens ao
     estimar o ritmo, pega a máquina lenta o tempo todo e não altera o que recebe
-- [x] Grão e vinheta em CSS (2026-09-19, `styles/sections/film.css`): pseudo-elementos do palco fixo
+- [x] ~~Filme em CSS~~ — construído em 2026-09-19 e **removido inteiro em 2026-09-20** (fim do item).
+  Como foi feito (`styles/sections/film.css`, agora apagado): pseudo-elementos do palco fixo
   (full, abaixo de todo o texto) e das figuras dos capítulos (lite). Ruído SVG embutido, sem download;
   o grão se mexe 8×/s só por `transform` (compositor) e para com reduced motion
   - 👁 variantes montadas em canvas com o mesmo ruído e a mesma mistura, sobre o quadro real, em 1:1 e
@@ -520,6 +525,22 @@ a zona 3D e parado num capítulo.
   - 📏 FPS rolando em 1152×720: 78, mediana 12,1 ms, p95 18,2 ms (igual). Lighthouse no build: desktop
     93 / 99 / 99 (a primeira rodada fria), mobile 100 / 100, CLS 0
   - 👁 375 px: vinheta nas figuras, grão animado, sem rolagem horizontal; console limpo
+  - 🐛 **Grão removido em 2026-09-20 (escolha do usuário), na reavaliação pedida no notebook.** Ele não
+    se via em 1:1 em nenhuma intensidade: `baseFrequency 0.85` dá detalhe de ~1,2 px, menor que o pixel
+    do monitor, e a tela faz a média. Medido: ~2 níveis de 255 de oscilação no meio-tom. Fica só a
+    vinheta; o banding das quedas escuras (14 degraus de 44–244 px, saltos de 1–3 níveis numa linha) é
+    aceito em troca de tirar uma animação permanente 8×/s. Contraste derivado: kicker 5,46 → 5,43.
+    Detalhes e os dois botões do ruído em design.md
+  - 🐛 **Vinheta removida logo depois, pela mesma razão (2026-09-20, escolha do usuário).** Nem o
+    usuário nem as capturas viram diferença entre `0` e `0.95`. Medido por anel de raio no quadro real:
+    aplica **0% na metade central** e 45% no canto, onde o nível médio já é **27 de 255** — remove ~12
+    níveis lá e zero no meio. O `film.css` foi apagado; só o `overflow: hidden` do palco sobreviveu,
+    movido para `stage.css`. Contraste derivado: kicker 5,46 → **~5,36**, acima dos 4,5 do bloco
+  - 👁 depois da remoção: full em 1400×900 com o palco intacto e console limpo; lite a 375 px com as
+    figuras preenchendo a moldura, sem rolagem horizontal e sem pseudo-elemento. 307 testes, build ok
+  - 🐛 **Defeito da minha própria medição, vale para a próxima vez:** trocar `--film-grain` por JS não
+    re-rasteriza a camada — ela só anda por `transform` no compositor, então eu estava fotografando o
+    ladrilho velho e concluindo que o ruído não renderizava. Variante de filme só se julga com recarga
 - [x] 🧪 Câmera em spline (2026-09-20, `smoothShotAt` em `lib/math.js`): a lista inteira de paradas
   vira uma curva só, em vez de um movimento reto por par. Passa exatamente por cada parada, mas sem a
   quebra de velocidade ao chegar nela. Interpola em volta do carro, como o `lerpOrbit` faz para um par

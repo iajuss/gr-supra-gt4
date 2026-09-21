@@ -21,6 +21,8 @@
   inset: 0;
   z-index: var(--z-canvas);
   background: var(--color-bg);
+  /* The renderer can hold a canvas wider than the viewport for a frame while a resize settles. */
+  overflow: hidden;
 }
 
 .stage__canvas {

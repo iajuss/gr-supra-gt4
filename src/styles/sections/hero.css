@@ -30,8 +30,8 @@
 }
 
 /* The words come first: the picture is darkened towards the bottom, where they sit, so the title
-   and the lead keep their contrast over a moving background. This takes the place of the film's
-   vignette here (sections/film.css puts the grain on ::after); both only ever darken. */
+   and the lead keep their contrast over a moving background. This is the only darkening left over the
+   car's imagery: the film pass (grain and vignette) was removed in 2026-09-20, see docs/design.md. */
 .hero__media::before {
   content: '';
   position: absolute;

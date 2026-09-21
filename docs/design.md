@@ -582,15 +582,51 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
     Sobre a imagem ele sobe para um cinza intermediário e vai a 5,5:1, o mesmo que já mede no desktop;
     a alternativa era esconder o clipe atrás de uma tarja quase opaca.
 
-- **Grão e vinheta em CSS, nos dois modos (feito):** sobre a imagem do carro e abaixo de todo o texto
-  (full: o palco fixo; lite: as figuras dos capítulos). Custo zero de GPU do palco, que continua
-  desenhando só sob demanda. Vinheta radial de 50% nas bordas; grão em ruído SVG embutido que se mexe
-  8×/s por `transform`, parado com reduced motion.
+- **Filme em CSS: construído, medido e removido inteiro (2026-09-20, escolha do usuário).** A ideia era
+  um acabamento sobre a imagem do carro e abaixo de todo o texto (full: o palco fixo; lite: as figuras
+  dos capítulos), em CSS para não custar GPU do palco. Saiu em duas etapas, na reavaliação pedida no
+  notebook: primeiro o grão, depois a vinheta. O `styles/sections/film.css` foi apagado; do que ele
+  fazia, só o `overflow: hidden` do palco fixo ficou, movido para `stage.css`.
+  - **A causa é a mesma nas duas camadas, e é o conteúdo:** o palco é um estúdio escuro que já cai para
+    o preto sozinho. Uma camada de CSS que só escurece não tem o que escurecer. Foi um item planejado
+    sobre uma suposição de imagem fotográfica que esta página não tem.
   - **O filme só escurece:** o grão é multiplicado (ruído em tons claros), não sobreposto. Com `overlay`
     ele clareava o piso atrás do texto do hero e derrubava o contraste para 3,7–4,3:1; multiplicado, o
     contraste sobe (medido no quadro renderizado, pior caso do ruído). Custo: ~5% de escurecimento médio.
-  - É acabamento, não destaque: aparece na tela grande e em movimento; nas imagens mandadas ao celular
-    só se via ampliado. O usuário escolheu a intensidade B e vai reavaliar no notebook.
+  - **Grão removido (2026-09-20, escolha do usuário), depois da reavaliação no notebook.** Ele não
+    aparecia em 1:1 — nem no valor publicado, nem em nenhum outro. Medido na página real: o ruído movia
+    um pixel de meio-tom em **~2 níveis de 255** (média de escurecimento 5,0%, que bate com o registrado
+    acima), e o motivo é que o `baseFrequency 0.85` dá detalhe de ~1,2 px, menor que o pixel do monitor
+    (`devicePixelRatio` 1,25): a tela faz a média e sobra escurecimento liso. **Opacidade não conserta**,
+    porque só escurece a imagem inteira por igual; quem engrossa o grão é a frequência, e quem o alarga
+    é a inclinação do `feComponentTransfer` (a faixa publicada era estreita, 0,647–0,969 de cinza).
+  - **Dois botões independentes, medidos:** `baseFrequency` muda só o tamanho do grão e a inclinação só
+    a amplitude — os histogramas de frequências diferentes são idênticos. Alargar o ruído para baixo é
+    de graça para o contraste, porque o pior caso é o pixel de ruído mais claro, e o topo da faixa quase
+    não se move (0,92 → 0,91). Com o intercepto recalculado para segurar a exposição, dava para ir de
+    5,4% a 17,3% de textura pico a pico sem mudar o escurecimento médio.
+  - **O único trabalho técnico do grão era dither, e as quedas escuras bandam mesmo:** uma linha
+    horizontal no quadro real tem 14 degraus largos, de 44 a 244 px, com saltos de 1 a 3 níveis entre
+    vizinhos. Os ~2 níveis do grão publicado eram da ordem certa para quebrar esses degraus — ou seja,
+    ele provavelmente já fazia esse trabalho, e ser invisível era o sintoma de estar bem calibrado.
+    **Só que dither e textura de cinema puxam para lados opostos**, e o usuário escolheu abrir mão dos
+    dois: o banding fica aceito em troca de tirar uma animação permanente 8×/s e uma camada de
+    compositor. Contraste: derivado dos números registrados, o kicker cai de 5,46 para **5,43** (num
+    fundo tão escuro o termo `+0,05` da fórmula domina), longe dos 4,5 do bloco.
+  - As capturas não precisaram ser regravadas: `tools/capture.html`, `shareCard.html` e `heroClip.html`
+    têm CSS próprio e nunca importaram o filme, então as imagens do lite, a `og.jpg` e o `hero.mp4`
+    jamais carregaram o grão — ele era aplicado por cima, na página.
+  - Era acabamento, não destaque: aparecia só ampliado. A escolha original (intensidade B) foi feita em
+    imagem ampliada mandada ao celular, e foi justamente a ampliação que a fez parecer visível.
+  - **Vinheta removida em seguida (2026-09-20), pelo mesmo sintoma e pela mesma medição.** O usuário
+    também não viu diferença entre `0` e `0.95`, e nem eu nas capturas. Medido por anel de raio sobre o
+    quadro real: ela aplica **0% em toda a metade central** (o degradê só começa em `t=0.5`) e 45% no
+    canto — mas o anel do canto já tem nível médio **27 de 255** (o mais claro é 67). Remove ~12 níveis
+    lá e zero no meio: o render já vinheta a si mesmo, e o que sobrava para ela escurecer era preto.
+  - Contraste, derivado dos números registrados (não remedido num render novo): atrás do kicker o filme
+    inteiro escurecia ~13,5% (grão 5% × vinheta 9%, que é o que ela aplica no raio onde o texto do hero
+    cai). Sem nada, o kicker vai de 5,46 para **~5,36** — o termo `+0,05` da fórmula domina num fundo
+    tão escuro. Os outros textos se movem na mesma ordem, e todos seguem acima dos 4,5 do bloco.
 - **Bloom discreto e físico, só nas luzes (feito):** brilham LEDs, lanternas, neblinas e luz de chuva, e
   nunca a lataria; sem halo em sprite nem facho no chão (os dois já rejeitados).
   - **Por que seletivo:** um limiar de brilho não separa as luzes do verniz. Os reflexos dos spots no
