@@ -668,6 +668,12 @@ Objetivo: subir o patamar de qualidade em ~3 dias, com o site já no ar. Plano e
     e rolando fica igual. O preço não é taxa de quadros: são 27 chamadas de desenho por quadro enquanto
     a zona 3D está na tela, onde antes eram 0 em repouso — GPU e bateria, medidos por canvas porque a
     volta tem palco próprio.
+  - **O celular também vê o ar (2026-09-20):** a imagem do capítulo no modo leve passou a ser capturada
+    com o fluxo, em vez de mostrar o carro parado no capítulo que fala de ar. Na página o ar é marca
+    correndo, então um quadro qualquer pega só traços; na imagem fixa a linha acende inteira, que é
+    o que faz a forma se ler parada — e é o que a decisão de "linhas, não pontos" dizia querer, sem
+    que a página jamais tivesse desenhado assim. Escolha do usuário entre as três, comparadas no
+    tamanho real da figura no celular e não em tela cheia.
   - **Reduced motion não chega aqui:** ele manda a página inteira para o modo leve
     (`lib/capabilities.js`), então o palco 3D nunca roda com ele. A guarda no laço fica como seguro: se
     essa regra mudar, esta é a única coisa da página que ficaria se mexendo para sempre.

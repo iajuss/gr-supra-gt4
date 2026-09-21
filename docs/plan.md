@@ -605,6 +605,25 @@ a zona 3D e parado num capítulo.
   - 📏 Custo do efeito, três passadas estáveis na parada do aero: **137 → 108 FPS**, mediana 6,2 ms,
     p95 18,1 ms. É o item mais caro da rodada, e por isso **cai junto com a câmera na mão** quando o
     orçamento aperta (escolha do usuário)
+  - [x] **A imagem do lite passou a mostrar o fluxo (2026-09-20)**, fechando a pendência de que os dois
+    modos contavam o capítulo do ar de formas diferentes. `tools/capture.js` monta o `createAirflow` e
+    liga só no shot do aero; a `aero.webp` foi de 32,6 para 54,3 KB (`loading="lazy"` e abaixo da dobra,
+    então não entra na primeira tela nem no LCP). O `alt` ganhou as linhas, que antes não existiam no
+    texto
+    - 🐛 **A ferramenta não "não montava o efeito": ela montava e ele se recusava a rodar.** O
+      `createAirflow` só anda com a aba visível, e no painel do app o `document.visibilityState` é
+      `hidden` — mas o `rAF` continua disparando ali, então esperar quadro resolvia e o laço nunca
+      rodava. Saía a imagem de sempre, sem erro no console e sem nada na tela. Virou `airflow.still()`:
+      um quadro desenhado sob demanda, determinístico, sem laço e sem regra de visibilidade
+    - 🐛 **A razão registrada para ter escolhido linhas em vez de pontos não era verdade:** "a linha
+      contínua desenha a forma do carro mesmo parada". O shader multiplica tudo pela marca que corre,
+      então qualquer quadro pega só traços. Na captura, sem marcas ao longo da linha todos os pontos
+      compartilham uma fase; segurando essa fase no pico da marca, a linha acende de ponta a ponta —
+      é a primeira vez que a frase vale
+    - 👁 três variantes comparadas no tamanho real de exibição (672×418, já em 2×), não a 1440×900:
+      sem fluxo, marcas correndo (39,2 KB) e linha contínua (54,3 KB). **Escolha do usuário: contínua**
+    - 👁 375 px: figura a 336×209 com as linhas legíveis depois da redução de ~4×, sem rolagem
+      horizontal, console limpo. `chassis.webp` e `engine.webp` saíram byte a byte idênticos
   - Reduced motion não chega aqui, como na câmera na mão: ele manda a página para o modo leve
   - Amarrar o fluxo ao som do motor foi levantado pelo usuário e **descartado por ele** depois de ver o
     efeito só no capítulo: o motor toca uma vez só, na abertura, com a câmera no hero

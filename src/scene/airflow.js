@@ -202,6 +202,17 @@ export function createAirflow(car, { view }, { mode, ...config }) {
       else stop();
       view.requestRender();
     },
+    /**
+     * One frame, drawn on demand: for the still captures (tools/capture.js), which need a known
+     * instant and run with the document reporting itself hidden, where the loop above refuses to go.
+     * @param {number} seconds where along the flow's own clock to draw
+     * @param {number} amount how much of the flow is on screen, 0 to 1
+     */
+    still(seconds = 0, amount = 1) {
+      drawing.object3D.visible = amount > 0;
+      drawing.step(seconds, amount);
+      view.requestRender();
+    },
     /** Given up for good, when the frame budget cannot afford something that draws forever. */
     park() {
       if (parked) return;
