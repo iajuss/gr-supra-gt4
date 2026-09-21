@@ -40,7 +40,7 @@ const FPS = 60;
 const STEP = 1000 / FPS;
 const WIDTH = 1920;
 const HEIGHT = 1080;
-const GATE_HOLD = 4.0; // the sound screen, before the visitor's gesture
+const GATE_HOLD = 2.0; // the sound screen, before the visitor's gesture
 
 const requireHere = createRequire(path.join(process.cwd(), 'resolve-from-here.js'));
 let chromium;
@@ -111,30 +111,34 @@ const marks = await page.evaluate(() => {
   };
 });
 
-// Where each of the lap's two stutters fires: one screen away it is built (lib/whenNear.js), half
-// visible it starts playing (components/lapPlayer.js). The pass holds still at both, so the page has
-// room to do that work between beats rather than in the middle of a move.
-marks.build = Math.max(0, marks.lap - HEIGHT * 1.9);
-marks.start = Math.max(0, marks.lap - HEIGHT * 0.5);
-
 // Seconds from the first rendered frame. Each chapter gets a beat of its own; the aero one has the
-// airflow to show, and the lap is held long enough to read the telemetry.
+// airflow to show, and the lap is held long enough to ride all three of its cameras.
+//
+// The run into the lap is one unbroken move, on purpose. The page opens the lap as a curtain, driven
+// by the scroll itself, so stopping anywhere inside it parks the picture in a composition that was
+// never meant to be seen - half a car above a half-raised curtain. An earlier pass held still there
+// twice, to give the page room for the two stutters on the way in; rendering on a clock of our own
+// made those stutters irrelevant, and the holds were left behind solving a problem that had gone.
 const plan = [
   { until: GATE_HOLD + 8.0, to: 'hero' },
   { until: GATE_HOLD + 10.5, to: 'aero', ease: true },
-  { until: GATE_HOLD + 12.0, to: 'aero' },
-  { until: GATE_HOLD + 14.5, to: 'chassis', ease: true },
-  { until: GATE_HOLD + 16.0, to: 'chassis' },
-  { until: GATE_HOLD + 18.5, to: 'engine', ease: true },
-  { until: GATE_HOLD + 20.0, to: 'engine' },
-  { until: GATE_HOLD + 20.6, to: 'build', ease: true },
-  { until: GATE_HOLD + 23.6, to: 'build' },
-  { until: GATE_HOLD + 24.4, to: 'start', ease: true },
-  { until: GATE_HOLD + 26.4, to: 'start' },
-  { until: GATE_HOLD + 27.9, to: 'lap', ease: true },
-  { until: GATE_HOLD + 32.4, to: 'lap' },
-  { until: GATE_HOLD + 34.4, to: 'specs', ease: true },
-  { until: GATE_HOLD + 36.4, to: 'specs' },
+  { until: GATE_HOLD + 12.5, to: 'aero' },
+  { until: GATE_HOLD + 15.0, to: 'chassis', ease: true },
+  { until: GATE_HOLD + 16.5, to: 'chassis' },
+  { until: GATE_HOLD + 19.0, to: 'engine', ease: true },
+  { until: GATE_HOLD + 20.5, to: 'engine' },
+  { until: GATE_HOLD + 24.5, to: 'lap', ease: true },
+  { until: GATE_HOLD + 32.0, to: 'lap' },
+  { until: GATE_HOLD + 34.0, to: 'specs', ease: true },
+  { until: GATE_HOLD + 36.5, to: 'specs' },
+];
+
+// The lap can be followed three ways and the page lets the visitor pick, so the pass picks all
+// three: it arrives on the one the page opens with (data/lapScene.js -> cameras.initial) and then
+// rides the other two, a beat each.
+const cues = [
+  { at: GATE_HOLD + 27.0, click: '[data-lap-camera="chase"]' },
+  { at: GATE_HOLD + 29.5, click: '[data-lap-camera="top"]' },
 ];
 const TOTAL = limit || Math.round(plan.at(-1).until * FPS);
 
@@ -171,6 +175,9 @@ for (let i = 0; i < TOTAL; i += 1) {
   const seconds = i / FPS;
   if (i === clickAt) await page.click('.gate [data-gate-silent]');
   if (i > clickAt) await page.evaluate((y) => window.scrollTo(0, y), Math.round(scrollAt(seconds)));
+  for (const cue of cues) {
+    if (i === Math.round(cue.at * FPS)) await page.click(cue.click);
+  }
 
   await goTo(base + i * STEP);
   const buffer = await shot();

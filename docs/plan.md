@@ -780,8 +780,17 @@ a zona 3D e parado num capítulo.
     de 1,9 s). Agora o relógio é nosso, então o problema deixou de existir
   - 📏 Conferido no vídeo final: título pousa **1,98 s** depois do clique (o dado pede 1,9), som do
     motor entra em 5,5 s com o envelope do original, contadores fecham em 430/650/1.350/100
-  - Peça entregue: `gr-supra-gt4-2026-09-21.mp4`, 40,5 s, 1920×1080 a 60 fps, 25,2 MB, no Desktop do
-    usuário. Falta decidir sobre a segunda peça, de 60 s
+  - 🐛 **As pausas que escondiam os engasgos quebravam a entrada no circuito, e o usuário pegou.** A
+    página abre a volta em cortina, movida pela própria rolagem; parar no meio dela mostra uma
+    composição que ninguém projetou — carro cortado ao meio sobre uma cortina meio subida — e, sendo
+    pausa, ficava assim por segundos. Elas existiam para dar folga aos dois engasgos da montagem da
+    volta; **renderizar com relógio próprio tornou os engasgos irrelevantes e eu esqueci de tirá-las**.
+    A entrada virou um movimento contínuo de 4 s
+  - 👁 A pedido do usuário: tela de som cortada de 4 para 2 s, e a volta passa pelas **três câmeras**
+    (`heli` na chegada, `chase` rente à pista, `top` com o circuito inteiro), clicando os próprios
+    botões da página, que acendem junto — fica claro que é a página trocando de modo
+  - Peça entregue: `gr-supra-gt4-2026-09-21.mp4`, 38,6 s, 1920×1080 a 60 fps, 28,9 MB, no Desktop do
+    usuário. Falta a segunda peça, de 60 s
 
 **Fora desta rodada:** o Supra na pista da volta, o som seguindo a telemetria (com botão de som no
 header), a página de case e a versão em português.
