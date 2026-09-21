@@ -77,7 +77,25 @@ pelo P0 (prévia do link), antes de o post do LinkedIn circular.
 4. ~~Deploy na Vercel~~ — feito em 2026-09-19.
 - Opcional: os ~20 ms de TBT a mais no desktop depois da abertura (tarefa no chunk `stage`).
 - Opcionais, sem efeito na nota: baixar o GLB em paralelo com o `createStage` (carro ~1 s antes);
-  pré-compilar o palco da volta (bloqueia ~380 ms ao chegar perto); GLB de 7,7 MB acima da meta de ~5 MB.
+  GLB de 7,7 MB acima da meta de ~5 MB.
+- 🐛 **O engasgo da volta 3D foi diagnosticado e a correção óbvia foi tentada e descartada (2026-09-20).**
+  Ele apareceu ao gravar o vídeo de divulgação, e primeiro precisei separar culpa: gravando o `rAF` da
+  página e os quadros do screencast na mesma passada, **a página engasga sozinha** (12 quadros acima de
+  100 ms contra 10 da captura) — não é artefato de gravação.
+  - 📏 **São duas fases, e confundi-las estraga a medição.** Medidas à parte, três passadas cada:
+    **montagem** (a seção entra a uma tela, o módulo é importado e construído, com a imagem parada)
+    350 · 383 · 333 ms de pior quadro; **chegada** (a câmera entra e a volta aparece) 633 · 650 · 683 ms.
+    Rolando direto de uma à outra, as duas se somam num único quadro de ~1 s
+  - O perfil da CPU na janela crítica: 323 ms de trabalho, com `(program)` em 113 ms e
+    **`getProgramInfoLog` em 37,8 ms** — a assinatura de link de shader síncrono
+  - **A pré-compilação não resolve.** `prepare()` no `lapStage` com `renderer.compileAsync`, como o
+    palco do carro faz, deixou a chegada igual (1233 · 650 · 650) e **piorou a montagem** em ~60 ms
+    (417 · 400 · 417). Revertida: código que custa e não entrega não fica
+  - Suspeitos que sobram, em ordem: os shaders do `EffectComposer` com bloom, que o `compileAsync` não
+    cobre; a alocação dos alvos de render quando o canvas ganha tamanho (`setSize` aparece no perfil);
+    e o envio das geometrias da pista à GPU no primeiro desenho
+  - **Ressalva:** tudo medido em Chromium headless com ANGLE. É possível que o `compileAsync` só renda
+    onde há compilação paralela de shaders e que num navegador comum ele ajude — não verificado
 - Em aberto por decisão: o preloader anuncia cada porcentagem (`role="status"`); emblema da Toyota
   discreto (regra "Sem logos oficiais").
 - Não visto no navegador: a animação do reveal depois da troca do `aria-label`.
@@ -721,7 +739,25 @@ a zona 3D e parado num capítulo.
   mente, a camada que não re-rasteriza) e os números finais da rodada. Em inglês, ~65 linhas; o
   README foi de 68 para 134. **Sem link para o vídeo**: ele ainda não existe, e um link morto num
   README público é pior que a ausência dele — entra quando o vídeo entrar
-- [ ] Vídeos de divulgação regravados (Playwright é download → pedir autorização)
+- [~] Vídeos de divulgação: **ferramenta pronta e verificada, vídeo ainda não escolhido** (2026-09-20).
+  `tools/promoClip.mjs` grava a passada inteira pela página, monta e encaixa o som numa chamada só;
+  rodado de ponta a ponta, saída de 40,6 s em 1920×1080 a 60 fps com áudio, 18,2 MB
+  - Playwright **aprovado no teste barato** antes de confiar nele: WebGL na GPU de verdade
+    (`ANGLE (Intel UHD, D3D11)`, não SwiftShader), 60 FPS cravados e imagem indistinguível da página.
+    Instalado fora do projeto, como o pipeline do modelo; o `package.json` não mudou
+  - Quadros vêm de screencast do CDP, não da gravação do Playwright (que é de baixa taxa e qualidade),
+    e cada um guarda seu carimbo de tempo: o vídeo é montado a 60 fps constante a partir deles, então
+    onde a página perdeu quadro o vídeo **segura** em vez de acelerar
+  - O som é o `engine-start.mp3` do repositório, posicionado pelos próprios dados da abertura
+    (`opening.engineAt`). Conferido contra a imagem, medindo onde o título do hero pousa: bateu com
+    80 ms de diferença. Falta a reverberação que a página aplica ao vivo
+  - 🐛 **Pré-aquecer a página gasta a abertura.** Tentei rolar até a volta antes de gravar, para montar
+    o palco 3D fora do vídeo; a ignição roda em tempo real desde a carga, então os 6,5 s de rolagem
+    foram descontados dela — o título pousou 0,5 s depois do clique em vez de 1,9 s. Medido comparando
+    a curva de brilho do título nas duas gravações. A ferramenta não pré-aquece nada
+  - 🐛 O screencast **para de mandar quadro quando a página fica imóvel**, e o último tique dos
+    contadores se perdia (fechava em 99 de 100). A ferramenta fecha com uma captura à parte
+  - Falta: o usuário escolher a peça final e onde guardá-la, e decidir sobre a segunda, de 60 s
 
 **Fora desta rodada:** o Supra na pista da volta, o som seguindo a telemetria (com botão de som no
 header), a página de case e a versão em português.
