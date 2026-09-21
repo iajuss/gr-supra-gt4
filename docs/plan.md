@@ -96,6 +96,36 @@ pelo P0 (prévia do link), antes de o post do LinkedIn circular.
     e o envio das geometrias da pista à GPU no primeiro desenho
   - **Ressalva:** tudo medido em Chromium headless com ANGLE. É possível que o `compileAsync` só renda
     onde há compilação paralela de shaders e que num navegador comum ele ajude — não verificado
+- ✅ **Engasgo da volta 3D corrigido (2026-09-21).** Quatro medições derrubaram as hipóteses anteriores
+  e apontaram a causa exata:
+  - 📏 **É compilação de shader, e só.** Cronometrando dentro do `initLapSection3d`: `import` 16 ms,
+    `buildLap` 8, `centreline` 5, `createLapStage` 57, minimapa 2, HUD 0 — e **`compileAsync` 530 ms**,
+    com o primeiro desenho custando **3 ms** depois dela. Por objeto da cena, um `Group` domina com
+    **593 ms**: é o do ambiente, cujo `MeshStandardMaterial` com luzes e névoa é o **primeiro shader
+    desse contexto WebGL** (o palco do carro é outro contexto e não compartilha nada)
+  - 📏 **`compileAsync` não tira o trabalho da thread principal aqui** — mesmo com ela, sobra uma
+    tarefa longa de 429 ms. Não há compilação paralela de shaders neste ambiente
+  - 📏 **Não é trabalho único: a segunda chegada custa o mesmo que a primeira** (700/667, 700/800,
+    883/967). Não há nada em cache para reaproveitar, o que **elimina qualquer solução por
+    pré-aquecimento** — e de fato desenhar a cena antes, fora da tela, piorou os dois lados
+  - 📏 **O controle salvou a análise:** o mesmo movimento entre capítulos dá pior quadro de **17 ms**,
+    então a ferramenta de medição não era o problema; só a entrada na volta engasga
+  - **A correção é escolher quando pagar.** O custo é irredutível e bloqueia; esperar a seção chegar
+    perto significava pagá-lo no meio da rolagem, toda vez. Agora a volta é construída no **primeiro
+    movimento do visitante**, correndo contra o `whenNear` — o que vier primeiro. É o mesmo gatilho
+    que o bloom já usava
+  - 🐛 **`openingOver` não servia de âncora:** ela só resolve **12 s depois do gesto**, porque espera o
+    clipe inteiro do motor. O gatilho arma 3 s depois do gesto, quando o título já pousou (1,9 s) e a
+    única coisa em movimento é a deriva da câmera
+  - 📏 **Resultado, três rodadas de cada lado:** sem o gatilho, pior quadro 767 · 767 · 767 ms com
+    tarefas longas de **689 · 720 · 683 ms**; com ele, 317 · 350 · 533 ms e **nenhuma tarefa longa**.
+    O bloqueio de thread sumiu da rolagem; o que resta é composição de GPU ao pôr o segundo canvas
+    em tela
+  - 📏 **Lighthouse intacto:** conferido nos relatórios que o módulo da volta **não é carregado em
+    nenhuma rodada** (o Lighthouse não mexe o mouse nem rola), e as rodadas limpas deram 100 com
+    TBT 31 e 36 ms, dentro da faixa registrada
+  - 👁 Verificado ponta a ponta: `mode=full`, volta construída no movimento, canvas visível na seção,
+    HUD com o tempo de volta, console sem erros
 - Em aberto por decisão: o preloader anuncia cada porcentagem (`role="status"`); emblema da Toyota
   discreto (regra "Sem logos oficiais").
 - Não visto no navegador: a animação do reveal depois da troca do `aria-label`.

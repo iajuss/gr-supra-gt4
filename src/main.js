@@ -48,6 +48,15 @@ const openingOver = new Promise((resolve) => {
   openingDone = resolve;
 });
 
+// The hero has landed and the stage is quiet again, which is sooner than the opening is over: that
+// one waits for the whole engine clip, twelve seconds in. Heavy work that must block the main thread
+// can go ahead from here (the lap's shaders, below).
+const SETTLED_AFTER_MS = 3000;
+let heroSettled;
+const heroLanded = new Promise((resolve) => {
+  heroSettled = resolve;
+});
+
 preloader.ready.then(() => {
   engine.preload();
   // Opening the audio device blocks for a moment: do it on the visitor's first move towards the
@@ -62,6 +71,7 @@ preloader.ready.then(() => {
       // With the car on stage the page opens as a car starts (data/opening.js): the lights blink on,
       // then the engine. Without it (lite, or a car still loading) the engine starts at once.
       const gesture = performance.now();
+      setTimeout(heroSettled, SETTLED_AFTER_MS);
       window.scrollTo(0, 0); // late layout (fonts, the lap's 3D layout) must not leave the page mid-way
       heroMedia.enter(); // the visitor is in: now the hero may weigh something
       const engineAt = ignition ? opening.engineAt : 0;
@@ -215,17 +225,33 @@ async function initStage(root) {
   }
 }
 
+/** Resolves on the visitor's first move, once the hero has settled. */
+function firstMove() {
+  return heroLanded.then(() => new Promise((resolve) => {
+    for (const type of ['pointermove', 'pointerdown', 'keydown']) {
+      window.addEventListener(type, resolve, { once: true, passive: true, capture: true });
+    }
+  }));
+}
+
 /**
- * Full mode loads the 3D lap on demand, once the section is a screen away: building it costs a few
- * hundred milliseconds of main thread that the first screen should not pay. Lite, or any failure
- * loading it, keeps the 2D lap.
+ * Full mode loads the 3D lap on demand: building it costs a few hundred milliseconds of main thread
+ * that the first screen should not pay. Lite, or any failure loading it, keeps the 2D lap.
+ *
+ * Whichever comes first, the visitor's first move or the section coming a screen away. Nearly all of
+ * that cost is the driver compiling the lap's shaders - 530 ms of it, measured, in one task on the
+ * main thread, which `compileAsync` does not move off (there is no parallel compilation here). It
+ * cannot be made smaller, so the only thing left to choose is when to pay it, and waiting for the
+ * section meant paying it halfway through the scroll: a freeze on the way into the lap, every time,
+ * since there is nothing cached to make the second arrival cheaper. The first move is the same
+ * moment the lamps' glow uses, with the page standing still and the hero already landed.
  */
 async function initLap(root) {
   if (mode === 'full') {
     // The 3D layout from the start, so the section does not jump when the stage arrives.
     root.dataset.lapView = '3d';
     try {
-      await whenNear(root);
+      await Promise.race([whenNear(root), firstMove()]);
       const { initLapSection3d } = await import('./components/lapSection3d.js');
       initLapSection3d(root);
       return;
