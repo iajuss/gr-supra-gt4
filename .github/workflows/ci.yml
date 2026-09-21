@@ -20,8 +20,12 @@ jobs:
       - run: npm test
       - run: npm run build
 
-  # Information only. The hosted runners swing far more than the page does - what actually decides
-  # anything here is a local alternating comparison against a reference commit (README, "Making of").
+  # Information only, and the light version only. The hosted runner has no GPU, so Chrome falls back
+  # to software WebGL and the full desktop page - a two-million-triangle car - stops responding, and
+  # Lighthouse gives up. Reproduced locally by disabling the GPU: the same page scores 70 there with
+  # 31,554 ms of blocking time, against 100 and 0 ms for the light version, which never downloads
+  # Three.js at all. Desktop belongs to a local run against a reference commit (README, "Making of"),
+  # which is what decides anything here anyway.
   # continue-on-error keeps a slow runner from ever failing a pull request.
   lighthouse:
     runs-on: ubuntu-latest
@@ -45,23 +49,19 @@ jobs:
           echo "the preview server never answered" >&2
           exit 1
 
-      - name: Measure
+      - name: Measure the light version
         run: |
+          npx --yes lighthouse@12 "http://localhost:4173/" --quiet \
+            --output=json --output-path=lh-mobile.json \
+            --chrome-flags="--headless=new --no-sandbox"
           {
             echo "| run | perf | a11y | best practices | seo | TBT | LCP | CLS | weight |"
             echo "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"
           } >> "$GITHUB_STEP_SUMMARY"
-          for preset in desktop mobile; do
-            flags=""
-            if [ "$preset" = desktop ]; then flags="--preset=desktop"; fi
-            npx --yes lighthouse@12 "http://localhost:4173/" $flags --quiet \
-              --output=json --output-path="lh-$preset.json" \
-              --chrome-flags="--headless=new --no-sandbox"
-            node .github/lighthouse-summary.mjs "lh-$preset.json" "$preset"
-          done
+          node .github/lighthouse-summary.mjs lh-mobile.json mobile
 
-      - name: Keep the reports
+      - name: Keep the report
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-reports
-          path: lh-*.json
+          name: lighthouse-report
+          path: lh-mobile.json

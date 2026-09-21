@@ -701,6 +701,20 @@ a zona 3D e parado num capítulo.
   referência — o runner oscila mais que a página, como a própria rodada final mostrou
   - Workflow não se verifica localmente: foi para uma branch com pull request, para o CI rodar
     sem publicar na Vercel
+  - 🐛 **A primeira versão media desktop e mobile, e o desktop travava o runner.** O log dizia
+    "the page stopped responding", e o `continue-on-error` mascarava: o run ficava verde sem nenhum
+    número. **Minha primeira hipótese estava errada** (achei que o servidor em segundo plano não
+    sobrevivia à troca de passo; o log mostrou que ele respondia). A causa é que **o runner não tem
+    GPU**: o Chrome cai para WebGL por software e o modo full tenta rasterizar 2M de triângulos na CPU
+  - 📏 **Reproduzido aqui com `--disable-gpu`**, que é a condição do runner: desktop **70 de nota e
+    31.554 ms de TBT**; mobile **100 e 0 ms**. Numa máquina mais lenta que esta, os 31 s viram o
+    "stopped responding". Não é instabilidade para repetir: é impossibilidade estrutural
+  - Por isso o CI mede **só o lite**, que é o que um visitante de celular recebe de verdade e o único
+    que um runner sem GPU consegue medir. O modo full continua medido localmente, contra um commit de
+    referência
+  - Logs de Actions pedem autenticação: a API pública devolve **403** para `/logs`. Sem o `gh` logado,
+    depurar CI depende do usuário colar o log — ou de reproduzir a condição do runner aqui, que foi o
+    que resolveu desta vez
 - [x] 📏 Rodada final (2026-09-20): Lighthouse alternado contra `6768e5c`, FPS e peso; números na Retomada
 - [x] README: seção "Making of" (2026-09-20): seis casos com antes e depois medido, mais uma nota
   sobre o que a medição ensinou (a aba aberta envenenando o Lighthouse, o `visibilityState` que
