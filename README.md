@@ -36,6 +36,72 @@ Vite · plain JavaScript (ES modules) · Three.js · GSAP + ScrollTrigger · Len
   opening's timing, loudness curves) lives in `src/lib/` with Vitest specs. The visuals were checked
   in the browser.
 
+## Making of
+
+Six things that went differently than planned, each settled by measuring rather than by taste. The
+full record, in Portuguese, is in [docs/design.md](docs/design.md) and [docs/plan.md](docs/plan.md).
+
+**The weight was the bodywork, not the format.** The car came in at 7.7 MB and 3.54M triangles, and
+the GLB was already Draco-compressed with nothing but positions and normals in it. What had never
+been simplified was the body shell, because the simplifier ignored normals and creased the varnish.
+Weighting the normals instead took half the triangles out at an error of 0.001: **7.7 → 5.6 MB**, and
+**61 → 74-79 FPS** on the same scroll. Shells at 30% and 20% were compared side by side too; at 20%
+the bonnet and the boot lid start to ripple.
+
+**The obvious way to make the lights glow cost half the frame rate.** A brightness threshold cannot
+separate lights from paint here: the spot reflections on the varnish are brighter than the headlights,
+and even at threshold 4 they turned into milky smears. Rendering everything through a multisampled
+half-float composer instead ran at **34 FPS against 76** without it. What shipped sends the scene
+straight to the canvas as before and builds the glow separately at a quarter resolution, from the
+lamps alone, hidden behind a coarse silhouette of the body that is never drawn in frame: **69 FPS,
+the same as with no bloom at all**. Compiling its shaders during load then cost ~60 ms of main thread
+and pulled desktop Lighthouse down to 93-96, so the bloom now switches on at the visitor's first
+move, like the audio device.
+
+**A frame budget has to count missed frames, not milliseconds.** The plan said to drop effects when
+p95 frame time went over 20 ms, which confuses work with vsync: 16.7 ms is a perfectly healthy 60 Hz,
+and that rule would have punished exactly the ordinary monitors it was meant to protect. It became
+frames missed against the screen's own rhythm, taken from the lower quartile of the intervals rather
+than the median, which would rise along with a stutter and hide it. Two guards came out of measuring:
+a ceiling on the estimated rhythm, or a machine that is slow all the time looks healthy, and a floor
+on what counts as missed, or a 164 Hz screen fails its own budget over 12 ms frames that are still
+80 per second.
+
+**An effect that belongs to one chapter cannot ask whether the section is on screen.** The airflow
+over the car was first tied to an observer on the aero section, which is 1008 px tall against a 720 px
+screen and is therefore "visible" for nearly the whole 3D zone: the air showed up three chapters away.
+It now follows the camera's own place along the scroll. Measuring it also caught the flow glowing
+when it should not: the bloom pass hid meshes from itself, and a line is not a mesh.
+
+**The phone's hero had no picture to use as a poster.** The plan called for the existing image; there
+wasn't one, only type on black, which the DOM said plainly. It became a silent 6-second turntable —
+a full 360°, so the loop closes by construction with no cut and no fade — at **769 KB**, downloaded
+only after the visitor taps through the sound screen, so the light version still ships no Three.js and
+Lighthouse never sees the video at all.
+
+**The film grain and vignette were built, measured, and taken back out.** Neither could be seen at
+1:1, and the numbers say why. The grain's noise was finer than a pixel (~1.2 px of detail on a 1.25×
+screen), so it moved a mid-tone pixel by about **2 levels out of 255** and the display averaged the
+rest away; more opacity only darkens the whole frame evenly. The vignette applies nothing across the
+middle half of the frame and 45% at the corner — where this render already sits at an average of
+**27 of 255**, because a dark studio vignettes itself. Both were planned for a photographic image
+this page does not have.
+
+### What the measuring taught
+
+Most of the wrong turns above were found by instruments, and the instruments lied too. A single
+forgotten tab with the page open drags desktop Lighthouse from 99 down to the 70s, because the stage
+now draws continuously while it is on screen. `document.visibilityState` will report `visible` while
+`requestAnimationFrame` has not fired for a full second, so the honest guard is to count frames. And
+a composited layer does not re-rasterise when the CSS variable behind it changes, which quietly
+invalidated a whole round of comparisons until a forced repaint gave the game away.
+
+Where it ended up, measured in alternating runs against the commit that opened this round: desktop
+**100** across three pairs with **22-36 ms** of total blocking time, against 36-126 ms before, and a
+page **1.9 MB lighter**. On mobile the blocking time came down to **7-19 ms**. Mobile scores swing
+between 95 and 100 on this machine — the pairs move together, so it is the machine, not the page —
+and in every pair this build matched or beat the reference.
+
 ## Run it
 
 ```bash

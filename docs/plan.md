@@ -696,7 +696,11 @@ a zona 3D e parado num capítulo.
   pendentes desde o Dia 1
 - [ ] Lighthouse CI no workflow, **informativo** (não bloqueia: o runner oscila)
 - [x] 📏 Rodada final (2026-09-20): Lighthouse alternado contra `6768e5c`, FPS e peso; números na Retomada
-- [ ] README: seção "Making of" (bastidores, métricas, antes e depois, link para o vídeo)
+- [x] README: seção "Making of" (2026-09-20): seis casos com antes e depois medido, mais uma nota
+  sobre o que a medição ensinou (a aba aberta envenenando o Lighthouse, o `visibilityState` que
+  mente, a camada que não re-rasteriza) e os números finais da rodada. Em inglês, ~65 linhas; o
+  README foi de 68 para 134. **Sem link para o vídeo**: ele ainda não existe, e um link morto num
+  README público é pior que a ausência dele — entra quando o vídeo entrar
 - [ ] Vídeos de divulgação regravados (Playwright é download → pedir autorização)
 
 **Fora desta rodada:** o Supra na pista da volta, o som seguindo a telemetria (com botão de som no
