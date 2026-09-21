@@ -757,7 +757,31 @@ a zona 3D e parado num capítulo.
     a curva de brilho do título nas duas gravações. A ferramenta não pré-aquece nada
   - 🐛 O screencast **para de mandar quadro quando a página fica imóvel**, e o último tique dos
     contadores se perdia (fechava em 99 de 100). A ferramenta fecha com uma captura à parte
-  - Falta: o usuário escolher a peça final e onde guardá-la, e decidir sobre a segunda, de 60 s
+  - 🐛 **A primeira ferramenta tremia do começo ao fim, e o defeito era meu, não da página.** O
+    usuário viu na hora: "está todo travado". Medido: só **65%** dos quadros capturados ocupavam uma
+    casa da grade de 60 fps, 28% ocupavam duas e 7% três ou mais, alternando sem padrão. A causa é o
+    teto da captura — screencast do CDP sustenta **38–45 fps** (medido em três qualidades) enquanto a
+    página roda a 60. Fonte irregular de 40 encaixada numa grade de 60 treme por construção
+  - **A ferramenta passou a renderizar em vez de gravar (2026-09-21).** O relógio da página é
+    substituído dentro dela (`timeweb`: `performance.now`, `Date`, `requestAnimationFrame`,
+    `setTimeout`), o tempo só anda sob comando e cada quadro é capturado antes de o relógio seguir.
+    A velocidade da captura deixou de importar. **2.424 quadros em 2,2 min**, e nos trechos em
+    movimento são **240 de 240 quadros distintos** a cada 4 s; as repetições só sobram nas pausas
+    deliberadas, onde a imagem de fato não muda
+  - 🐛 **O tempo virtual do CDP não serve e custou meia hora para descobrir.** Com ele o compositor
+    para de emitir quadros: a renderização morreu aos 16,0 s e ficou com **um único quadro por 24 s**.
+    Perguntado à própria página no instante do congelamento: `scrollY` andando (1092 → 1345),
+    `performance.now()` andando (14787 → 15320) e o contador de `rAF` **parado em 10534**. O
+    `maxVirtualTimeTaskStarvationCount` não mudou nada
+  - 🐛 Com o relógio congelado, o `evaluate` do Playwright **trava**: ele espera a página assentar, e
+    assentar precisa de tempo. As instruções vão direto pelo CDP
+  - 🐛 Pré-aquecer a página gasta a abertura: a ignição roda em tempo real desde a carga, então 6,5 s
+    de rolagem antes do clique foram descontados dela (título pousando 0,5 s depois do clique em vez
+    de 1,9 s). Agora o relógio é nosso, então o problema deixou de existir
+  - 📏 Conferido no vídeo final: título pousa **1,98 s** depois do clique (o dado pede 1,9), som do
+    motor entra em 5,5 s com o envelope do original, contadores fecham em 430/650/1.350/100
+  - Peça entregue: `gr-supra-gt4-2026-09-21.mp4`, 40,5 s, 1920×1080 a 60 fps, 25,2 MB, no Desktop do
+    usuário. Falta decidir sobre a segunda peça, de 60 s
 
 **Fora desta rodada:** o Supra na pista da volta, o som seguindo a telemetria (com botão de som no
 header), a página de case e a versão em português.
