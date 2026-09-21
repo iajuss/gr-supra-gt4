@@ -9,7 +9,7 @@
   branch `main`). A Vercel publica sozinha a cada push no `main`. Commits com o e-mail noreply do GitHub
   (`269213431+iajuss@users.noreply.github.com`, configurado no repositório; o histórico foi reescrito
   antes do primeiro envio para tirar o e-mail da Insper).
-- **Estado do código:** Blocos 1–5 concluídos. 240 testes verdes, build ok.
+- **Estado do código:** Blocos 1–5 concluídos, Bloco 6 quase. 307 testes verdes, build ok.
   Última sessão (2026-09-19, tarde): **abertura como partida do motor** — carregamento em linha, faróis
   piscando, motor, "SUPRA" na pega, som com ambiente (design.md "Abertura: partida do motor").
   Sessão de 2026-09-19: **abertura da volta em cortina** — a transição virou a abertura da seção da
@@ -27,6 +27,42 @@
     anterior (build do HEAD numa worktree, rodadas alternadas): 100 / TBT 55–82 contra 99–100 / TBT 81–97.
     ~20 ms a mais, numa tarefa do chunk `stage` aos ~0,4 s; não investigado. Rodadas isoladas de 83–87 aparecem com
     a máquina ocupada (captura de imagens, laboratório aberto); repetir sem carga antes de concluir.
+
+- **Rodada final de medições (2026-09-20)**, contra o início do Bloco 6 (`6768e5c`) numa worktree,
+  `vite preview` em 4173 (atual) e 4273 (referência), rodadas alternadas, primeira rodada fria
+  descartada, painel do navegador fechado e dev server parado:
+  - **Lighthouse desktop**, 3 pares: **100 / 100 / 100** contra 100 / 98 / 100. TBT **22–36 ms**
+    contra 36–126 — a faixa desta versão fica inteira abaixo da faixa da referência. Peso
+    **6.276 KB** contra 8.175 (−1,9 MB, quase tudo o carro mais leve). Acessibilidade, práticas e
+    SEO 100; um `a11y=91` isolado apareceu numa rodada da referência e não foi investigado.
+  - **Lighthouse mobile**, 3 pares: **96 / 100 / 100** contra 96 / 100 / 95. TBT **7–19 ms** contra
+    11–22. LCP 1,51 s nas rodadas limpas, CLS 0. Peso **370 KB** contra 346 (+24 KB da `aero.webp`
+    com o fluxo).
+    - **A nota de celular oscila 95–100 neste ambiente, e oscila em par:** o que a move é o LCP
+      pulando de 1,51 para 2,6–2,9 s, nos dois lados na mesma rodada. É ruído da máquina, não da
+      página, e é para isso que a comparação alternada serve. **Não escrever "mobile 100/100/100"
+      com estes dados**; em todos os pares o atual ficou igual ou acima da referência.
+    - **O TBT do celular voltou ao lugar e passou dele:** era 12–15 ms antes do vídeo do hero, subiu
+      para 34–44 com ele, e agora mede 7–19. A animação do grão rodava 8×/s no hero do lite e saiu
+      junto com o filme. A ressalva aberta no Dia 3 está encerrada.
+    - O peso **entra** na conta do Lighthouse mesmo com a imagem sendo `lazy` e abaixo da dobra; o
+      que ela não move é o LCP. (Eu tinha afirmado o contrário ao escolher a imagem.)
+  - **FPS em 1152×720, dois pares alternados**, amostrando o `rAF` da própria página:
+    - Parado no capítulo aero: referência **165 / 165** FPS (mediana 6,1 ms, p95 6,2) contra
+      **133 / 116** (mediana 6,1–6,2, p95 12,2–12,3). A diferença é real e se repete: a referência
+      não desenha nada em repouso, então fica cravada no vsync, enquanto esta versão desenha sempre
+      por causa da câmera na mão e do fluxo. **Refina o que estava registrado** ("o custo não é taxa
+      de quadros, é GPU contínua"): numa tela de 164 Hz ele também aparece como taxa de quadros —
+      um quadro a cada vinte leva dois intervalos de vsync.
+    - Rolando do hero à transição, 4 s programados: referência **103 / 104** FPS contra **125 / 101**.
+      Aqui os números não sustentam conclusão: o **pior quadro de 91–115 ms aparece nos dois lados**
+      (é a montagem da volta 3D, que já existia) e o painel do app oscila sozinho, chegando a rodar
+      a metade do ritmo entre uma execução e outra.
+  - 🐛 **`document.visibilityState` mente no painel do app.** Medido: **zero callbacks de `rAF` em um
+    segundo inteiro** com ele respondendo `"visible"` — a janela estava atrás de outra. A dica antiga
+    ("conferir o `visibilityState` dentro da medição") não basta; o guarda confiável é **contar se o
+    `rAF` avança**, e devolver cedo se não avançar, senão a chamada trava até o limite de tempo.
+    Lighthouse não sofre disso: roda em Edge headless, em processo próprio.
 
 ### ▶ Próxima rodada: Bloco 6 — upgrades (planejado em 2026-09-19)
 
@@ -659,7 +695,7 @@ a zona 3D e parado num capítulo.
   `tools/capture.html` e a `og.jpg` por `tools/shareCard.html?save=a` — agora com o bloom nas luzes,
   pendentes desde o Dia 1
 - [ ] Lighthouse CI no workflow, **informativo** (não bloqueia: o runner oscila)
-- [ ] 📏 Rodada final: Lighthouse alternado contra a referência, FPS, peso da página; números na Retomada
+- [x] 📏 Rodada final (2026-09-20): Lighthouse alternado contra `6768e5c`, FPS e peso; números na Retomada
 - [ ] README: seção "Making of" (bastidores, métricas, antes e depois, link para o vídeo)
 - [ ] Vídeos de divulgação regravados (Playwright é download → pedir autorização)
 
